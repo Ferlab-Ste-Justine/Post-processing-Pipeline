@@ -7,27 +7,45 @@
     "items": {
         "type": "object",
         "properties": {
-            "sample": {
+            "familyID": {
                 "type": "string",
-                "pattern": "^\\S+$",
                 "errorMessage": "Sample name must be provided and cannot contain spaces",
                 "meta": ["id"]
             },
-            "fastq_1": {
+            "sequencingType": {
                 "type": "string",
-                "format": "file-path",
-                "exists": true,
-                "pattern": "^\\S+\\.f(ast)?q\\.gz$",
-                "errorMessage": "FastQ file for reads 1 must be provided, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+                "pattern": "(WES|WGS)",
+                "errorMessage": "If the format is V2, the sequencing type (WES or WGS) will show in the 2nd column",
+                "meta": ["id"]
             },
-            "fastq_2": {
+            "sample_1": {
                 "type": "string",
                 "format": "file-path",
                 "exists": true,
-                "pattern": "^\\S+\\.f(ast)?q\\.gz$",
-                "errorMessage": "FastQ file for reads 2 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+                "pattern": "^\\S+\\.g(enome.)?vcf\\.gz$",
+                "errorMessage": "first GVCF sample must be provided and must have file extension 'genome.vcf.gz' or 'gvcf.gz'"
+            },
+            "sample_2": {
+                "type": "string",
+                "format": "file-path",
+                "exists": true,
+                "pattern": "^\\S+\\.g(enome.)?vcf\\.gz$",
+                "errorMessage": "optional second GVCF sample must be provided and must have file extension 'genome.vcf.gz' or 'gvcf.gz'"
+            },
+            "sample_3": {
+                "type": "string",
+                "format": "file-path",
+                "exists": true,
+                "pattern": "^\\S+\\.g(enome.)?vcf\\.gz$",
+                "errorMessage": "optional third GVCF sample must be provided and must have file extension 'genome.vcf.gz' or 'gvcf.gz'"
+            },
+            "sample_4": {
+                "type": "string",
+                "format": "file-path",
+                "exists": true,
+                "pattern": "^\\S+\\.g(enome.)?vcf\\.gz$",
+                "errorMessage": "optional fourth GVCF sample must be provided and must have file extension 'genome.vcf.gz' or 'gvcf.gz'"
             }
-        },
-        "required": ["sample", "fastq_1"]
+        }
     }
 }

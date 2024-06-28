@@ -10,6 +10,7 @@ Initial release of ferlab/postprocessing, created with the [nf-core](https://nf-
 ### `Added`
 
 ### `Fixed`
+[#1](https://github.com/FelixAntoineLeSieur/Post-processing-Pipeline/pull/1) Fixed template schemas
 
 ### `Dependencies`
 

@@ -8,7 +8,7 @@
 
 ## Samplesheet input
 
-You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row as shown in the examples below.
+You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a tab-separated file with the first column being the family ID. There are 2 possible format, V1 and V2 (See README for details). V1 includes only the family ID and the sample files as columns, while V2 has the sequencingType as a second column in addition the the familyID and sample files. 
 
 ```bash
 --input '[path to samplesheet file]'

@@ -1,14 +1,14 @@
 nextflow_workflow {
 
-    name "Test Workflow UTILS_NFVALIDATION_PLUGIN"
+    name "Test Workflow UTILS_NFSCHEMA_PLUGIN"
     script "../main.nf"
-    workflow "UTILS_NFVALIDATION_PLUGIN"
+    workflow "UTILS_NFSCHEMA_PLUGIN"
     tag "subworkflows"
     tag "subworkflows_nfcore"
-    tag "plugin/nf-validation"
-    tag "'plugin/nf-validation'"
-    tag "utils_nfvalidation_plugin"
-    tag "subworkflows/utils_nfvalidation_plugin"
+    tag "plugin/nf-schema"
+    tag "'plugin/nf-schema'"
+    tag "utils_nfschema_plugin"
+    tag "subworkflows/utils_nfschema_plugin"
 
     test("Should run nothing") {
 

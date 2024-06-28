@@ -8,9 +8,9 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { UTILS_NFVALIDATION_PLUGIN } from '../../nf-core/utils_nfvalidation_plugin'
-include { paramsSummaryMap          } from 'plugin/nf-validation'
-include { fromSamplesheet           } from 'plugin/nf-validation'
+include { UTILS_NFSCHEMA_PLUGIN } from '../../nf-core/utils_nfschema_plugin'
+include { paramsSummaryMap          } from 'plugin/nf-schema'
+include { samplesheetToList         } from 'plugin/nf-schema'
 include { UTILS_NEXTFLOW_PIPELINE   } from '../../nf-core/utils_nextflow_pipeline'
 include { completionEmail           } from '../../nf-core/utils_nfcore_pipeline'
 include { completionSummary         } from '../../nf-core/utils_nfcore_pipeline'
@@ -57,7 +57,7 @@ workflow PIPELINE_INITIALISATION {
     pre_help_text = nfCoreLogo(monochrome_logs)
     post_help_text = '\n' + workflowCitation() + '\n' + dashedLine(monochrome_logs)
     def String workflow_command = "nextflow run ${workflow.manifest.name} -profile <docker/singularity/.../institute> --input samplesheet.csv --outdir <OUTDIR>"
-    UTILS_NFVALIDATION_PLUGIN (
+    UTILS_NFSCHEMA_PLUGIN (
         help,
         workflow_command,
         pre_help_text,
@@ -72,6 +72,13 @@ workflow PIPELINE_INITIALISATION {
     UTILS_NFCORE_PIPELINE (
         nextflow_cli_args
     )
+    //_________Local___________
+    //Check samplesheet format:
+    sampleChannel().set{ sampleFile }
+    sampleFile.meta | view{"Meta: $it"}
+    sampleFile.files | view{"files: $it"}
+
+
     //
     // Custom validation for pipeline parameters
     //
@@ -81,7 +88,7 @@ workflow PIPELINE_INITIALISATION {
     // Create channel from input file provided through params.input
     //
     Channel
-        .fromSamplesheet("input")
+        .fromList(samplesheetToList(input,"assets/schema_input.json"))
         .map {
             meta, fastq_1, fastq_2 ->
                 if (!fastq_2) {
@@ -152,6 +159,95 @@ workflow PIPELINE_COMPLETION {
 ========================================================================================
 */
 //
+//_____________Local functions_____________
+enum SequencingType {
+    WGS,
+    WES
+}
+
+enum SampleFileFormat {
+    V1,
+    V2
+}
+
+def findParamInEnum(paramName, paramValue, enumInstance) {
+    def validValues = enumInstance.values()*.name()
+    if (!validValues.contains(paramValue)) {
+        def validValuesStr = validValues.collect{"`$it`"}.join(", ")
+        error("Invalid value for parameter `$paramName`: `$paramValue`. Possible values are: $validValuesStr")
+    }
+    return enumInstance.valueOf(paramValue)
+}
+def getSampleFileFormat() {
+    if (!params.sampleFileFormat) {
+        log.warn("Using default value `V1` for parameter `sampleFileFormat`")
+        params.sampleFileFormat="V1"
+    }
+    return findParamInEnum("sampleFileFormat", params.sampleFileFormat.toUpperCase(), SampleFileFormat)
+}
+
+def getSequencingType() {
+    if (!params.sequencingType) {
+        log.warn("Using default value `WGS` for parameter `sequencingType`")
+        params.sequencingType="WGS"
+    }
+    return findParamInEnum("sequencingType", params.sequencingType.toUpperCase(), SequencingType)
+}
+
+def sampleChannel() {
+    def rowMapper = getRowMapper()
+
+    return Channel.fromPath(file("$params.input"))
+        .splitCsv(sep: '\t', strip: true)
+        .view{"Split CSV: $it" }
+        .map(rowMapper)
+        .view{"rowMapper: $it" }
+        .flatMap { it ->
+            return it.files.collect{f -> [familyId: it.familyId, sequencingType: it.sequencingType, size: it.files.size(), file: f]};
+        }.multiMap { it ->
+            meta: tuple(it.familyId, [size: it.size, sequencingType: it.sequencingType])
+            files: tuple(it.familyId, file("${it.file}*"))
+        }
+
+}
+
+/**
+Get row mapper that match the configured sample file format
+
+Note: it is returned as a closure to guaranty the compatibility with nextflow channel operators
+*/
+def getRowMapper() {
+    def format = getSampleFileFormat()
+
+    if (format == SampleFileFormat.V1) {
+        def sequencingType = getSequencingType()
+        return {columns -> rowMapperV1(columns, sequencingType)}
+    }
+    return {columns -> rowMapperV2(columns)}
+}
+
+
+//Transform a row from the sample file in V1 format from a list structure to a map structure.
+def rowMapperV1(columns, sequencingType) {
+    return [
+        familyId: columns[0],
+        sequencingType: sequencingType,
+        files: columns.tail()
+    ]
+}
+
+
+//Transform a row from the sample file in V2 format from a list structure to a map structure
+def rowMapperV2(columns) {
+    return [
+        familyId: columns[0],
+        sequencingType: columns[1].toUpperCase() as SequencingType,
+        files: columns[2..-1]
+    ]
+}
+
+
+//_____________Template functions_____________
 // Check and validate pipeline parameters
 //
 def validateInputParameters() {

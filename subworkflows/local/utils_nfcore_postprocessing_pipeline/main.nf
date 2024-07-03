@@ -254,8 +254,8 @@ however V2 format is not respected \n Please check the sample file and use \
         exit(0)
     }
     if (sampleSeqType != params.sequencingType){
-        error("Error: sequencingType stated as '$params.sequencingType', however sample file states '$sampleSeqType'.\
- Please make sure to input the correct type as --sequencingType")
+        error("Error: sequencingType stated as '$params.sequencingType', however sample file states '$sampleSeqType'. \
+Please make sure to input the correct type as --sequencingType")
         exit(0)
     }
     return [

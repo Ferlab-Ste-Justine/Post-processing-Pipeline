@@ -77,6 +77,27 @@ workflow PIPELINE_INITIALISATION {
     //
     validateInputParameters()
 
+        //_________Local___________
+    def rowMapper = getRowMapper()
+
+    Channel.fromPath(file("$params.input"))
+        .splitCsv(sep: '\t', strip: true)
+        .view{"Split CSV: $it" }
+        .map(rowMapper)
+        .view{"rowMapper: $it" }
+        .flatMap { it ->
+            return it.files.collect{f -> [familyId: it.familyId, sequencingType: it.sequencingType, size: it.files.size(), file: f]};
+        }.multiMap { it ->
+            meta: tuple(it.familyId, [size: it.size, sequencingType: it.sequencingType])
+            files: tuple(it.familyId, file("${it.file}*"))
+        }
+        .set { sampleFile }
+        emit:
+        samplesheet = sampleFile
+        versions = ch_versions
+
+    sampleFile.meta | view{"Meta: $it"}
+    sampleFile.files | view{"files: $it"}
     //
     // Create channel from input file provided through params.input
     //
@@ -154,6 +175,99 @@ workflow PIPELINE_COMPLETION {
 ========================================================================================
 */
 //
+//_____________Local functions_____________
+enum SequencingType {
+    WGS,
+    WES
+}
+
+enum SampleFileFormat {
+    V1,
+    V2
+}
+
+def findParamInEnum(paramName, paramValue, enumInstance) {
+    def validValues = enumInstance.values()*.name()
+    if (!validValues.contains(paramValue)) {
+        def validValuesStr = validValues.collect{"`$it`"}.join(", ")
+        error("Invalid value for parameter `$paramName`: `$paramValue`. Possible values are: $validValuesStr")
+    }
+    return enumInstance.valueOf(paramValue)
+}
+def getSampleFileFormat() {
+    if (!params.sampleFileFormat) {
+        log.warn("Using default value `V1` for parameter `sampleFileFormat`")
+        params.sampleFileFormat="V1"
+    }
+    return findParamInEnum("sampleFileFormat", params.sampleFileFormat.toUpperCase(), SampleFileFormat)
+}
+
+def getSequencingType() {
+    if (!params.sequencingType) {
+        log.warn("Using default value `WGS` for parameter `sequencingType`")
+        params.sequencingType="WGS"
+    }
+    return findParamInEnum("sequencingType", params.sequencingType.toUpperCase(), SequencingType)
+}
+
+
+/**
+Get row mapper that match the configured sample file format
+
+Note: it is returned as a closure to guaranty the compatibility with nextflow channel operators
+*/
+def getRowMapper() {
+    def format = getSampleFileFormat()
+
+    if (format == SampleFileFormat.V1) {
+        def sequencingType = getSequencingType()
+        return {columns -> rowMapperV1(columns, sequencingType)}
+    }
+    return {columns -> rowMapperV2(columns)}
+}
+
+
+//Transform a row from the sample file in V1 format from a list structure to a map structure.
+def rowMapperV1(columns, sequencingType) {
+    if ((columns[1] == "WGS") || (columns[1] == "WES")){
+        error("Error: SampleFileFormat stated as V1 (possibly by default), \
+however V2 format seems to be in use. \n Please check the sample file and use\
+--sampleFileFormat V2 as needed")
+        exit(0)
+    }
+    print(columns[1])
+    return [
+        familyId: columns[0],
+        sequencingType: sequencingType,
+        files: columns.tail()
+    ]
+}
+
+
+//Transform a row from the sample file in V2 format from a list structure to a map structure
+def rowMapperV2(columns) {
+    def sampleSeqType = columns[1]
+    if ((sampleSeqType != "WGS") && (sampleSeqType != "WES")){
+        error("Error: SampleFileFormat stated as V2, \
+however V2 format is not respected \n Please check the sample file and use \
+--sampleFileFormat V1 as needed")
+        exit(0)
+    }
+    if (sampleSeqType != params.sequencingType){
+        error("Error: sequencingType stated as '$params.sequencingType', however sample file states '$sampleSeqType'.\
+ Please make sure to input the correct type as --sequencingType")
+        exit(0)
+    }
+    return [
+        familyId: columns[0],
+        sequencingType: columns[1].toUpperCase() as SequencingType,
+        files: columns[2..-1]
+    ]
+}
+
+
+//_____________Template functions_____________
+//
 // Check and validate pipeline parameters
 //
 def validateInputParameters() {
@@ -163,6 +277,7 @@ def validateInputParameters() {
 //
 // Validate channels from input samplesheet
 //
+/*
 def validateInputSamplesheet(input) {
     def (metas, fastqs) = input[1..2]
 
@@ -174,6 +289,7 @@ def validateInputSamplesheet(input) {
 
     return [ metas[0], fastqs ]
 }
+*/
 //
 // Get attribute from genome config file e.g. fasta
 //

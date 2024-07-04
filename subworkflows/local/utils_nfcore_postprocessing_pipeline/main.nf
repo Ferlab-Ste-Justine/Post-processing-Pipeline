@@ -91,13 +91,14 @@ workflow PIPELINE_INITIALISATION {
             meta: tuple(it.familyId, [size: it.size, sequencingType: it.sequencingType])
             files: tuple(it.familyId, file("${it.file}*"))
         }
-        .set { sampleFile }
+        .set { sampleChannel}
         emit:
-        samplesheet = sampleFile
+        sampleFiles = sampleChannel.files
+        sampleMeta = sampleChannel.meta
         versions = ch_versions
 
-    sampleFile.meta | view{"Meta: $it"}
-    sampleFile.files | view{"files: $it"}
+    sampleMeta | view{"Meta: $it"}
+    sampleFiles | view{"files: $it"}
     //
     // Create channel from input file provided through params.input
     //

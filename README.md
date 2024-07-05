@@ -1,5 +1,3 @@
-[![GitHub Actions CI Status](https://github.com/ferlab/postprocessing/actions/workflows/ci.yml/badge.svg)](https://github.com/ferlab/postprocessing/actions/workflows/ci.yml)
-[![GitHub Actions Linting Status](https://github.com/ferlab/postprocessing/actions/workflows/linting.yml/badge.svg)](https://github.com/ferlab/postprocessing/actions/workflows/linting.yml)[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.XXXXXXX-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.XXXXXXX)
 [![nf-test](https://img.shields.io/badge/unit_tests-nf--test-337ab7.svg)](https://www.nf-test.com)
 
 [![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A523.04.0-23aa62.svg)](https://www.nextflow.io/)
@@ -10,41 +8,58 @@
 
 ## Introduction
 
-**ferlab/postprocessing** is a bioinformatics pipeline that ...
+**ferlab/postprocessing** is a bioinformatics pipeline that recombines gvcf for family's samples in order to facilitate denovo identification.
 
-<!-- TODO nf-core:
-   Complete this sentence with a 2-3 sentence summary of what types of data the pipeline ingests, a brief overview of the
-   major pipeline sections and the types of output it produces. You're giving an overview to someone new
-   to nf-core here, in 15-20 seconds. For an example, see https://github.com/nf-core/rnaseq/blob/master/README.md#introduction
--->
-
-<!-- TODO nf-core: Include a figure that guides the user through the major workflow steps. Many nf-core
-     workflows use the "tube map" design for that. See https://nf-co.re/docs/contributing/design_guidelines#examples for examples.   -->
 <!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
+###  Summary:
+1. Remove MNPs from bedtools 
+2. Combine gvcfs
+3. [Joint-genotyping](https://gatk.broadinstitute.org/hc/en-us/articles/360037057852-GenotypeGVCFs)
+4. Remove false positives with either:
+  - If using whole genome sequencing: [Variant quality score recalibration (VQSR)](https://gatk.broadinstitute.org/hc/en-us/articles/360036510892-VariantRecalibrator)
+  - If using whole exome sequencing: [Hard-Filtering](https://gatk.broadinstitute.org/hc/en-us/articles/360036733451-VariantFiltration)
+5. Annotate variants with [Variant effect predictor (VEP)](https://useast.ensembl.org/info/docs/tools/vep/index.html)
 
-1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
-2. Present QC for raw reads ([`MultiQC`](http://multiqc.info/))
 
 ## Usage
 
 > [!NOTE]
 > If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline) with `-profile test` before running the workflow on actual data.
 
-<!-- TODO nf-core: Describe the minimum required steps to execute the pipeline, e.g. how to prepare samplesheets.
-     Explain what rows and columns represent. For instance (please edit as appropriate):
+### Samples
+The workflow will accept sample data in two format (called V1 and V2). The path to the sample file must be specified with the "**sampleFile**" parameter.
 
-First, prepare a samplesheet with your input data that looks as follows:
+1.  The first format is used by default and looks as follows:
 
-`samplesheet.csv`:
+**sampleV1.tsv**
 
-```csv
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
+_FAMILY_ID_ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; _Patient1_File_&nbsp; &nbsp; &nbsp;&nbsp; &nbsp;_Patient2_File_&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;_Patient3_File_
+```tsv
+CONGE-XXX       CONGE-XXX-01.hard-filtered.gvcf.gz   CONGE-XXX-02.hard-filtered.gvcf.gz   CONGE-XXX-03.hard-filtered.gvcf.gz
+CONGE-YYY       CONGE-YYY-01.hard-filtered.gvcf.gz   CONGE-YYY-02.hard-filtered.gvcf.gz   CONGE-YYY-03.hard-filtered.gvcf.gz
 ```
 
-Each row represents a fastq file (single-end) or a pair of fastq files (paired end).
+2.  The second format is used in older data and includes the sequencing type (WGS or WES)
 
--->
+**sampleV2.tsv**
+
+_FAMILY_ID_ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; _SEQUENCING_TYPE_ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;_Patient1_File_&nbsp; &nbsp; &nbsp;&nbsp; &nbsp;_Patient2_File_&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;_Patient3_File_
+```tsv
+CONGE-XXX       WES       CONGE-XXX-01.hard-filtered.gvcf.gz   CONGE-XXX-02.hard-filtered.gvcf.gz   CONGE-XXX-03.hard-filtered.gvcf.gz
+CONGE-YYY       WES       CONGE-YYY-01.hard-filtered.gvcf.gz   CONGE-YYY-02.hard-filtered.gvcf.gz   CONGE-YYY-03.hard-filtered.gvcf.gz
+```
+
+
+The file format can be chosen with the "**sampleFileFormat**" parameter (either "V1" or "V2", default "V1"). Note that both types are tab-delimited (.tsv)
+
+Next, if the file format is "V1", the sequencing type can be specified with the "**sequencingType**" parameter (either "WGS" for Whole Genome Sequencing or "WES" for Whole Exome Sequencing, default "WGS")
+
+> [!NOTE]
+> The sequencing type also determines the type of variant filtering the pipeline will use.
+> 
+> In the case of Whole Genome Sequencing, VQSR (Variant Quality Score Recalibration) is used (preferred method).
+> 
+> In the case of Whole Exome Sequencing, Hard-filtering needs to be used.
 
 Now, you can run the pipeline using:
 
@@ -52,7 +67,7 @@ Now, you can run the pipeline using:
 
 ```bash
 nextflow run ferlab/postprocessing \
-   -profile <docker/singularity/.../institute> \
+   -profile <docker/singularity/.../> \
    --input samplesheet.csv \
    --outdir <OUTDIR>
 ```
@@ -60,6 +75,49 @@ nextflow run ferlab/postprocessing \
 > [!WARNING]
 > Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_;
 > see [docs](https://nf-co.re/usage/configuration#custom-configuration-files).
+
+### References
+Reference files are necessary at multiple steps of the workflow, notably for joint-genotyping,the variant effect predictor (VEP) and VQSR. 
+
+Specifically, we need a reference genome directory and filename specified with the **referenceGenome** and **referenceGenomeFasta** parameters respectively. 
+
+Generally, we use the Homo_sapiens_assembly38.fasta as referenceGenome (see Resources)
+
+
+
+Next, we also need broader references, which are contained in a path defined by the **broad** parameter.
+
+The broad directory must contain the following files:
+
+- The interval list which determines the genomic interval(s) over which we operate: filename of this list must be defined with the **intervalsFile** parameter
+- Highly validated variance ressources currently required by VQSR. ***These are currently hard coded in the pipeline!***
+  - HapMap file : hapmap_3.3.hg38.vcf.gz
+  - 1000G omni2.5 file : 1000G_omni2.5.hg38.vcf.gz
+  - 1000G reference file : 1000G_phase1.snps.high_confidence.hg38.vcf.gz
+  - SNP database : Homo_sapiens_assembly38.dbsnp138.vcf.gz
+
+ 
+Finally, the vep cache directory must be specified with **vepCache**, which is usually created by vep itself on first installation.
+Generally, we only need the human files obtainable from https://ftp.ensembl.org/pub/release-112/variation/vep/homo_sapiens_vep_112_GRCh38.tar.gz
+
+### Stub run
+The -stub-run option can be added to run the "stub" block of processes instead of the "script" block. This can be helpful for testing.
+
+🚧
+
+Parameters summary
+-----
+
+| Parameter name | Required? | Accepted input |
+| --- | --- | --- |
+| `sampleFile` | _Required_ | file |
+| `sampleFileFormat` | _Optional_ | `V1` or `V2`, default `V1` |
+| `sequencingType` | _Optional_ | `WGS` or `WES`, default `WGS` |
+| `referenceGenome` | _Required_ | path |
+| `referenceGenomeFasta` | _Required_ | file |
+| `broad` | _Required_ | path |
+| `intervalsFile` | _Required_ | list of genome intervals |
+| `vepCache` | _Required_ | path |
 
 ## Credits
 
@@ -73,10 +131,23 @@ We thank the following people for their extensive assistance in the development 
 
 If you would like to contribute to this pipeline, please see the [contributing guidelines](.github/CONTRIBUTING.md).
 
-## Citations
+Resources
+-----
+The documentation of the various tools used in this workflow are available here:
 
-<!-- TODO nf-core: Add citation for pipeline after first release. Uncomment lines below and update Zenodo doi and badge at the top of this file. -->
-<!-- If you use ferlab/postprocessing for your analysis, please cite it using the following doi: [10.5281/zenodo.XXXXXX](https://doi.org/10.5281/zenodo.XXXXXX) -->
+[Nextflow](https://www.nextflow.io/docs/latest/index.html)
+
+[bcftools](https://samtools.github.io/bcftools/bcftools.html)
+
+**GATK**:
+- [CombineGVCFs](https://gatk.broadinstitute.org/hc/en-us/articles/360037593911-CombineGVCFs)
+- [GenotypeGVCFs](https://gatk.broadinstitute.org/hc/en-us/articles/360037057852-GenotypeGVCFs)
+- [VariantRecalibrator](https://gatk.broadinstitute.org/hc/en-us/articles/360035531612-Variant-Quality-Score-Recalibration-VQSR)
+- [VariantFiltration](https://gatk.broadinstitute.org/hc/enus/articles/360041850471-VariantFiltration))
+
+[VEP](https://useast.ensembl.org/info/docs/tools/vep/script/vep_options.html)
+
+## Citations
 
 <!-- TODO nf-core: Add bibliography of tools and data used in your pipeline -->
 

@@ -8,6 +8,13 @@ lint:
   - .github/workflows/awstest.yml
   - .github/workflows/awsfulltest.yml
   - .github/.dockstore.yml
+  - .editorconfig
+  - .prettierignore
+  - .prettierrc.yml
+  - LICENSE
+  - assets/email_template.html
+  - assets/email_template.txt
+  - assets/sendmail_template.txt
   files_unchanged:
   - CODE_OF_CONDUCT.md
   - assets/nf-core-postprocessing_logo_light.png

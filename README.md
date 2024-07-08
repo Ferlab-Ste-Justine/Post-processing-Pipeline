@@ -27,7 +27,7 @@
 > If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline) with `-profile test` before running the workflow on actual data.
 
 ### Samples
-The workflow will accept sample data in two format (called V1 and V2). The path to the sample file must be specified with the "**sampleFile**" parameter.
+The workflow will accept sample data in two format (called V1 and V2). The path to the sample file must be specified with the "**input**" parameter.
 
 1.  The first format is used by default and looks as follows:
 
@@ -110,7 +110,8 @@ Parameters summary
 
 | Parameter name | Required? | Accepted input |
 | --- | --- | --- |
-| `sampleFile` | _Required_ | file |
+| `input` | _Required_ | file |
+| `outdir` | _Required_ | path |
 | `sampleFileFormat` | _Optional_ | `V1` or `V2`, default `V1` |
 | `sequencingType` | _Optional_ | `WGS` or `WES`, default `WGS` |
 | `referenceGenome` | _Required_ | path |
@@ -118,6 +119,13 @@ Parameters summary
 | `broad` | _Required_ | path |
 | `intervalsFile` | _Required_ | list of genome intervals |
 | `vepCache` | _Required_ | path |
+
+
+Pipeline Output
+-----
+Path to output directory must be specified in **outdir** parameter.
+🚧
+
 
 ## Credits
 

@@ -281,15 +281,5 @@
         {
             "$ref": "#/definitions/generic_options"
         }
-    ],
-    "properties": {
-        "sampleFileFormat": {
-            "type": "string",
-            "default": "V1"
-        },
-        "sequencingType": {
-            "type": "string",
-            "default": "WGS"
-        }
-    }
+    ]
 }

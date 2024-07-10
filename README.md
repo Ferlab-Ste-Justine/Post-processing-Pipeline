@@ -8,14 +8,14 @@
 
 ## Introduction
 
-**ferlab/postprocessing** is a bioinformatics pipeline that recombines gvcf for family's samples in order to facilitate denovo identification.
+**ferlab/postprocessing** is a bioinformatics pipeline that recombines gvcf for family's samples in order to facilitate denovo identification using tags and annotations. 
 
 <!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
 ###  Summary:
 1. Remove MNPs from bedtools 
 2. Combine gvcfs
 3. [Joint-genotyping](https://gatk.broadinstitute.org/hc/en-us/articles/360037057852-GenotypeGVCFs)
-4. Remove false positives with either:
+4. Tag false positives with either:
   - If using whole genome sequencing: [Variant quality score recalibration (VQSR)](https://gatk.broadinstitute.org/hc/en-us/articles/360036510892-VariantRecalibrator)
   - If using whole exome sequencing: [Hard-Filtering](https://gatk.broadinstitute.org/hc/en-us/articles/360036733451-VariantFiltration)
 5. Annotate variants with [Variant effect predictor (VEP)](https://useast.ensembl.org/info/docs/tools/vep/index.html)
@@ -27,21 +27,9 @@
 > If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline) with `-profile test` before running the workflow on actual data.
 
 ### Samples
-The workflow will accept sample data in two format (called V1 and V2). The path to the sample file must be specified with the "**input**" parameter.
+The workflow will accept sample data separated by tabs. The path to the sample file must be specified with the "**input**" parameter. The second column must be either WES (Whole Exome Sequencing) or WGS (Whole Genome Sequencing)
 
-1.  The first format is used by default and looks as follows:
-
-**sampleV1.tsv**
-
-_FAMILY_ID_ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; _Patient1_File_&nbsp; &nbsp; &nbsp;&nbsp; &nbsp;_Patient2_File_&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;_Patient3_File_
-```tsv
-CONGE-XXX       CONGE-XXX-01.hard-filtered.gvcf.gz   CONGE-XXX-02.hard-filtered.gvcf.gz   CONGE-XXX-03.hard-filtered.gvcf.gz
-CONGE-YYY       CONGE-YYY-01.hard-filtered.gvcf.gz   CONGE-YYY-02.hard-filtered.gvcf.gz   CONGE-YYY-03.hard-filtered.gvcf.gz
-```
-
-2.  The second format is used in older data and includes the sequencing type (WGS or WES)
-
-**sampleV2.tsv**
+**sample.tsv**
 
 _FAMILY_ID_ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; _SEQUENCING_TYPE_ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;_Patient1_File_&nbsp; &nbsp; &nbsp;&nbsp; &nbsp;_Patient2_File_&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;_Patient3_File_
 ```tsv
@@ -49,10 +37,6 @@ CONGE-XXX       WES       CONGE-XXX-01.hard-filtered.gvcf.gz   CONGE-XXX-02.hard
 CONGE-YYY       WES       CONGE-YYY-01.hard-filtered.gvcf.gz   CONGE-YYY-02.hard-filtered.gvcf.gz   CONGE-YYY-03.hard-filtered.gvcf.gz
 ```
 
-
-The file format can be chosen with the "**sampleFileFormat**" parameter (either "V1" or "V2", default "V1"). Note that both types are tab-delimited (.tsv)
-
-Next, if the file format is "V1", the sequencing type can be specified with the "**sequencingType**" parameter (either "WGS" for Whole Genome Sequencing or "WES" for Whole Exome Sequencing, default "WGS")
 
 > [!NOTE]
 > The sequencing type also determines the type of variant filtering the pipeline will use.
@@ -78,11 +62,8 @@ nextflow run ferlab/postprocessing \
 
 ### References
 Reference files are necessary at multiple steps of the workflow, notably for joint-genotyping,the variant effect predictor (VEP) and VQSR. 
-
-Specifically, we need a reference genome directory and filename specified with the **referenceGenome** and **referenceGenomeFasta** parameters respectively. 
-
-Generally, we use the Homo_sapiens_assembly38.fasta as referenceGenome (see Resources)
-
+Using igenome, we can retrieve the relevant files for the desired version of the human genome.
+Specifically, we specifiy the igenome version with the **genome** parameter. Most likely this value will be *'GRCh38'*
 
 
 Next, we also need broader references, which are contained in a path defined by the **broad** parameter.
@@ -112,10 +93,7 @@ Parameters summary
 | --- | --- | --- |
 | `input` | _Required_ | file |
 | `outdir` | _Required_ | path |
-| `sampleFileFormat` | _Optional_ | `V1` or `V2`, default `V1` |
-| `sequencingType` | _Optional_ | `WGS` or `WES`, default `WGS` |
-| `referenceGenome` | _Required_ | path |
-| `referenceGenomeFasta` | _Required_ | file |
+| `genome` | _Required_ | igenome version, ie 'GRCh38'|
 | `broad` | _Required_ | path |
 | `intervalsFile` | _Required_ | list of genome intervals |
 | `vepCache` | _Required_ | path |
@@ -146,6 +124,8 @@ The documentation of the various tools used in this workflow are available here:
 [Nextflow](https://www.nextflow.io/docs/latest/index.html)
 
 [bcftools](https://samtools.github.io/bcftools/bcftools.html)
+
+[igenomes](https://support.illumina.com/sequencing/sequencing_software/igenome.html)
 
 **GATK**:
 - [CombineGVCFs](https://gatk.broadinstitute.org/hc/en-us/articles/360037593911-CombineGVCFs)

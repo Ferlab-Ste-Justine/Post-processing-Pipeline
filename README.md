@@ -8,18 +8,20 @@
 
 ## Introduction
 
-**ferlab/postprocessing** is a bioinformatics pipeline that recombines gvcf for family's samples in order to facilitate denovo identification using tags and annotations. 
+**ferlab/postprocessing** is a bioinformatics pipeline that takes GVCFs from several samples to combine, perform joint genotyping, tag low quality variant and annotate a final vcf version.
 
 <!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
 ###  Summary:
-1. Remove MNPs from bedtools 
-2. Combine gvcfs
-3. [Joint-genotyping](https://gatk.broadinstitute.org/hc/en-us/articles/360037057852-GenotypeGVCFs)
-4. Tag false positives with either:
-  - If using whole genome sequencing: [Variant quality score recalibration (VQSR)](https://gatk.broadinstitute.org/hc/en-us/articles/360036510892-VariantRecalibrator)
-  - If using whole exome sequencing: [Hard-Filtering](https://gatk.broadinstitute.org/hc/en-us/articles/360036733451-VariantFiltration)
-5. Annotate variants with [Variant effect predictor (VEP)](https://useast.ensembl.org/info/docs/tools/vep/index.html)
+1. Remove MNPs using bcftools 
+2. Normalize .gvcf
+3. Combine .gvcf
+4. [Joint-genotyping](https://gatk.broadinstitute.org/hc/en-us/articles/360037057852-GenotypeGVCFs)
+5. Tag false positive variants with either:
+  - For whole genome sequencing data: [Variant quality score recalibration (VQSR)](https://gatk.broadinstitute.org/hc/en-us/articles/360036510892-VariantRecalibrator)
+  - For whole exome sequencing data: [Hard-Filtering](https://gatk.broadinstitute.org/hc/en-us/articles/360036733451-VariantFiltration)
+6. Annotate variants with [Variant effect predictor (VEP)](https://useast.ensembl.org/info/docs/tools/vep/index.html)
 
+![PostProcessingDiagram](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/blob/main/assets/PostProcessingImage.png?raw=true)
 
 ## Usage
 

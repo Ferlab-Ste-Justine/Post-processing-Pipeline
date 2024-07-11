@@ -21,7 +21,7 @@
   - For whole exome sequencing data: [Hard-Filtering](https://gatk.broadinstitute.org/hc/en-us/articles/360036733451-VariantFiltration)
 6. Annotate variants with [Variant effect predictor (VEP)](https://useast.ensembl.org/info/docs/tools/vep/index.html)
 
-![PostProcessingDiagram](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/blob/main/assets/PostProcessingImage.png?raw=true)
+![PostProcessingDiagram](assets/PostProcessingImage.png?raw=true)
 
 ## Usage
 

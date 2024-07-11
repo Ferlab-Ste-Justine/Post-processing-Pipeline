@@ -18,3 +18,7 @@ Initial release of ferlab/postprocessing, created with the [nf-core](https://nf-
 
 ### `Deprecated`
 
+### `Removed`
+[#1](https://github.com/FelixAntoineLeSieur/Post-processing-Pipeline/pull/1) Removed input_schema
+[#2](https://github.com/FelixAntoineLeSieur/Post-processing-Pipeline/pull/2) Removed V1 format input. V2 is the only accepted format.
+

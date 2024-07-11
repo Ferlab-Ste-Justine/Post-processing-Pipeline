@@ -1,1 +1,1 @@
-Test1	https://raw.githubusercontent.com/nf-core/test-datasets/sarek3/data/genomics/homo_sapiens/illumina/gvcf/test.genome.vcf.gz   https://raw.githubusercontent.com/nf-core/test-datasets/blob/modules/data/genomics/homo_sapiens/illumina/gvcf/test2.genome.vcf.gz
+Test1	WES	https://raw.githubusercontent.com/nf-core/test-datasets/sarek3/data/genomics/homo_sapiens/illumina/gvcf/test.genome.vcf.gz   https://raw.githubusercontent.com/nf-core/test-datasets/blob/modules/data/genomics/homo_sapiens/illumina/gvcf/test2.genome.vcf.gz

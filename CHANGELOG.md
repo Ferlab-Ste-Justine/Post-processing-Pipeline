@@ -9,6 +9,7 @@ Initial release of ferlab/postprocessing, created with the [nf-core](https://nf-
 
 ### `Added`
 [#2](https://github.com/FelixAntoineLeSieur/Post-processing-Pipeline/pull/2) Added tests and samplefile channel functions
+[#3](https://github.com/FelixAntoineLeSieur/Post-processing-Pipeline/pull/3) Added a test file for the test profile
 
 ### `Fixed`
 [#1](https://github.com/FelixAntoineLeSieur/Post-processing-Pipeline/pull/1) Fixed template schemas
@@ -16,3 +17,8 @@ Initial release of ferlab/postprocessing, created with the [nf-core](https://nf-
 ### `Dependencies`
 
 ### `Deprecated`
+
+### `Removed`
+[#1](https://github.com/FelixAntoineLeSieur/Post-processing-Pipeline/pull/1) Removed input_schema
+[#2](https://github.com/FelixAntoineLeSieur/Post-processing-Pipeline/pull/2) Removed V1 format input. V2 is the only accepted format.
+

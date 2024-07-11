@@ -20,7 +20,7 @@ If you'd like to write some code for ferlab/postprocessing, the standard workflo
 2. [Fork](https://help.github.com/en/github/getting-started-with-github/fork-a-repo) the [ferlab/postprocessing repository](https://github.com/ferlab/postprocessing) to your GitHub account
 3. Make the necessary changes / additions within your forked repository following [Pipeline conventions](#pipeline-contribution-conventions)
 4. Use `nf-core schema build` and add any new parameters to the pipeline JSON schema (requires [nf-core tools](https://github.com/nf-core/tools) >= 1.10).
-5. Submit a Pull Request against the `dev` branch and wait for the code to be reviewed and merged
+5. Submit a Pull Request against the main branch and wait for the code to be reviewed and merged
 
 If you're not used to this workflow with git, you can start with some [docs from GitHub](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests) or even their [excellent `git` resources](https://try.github.io/).
 
@@ -51,13 +51,13 @@ Each `nf-core` pipeline should be set up with a minimal set of test-data.
 If there are any failures then the automated tests fail.
 These tests are run both with the latest available version of `Nextflow` and also the minimum required version that is stated in the pipeline code.
 
-## Patch
+## Hotfix
 
 :warning: Only in the unlikely and regretful event of a release happening with a bug.
 
-- On your own fork, make a new branch `patch` based on `upstream/master`.
+- On your own fork, make a new branch `fix` based on `origin/main`.
 - Fix the bug, and bump version (X.Y.Z+1).
-- A PR should be made on `master` from patch to directly this particular bug.
+- A PR should be made on `main` from fix to directly this particular bug.
 
 ## Pipeline contribution conventions
 

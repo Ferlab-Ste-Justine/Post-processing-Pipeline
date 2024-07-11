@@ -89,20 +89,14 @@ workflow {
     FERLAB_POSTPROCESSING (
         PIPELINE_INITIALISATION.out.samplesheet
     )
-
+*/
     //
     // SUBWORKFLOW: Run completion tasks
     //
     PIPELINE_COMPLETION (
-        params.email,
-        params.email_on_fail,
-        params.plaintext_email,
         params.outdir,
         params.monochrome_logs,
-        params.hook_url,
-        FERLAB_POSTPROCESSING.out.multiqc_report
     )
-    */
 }
 
 /*

@@ -7,12 +7,24 @@ lint:
   - .github/ISSUE_TEMPLATE/config.yml
   - .github/workflows/awstest.yml
   - .github/workflows/awsfulltest.yml
+  - .github/workflows/linting_comment.yml
+  - .github/.dockstore.yml
+  - .editorconfig
+  - .prettierignore
+  - .prettierrc.yml
+  - LICENSE
+  - assets/email_template.html
+  - assets/email_template.txt
+  - assets/sendmail_template.txt
   files_unchanged:
   - CODE_OF_CONDUCT.md
   - assets/nf-core-postprocessing_logo_light.png
   - docs/images/nf-core-postprocessing_logo_light.png
   - docs/images/nf-core-postprocessing_logo_dark.png
   - .github/ISSUE_TEMPLATE/bug_report.yml
+  - .github/CONTRIBUTING.md
+  - .github/PULL_REQUEST_TEMPLATE.md
+  - .github/workflows/linting_comment.yml
   multiqc_config:
   - report_comment
   nextflow_config:

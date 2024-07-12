@@ -9,6 +9,9 @@ Please use the pre-filled template to save time.
 However, don't be put off by this template - other more general issues and suggestions are welcome!
 Contributions to the code are even more welcome ;)
 
+Since this repository is in construction, some of the points below might not apply yet (ex: tests, linter, naming conventions, versioning).
+Make sure to do the maximum possible. If you are not sure about current standards or need support, you can ask help on the [#bioinfo](https://cr-ste-justine.slack.com/archives/C074VMACUD9slack) slack channel.
+
 ## Contribution workflow
 
 If you'd like to write some code for ferlab/postprocessing, the standard workflow is as follows:
@@ -17,7 +20,7 @@ If you'd like to write some code for ferlab/postprocessing, the standard workflo
 2. [Fork](https://help.github.com/en/github/getting-started-with-github/fork-a-repo) the [ferlab/postprocessing repository](https://github.com/ferlab/postprocessing) to your GitHub account
 3. Make the necessary changes / additions within your forked repository following [Pipeline conventions](#pipeline-contribution-conventions)
 4. Use `nf-core schema build` and add any new parameters to the pipeline JSON schema (requires [nf-core tools](https://github.com/nf-core/tools) >= 1.10).
-5. Submit a Pull Request against the `dev` branch and wait for the code to be reviewed and merged
+5. Submit a Pull Request against the main branch and wait for the code to be reviewed and merged
 
 If you're not used to this workflow with git, you can start with some [docs from GitHub](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests) or even their [excellent `git` resources](https://try.github.io/).
 
@@ -48,13 +51,13 @@ Each `nf-core` pipeline should be set up with a minimal set of test-data.
 If there are any failures then the automated tests fail.
 These tests are run both with the latest available version of `Nextflow` and also the minimum required version that is stated in the pipeline code.
 
-## Patch
+## Hotfix
 
 :warning: Only in the unlikely and regretful event of a release happening with a bug.
 
-- On your own fork, make a new branch `patch` based on `upstream/master`.
+- On your own fork, make a new branch `fix` based on `origin/main`.
 - Fix the bug, and bump version (X.Y.Z+1).
-- A PR should be made on `master` from patch to directly this particular bug.
+- A PR should be made on `main` from fix to directly this particular bug.
 
 ## Pipeline contribution conventions
 
@@ -72,8 +75,7 @@ If you wish to contribute a new step, please use the following coding standards:
 6. Add sanity checks and validation for all relevant parameters.
 7. Perform local tests to validate that the new code works as expected.
 8. If applicable, add a new test command in `.github/workflow/ci.yml`.
-9. Update MultiQC config `assets/multiqc_config.yml` so relevant suffixes, file name clean up and module plots are in the appropriate order. If applicable, add a [MultiQC](https://https://multiqc.info/) module.
-10. Add a description of the output files and if relevant any appropriate images from the MultiQC report to `docs/output.md`.
+9. Add a description of the output files if relevant to `docs/output.md`.
 
 ### Default values
 
@@ -102,17 +104,3 @@ If you are using a new feature from core Nextflow, you may bump the minimum requ
 
 For overview images and other documents we follow the nf-core [style guidelines and examples](https://nf-co.re/developers/design_guidelines).
 
-## GitHub Codespaces
-
-This repo includes a devcontainer configuration which will create a GitHub Codespaces for Nextflow development! This is an online developer environment that runs in your browser, complete with VSCode and a terminal.
-
-To get started:
-
-- Open the repo in [Codespaces](https://github.com/ferlab/postprocessing/codespaces)
-- Tools installed
-  - nf-core
-  - Nextflow
-
-Devcontainer specs:
-
-- [DevContainer config](.devcontainer/devcontainer.json)

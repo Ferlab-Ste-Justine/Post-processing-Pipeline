@@ -85,11 +85,9 @@ workflow {
     //
     // WORKFLOW: Run main workflow
     //
-    /* Skip for now
     FERLAB_POSTPROCESSING (
         PIPELINE_INITIALISATION.out.samplesheet
     )
-*/
     //
     // SUBWORKFLOW: Run completion tasks
     //

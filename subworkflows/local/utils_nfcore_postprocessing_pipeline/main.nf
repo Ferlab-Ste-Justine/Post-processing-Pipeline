@@ -92,8 +92,7 @@ workflow PIPELINE_INITIALISATION {
         }
         .set { ch_sampleChannel}
         emit:
-        sampleFiles = ch_sampleChannel.files
-        sampleMeta = ch_sampleChannel.meta
+        samplesheet = ch_samplechannel
         versions = ch_versions
 }
 

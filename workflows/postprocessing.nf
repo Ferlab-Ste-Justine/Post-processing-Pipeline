@@ -241,13 +241,13 @@ workflow POSTPROCESSING {
 
     ch_versions = Channel.empty()
     ch_multiqc_files = Channel.empty()
-/*
+
     Channel
     .fromList(workflow.configFiles)
     .collectFile(storeDir: "${params.outdir}/pipeline_info/configs",cache: false)
 
     writemeta()
-*/
+
     sampleChannel().set{ sampleFile }
 
     filtered = excludeMNPs(sampleFile.files)

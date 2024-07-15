@@ -75,7 +75,58 @@ workflow PIPELINE_INITIALISATION {
     //
     validateInputParameters()
 
+        //_________Local___________
+    //
+    // Create channel from input file provided through params.input
+    //
+    Channel
+        .fromSamplesheet("input")
+        .map {
+            meta, file ->
+            [meta.familyID, [meta, file]]
+        }
+        .tap{ch_sample_simple}
+        .groupTuple()
+        .map{
+            family_sampleID, ch_items ->
+            [family_sampleID, ch_items.size()]
+        }
+        .combine(ch_sample_simple,by:0)
+        .map {
+            id,size,metasfile ->
+                [meta:
+                    [familyId: id,
+                    sampleID: metasfile[0].sampleID,
+                    sequencingType: metasfile[0].sequencingType,
+                    sampleSize: size],
+                file: metasfile[1]
+                ]
+        }
+        .view{"final: ${it}"}
+        .set {ch_samplesheet}
+    ch_samplesheet.view{"Channel: ${it}"}
+    emit:
+    samplesheet = ch_samplesheet
+    versions    = ch_versions
+
+    /*
+    Channel.fromPath(file("$params.input"))
+        .splitCsv(sep: '\t', strip: true)
+        .map{rowMapperV2(it)}
+        .flatMap { it ->
+            return it.files.collect{f -> [familyId: it.familyId, sequencingType: it.sequencingType, size: it.files.size(), file: f]};
+        }.multiMap { it ->
+            meta: tuple(it.familyId, [size: it.size, sequencingType: it.sequencingType])
+            files: tuple(it.familyId, file("${it.file}*"))
+        }
+        .set { ch_sampleChannel}
+        emit:
+        sampleFiles = ch_sampleChannel.files
+        sampleMeta = ch_sampleChannel.meta
+        versions = ch_versions
+        */
 }
+
 /*
 ========================================================================================
     SUBWORKFLOW FOR PIPELINE COMPLETION

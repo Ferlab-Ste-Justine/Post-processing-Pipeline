@@ -16,11 +16,12 @@
           "type": "string",
           "format": "file-path",
           "exists": true,
-          "mimetype": "text/tsv",
-          "pattern": "^\\S+\\.tsv$",
-          "description": "Path to the .tsv sample file, of format V1 or V2, containing the Family ID and path to GVCF files",
+          "mimetype": "text/csv",
+          "pattern": "^\\S+\\.csv$",
+          "description": "Path to the .csv sample file containing the Family ID, sample ID, sequencing Type and path to GVCF files",
           "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row.",
-          "fa_icon": "fas fa-file-csv"
+          "fa_icon": "fas fa-file-csv",
+          "schema": "assets/schema_input.json"
         },
         "outdir": {
           "type": "string",
@@ -60,12 +61,6 @@
           "description": "Directory containing the referenceGenomeFasta",
           "help_text": "Contains the path to the directory that contains the reference fasta genome.",
           "format": "directory-path"
-        },
-        "referenceGenomeFasta": {
-          "type": "string",
-          "description": "Name of the fasta file for the genome",
-          "help_text": "Name of the fasta file for the genome we usually apply \"Homo_sapiens_assembly38.fasta\"",
-          "format": "file-path"
         },
         "referenceGenomeFasta": {
           "type": "string",
@@ -243,6 +238,13 @@
           "default": "https://raw.githubusercontent.com/nf-core/test-datasets/",
           "hidden": true
         },
+        "sequencingType": {
+          "type": "string",
+          "default": "WGS",
+          "description": "\"Either \\\"WGS\\\" for Whole Genome Sequencing or \\\"WES\\\" for Whole Exome Sequencing\"",
+          "help_text": "\"Either \\\"WGS\\\" for Whole Genome Sequencing or \\\"WES\\\" for Whole Exome Sequencing\"",
+          "enum": ["WGS", "WES"]
+        },
         "TSfilterSNP": {
           "type": "string",
           "default": "99",
@@ -256,7 +258,8 @@
           "description": "Truth-sensitivity filter level for Indels"
         },
         "hardFilters": {
-          "type": "array",
+          "type": "string",
+          "default": "[[name:'QD2', expression:'QD < 2.0'], [name:'QD1', expression:'QD < 1.0'], [name:'QUAL30', expression:'QUAL < 30.0'], [name:'SOR3', expression:'SOR > 3.0'], [name:'FS60', expression:'FS > 60.0'], [name:'MQ40', expression:'MQ < 40.0'], [name:'MQRankSum-12.5', expression:'MQRankSum < -12.5'], [name:'ReadPosRankSum-8', expression:'ReadPosRankSum < -8.0']]",
           "description": "Parameters for Hard-Filtering",
           "help_text": "Parameters for Hard-Filtering. Must be an array containing each desired filter. Each filter must be formatted with the desired name and expression, for example\\n[[name: 'QD1', expression: 'QD < 1.0'],[name: 'QD2', expression: 'QD < 2.0]]"
         }

@@ -14,6 +14,12 @@ include { splitMultiAllelics        } from '../modules/local/vep'
 include { vep                       } from '../modules/local/vep'
 include { tabix                     } from '../modules/local/vep'
 
+include { VQSR } from "../subworkflows/local/vqsr"
+include { hardFiltering } from '../modules/local/hardFilter'
+include { splitMultiAllelics        } from '../modules/local/vep'
+include { vep                       } from '../modules/local/vep'
+include { tabix                     } from '../modules/local/vep'
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
@@ -36,27 +42,26 @@ enum SequencingType {
 
 def sampleChannel() {    
     return Channel.fromPath(file("$params.input"))
-        .splitCsv(sep: '\t', strip: true)
-        .map{rowMapperV2(it)}
+        .splitCsv(sep: ',', strip: true)
+        //.view{"splitCsv: ${it}"}
+        .map {
+            it ->
+                return [
+                    familyId: it[0],
+                    sampleID: it[1],
+                    sequencingType: it[2],
+                    files: it[3..-1]
+                ]
+        }
+        //.view{"Map: ${it}"}
         .flatMap { it ->
             return it.files.collect{f -> [familyId: it.familyId, sequencingType: it.sequencingType, size: it.files.size(), file: f]};             
-        }.multiMap { it ->
+        }
+        //.view{"Flatmap: ${it}"}
+        .multiMap { it ->
             meta: tuple(it.familyId, [size: it.size, sequencingType: it.sequencingType])
             files: tuple(it.familyId, file("${it.file}*"))
         }
-}
-
-def rowMapperV2(columns) {
-    def sampleSeqType = columns[1].toUpperCase()
-    if (!(SequencingType.contains(sampleSeqType))){
-        error("Error: Second column of the sample sheet should be either 'WES' or 'WGS'")
-        exit(1)
-    }
-    return [
-        familyId: columns[0],
-        sequencingType: sampleSeqType.toUpperCase() as SequencingType,
-        files: columns[2..-1]
-    ]
 }
 
 process excludeMNPs {
@@ -232,12 +237,11 @@ workflow POSTPROCESSING {
     file(params.outdir).mkdirs()
 
     take:
-    input
+    ch_samplesheet
 
     main:
 
     ch_versions = Channel.empty()
-    ch_multiqc_files = Channel.empty()
 
     Channel
     .fromList(workflow.configFiles)
@@ -246,6 +250,10 @@ workflow POSTPROCESSING {
     writemeta()
 
     sampleChannel().set{ sampleFile }
+    print("SampleFile:")
+    sampleFile.meta.view{"Meta: ${it}"}
+    sampleFile.files.view{"File: ${it}"}
+
 
     filtered = excludeMNPs(sampleFile.files)
                     .join(sampleFile.meta)
@@ -274,7 +282,7 @@ workflow POSTPROCESSING {
     //Annotating mutations
     vep(s, referenceGenome, vepCache)
     tabix(vep.out) 
-
+  
     emit:
     tabix.out
 

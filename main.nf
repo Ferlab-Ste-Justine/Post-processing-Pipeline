@@ -56,7 +56,8 @@ workflow FERLAB_POSTPROCESSING {
     )
 
     emit:
-    multiqc_report = POSTPROCESSING.out.multiqc_report // channel: /path/to/multiqc_report.html
+    POSTPROCESSING.out
+    //multiqc_report = POSTPROCESSING.out.multiqc_report // channel: /path/to/multiqc_report.html
 
 }
 /*
@@ -72,6 +73,7 @@ workflow {
     //
     // SUBWORKFLOW: Run initialisation tasks
     //
+    /*
     PIPELINE_INITIALISATION (
         params.version,
         params.help,
@@ -81,15 +83,14 @@ workflow {
         params.outdir,
         params.input
     )
-
+*/
     //
     // WORKFLOW: Run main workflow
     //
-    /* Skip for now
     FERLAB_POSTPROCESSING (
-        PIPELINE_INITIALISATION.out.samplesheet
+        params.input
+ //       Channel.of(PIPELINE_INITIALISATION.out.meta, PIPELINE_INITIALISATION.out.files)
     )
-*/
     //
     // SUBWORKFLOW: Run completion tasks
     //

@@ -73,7 +73,7 @@ workflow {
     //
     // SUBWORKFLOW: Run initialisation tasks
     //
-    /*
+
     PIPELINE_INITIALISATION (
         params.version,
         params.help,
@@ -83,13 +83,12 @@ workflow {
         params.outdir,
         params.input
     )
-*/
+
     //
     // WORKFLOW: Run main workflow
     //
     FERLAB_POSTPROCESSING (
         params.input
- //       Channel.of(PIPELINE_INITIALISATION.out.meta, PIPELINE_INITIALISATION.out.files)
     )
     //
     // SUBWORKFLOW: Run completion tasks

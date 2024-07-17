@@ -73,13 +73,26 @@
           "help_text": "Contains the path to the directory that contains the reference fasta genome.",
           "format": "directory-path"
         },
+        "referenceGenomeFasta": {
+          "type": "string",
+          "description": "Name of the fasta file for the genome",
+          "help_text": "Name of the fasta file for the genome we usually apply \"Homo_sapiens_assembly38.fasta\"",
+          "format": "file-path"
+        },
         "vepCache": {
           "type": "string",
           "help_text": "Path to the vepCache directory, which is usually installed by vep by default. It should contain at least the homo_sapien/111_GRCh38/ directory. ",
           "description": "Directory of the Vep Cache",
           "format": "directory-path"
+        },
+        "intervalsFile": {
+          "type": "string",
+          "description": "Namefile of the genome interval we want to use",
+          "help_text": "Namefile of the genome interval. Used during the CombineGVCFs step to indicate the regions of interest",
+          "format": "file-path"
         }
-      }
+      },
+      "required": ["intervalsFile"]
     },
     "institutional_config_options": {
       "title": "Institutional config options",
@@ -147,7 +160,7 @@
         "max_memory": {
           "type": "string",
           "description": "Maximum amount of memory that can be requested for any single job.",
-          "default": "128.GB",
+          "default": "120 GB",
           "fa_icon": "fas fa-memory",
           "pattern": "^\\d+(\\.\\d+)?\\.?\\s*(K|M|G|T)?B$",
           "hidden": true,
@@ -156,11 +169,19 @@
         "max_time": {
           "type": "string",
           "description": "Maximum amount of time that can be requested for any single job.",
-          "default": "240.h",
+          "default": "12h",
           "fa_icon": "far fa-clock",
           "pattern": "^(\\d+\\.?\\s*(s|m|h|d|day)\\s*)+$",
           "hidden": true,
           "help_text": "Use to set an upper-limit for the time requirement for each process. Should be a string in the format integer-unit e.g. `--max_time '2.h'`"
+        },
+        "vepCpu": {
+          "type": "integer",
+          "default": 4
+        },
+        "max_disk": {
+          "type": "string",
+          "default": "80 GB"
         }
       }
     },
@@ -286,6 +307,31 @@
           "description": "Base URL or local path to location of pipeline test dataset files",
           "default": "https://raw.githubusercontent.com/nf-core/test-datasets/",
           "hidden": true
+        },
+        "sequencingType": {
+          "type": "string",
+          "default": "WGS",
+          "description": "\"Either \\\"WGS\\\" for Whole Genome Sequencing or \\\"WES\\\" for Whole Exome Sequencing\"",
+          "help_text": "\"Either \\\"WGS\\\" for Whole Genome Sequencing or \\\"WES\\\" for Whole Exome Sequencing\"",
+          "enum": ["WGS", "WES"]
+        },
+        "TSfilterSNP": {
+          "type": "string",
+          "default": "99",
+          "description": "Truth-sensitivity filter level for SNPs",
+          "help_text": "Truth-sensitivity filter level for SNPs. This value is required by the VQSR step"
+        },
+        "TSfilterINDEL": {
+          "type": "string",
+          "default": "99",
+          "help_text": "This value is required by the VQSR step",
+          "description": "Truth-sensitivity filter level for Indels"
+        },
+        "hardFilters": {
+          "type": "string",
+          "default": "[[name:'QD2', expression:'QD < 2.0'], [name:'QD1', expression:'QD < 1.0'], [name:'QUAL30', expression:'QUAL < 30.0'], [name:'SOR3', expression:'SOR > 3.0'], [name:'FS60', expression:'FS > 60.0'], [name:'MQ40', expression:'MQ < 40.0'], [name:'MQRankSum-12.5', expression:'MQRankSum < -12.5'], [name:'ReadPosRankSum-8', expression:'ReadPosRankSum < -8.0']]",
+          "description": "Parameters for Hard-Filtering",
+          "help_text": "Parameters for Hard-Filtering. Must be an array containing each desired filter. Each filter must be formatted with the desired name and expression, for example\\n[[name: 'QD1', expression: 'QD < 1.0'],[name: 'QD2', expression: 'QD < 2.0]]"
         }
       }
     }

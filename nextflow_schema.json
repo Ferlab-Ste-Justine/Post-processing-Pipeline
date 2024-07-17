@@ -79,6 +79,12 @@
           "help_text": "Name of the fasta file for the genome we usually apply \"Homo_sapiens_assembly38.fasta\"",
           "format": "file-path"
         },
+        "referenceGenomeFasta": {
+          "type": "string",
+          "description": "Name of the fasta file for the genome",
+          "help_text": "Name of the fasta file for the genome we usually apply \"Homo_sapiens_assembly38.fasta\"",
+          "format": "file-path"
+        },
         "vepCache": {
           "type": "string",
           "help_text": "Path to the vepCache directory, which is usually installed by vep by default. It should contain at least the homo_sapien/111_GRCh38/ directory. ",

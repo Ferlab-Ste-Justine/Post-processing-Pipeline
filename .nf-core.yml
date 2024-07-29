@@ -14,6 +14,7 @@ lint:
   - .prettierignore
   - .prettierrc.yml
   - LICENSE
+  - CITATIONS.md
   - assets/email_template.html
   - assets/email_template.txt
   - assets/sendmail_template.txt

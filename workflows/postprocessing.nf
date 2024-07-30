@@ -194,8 +194,8 @@ a hard filtering approach.
 def tagArtifacts(inputChannel, metadataChannel, hardFilters) {
     def inputSequencingTypes = inputChannel.join(metadataChannel)
     
-    def wgs = inputSequencingTypes.filter{"$params.sequencingType" == SequencingType.WGS}.map(it -> it.dropRight(1))
-    def wes = inputSequencingTypes.filter{"$params.sequencingType"== SequencingType.WES}.map(it -> it.dropRight(1))
+    def wgs = inputSequencingTypes.filter{it[2].sequencingType == SequencingType.WGS}.map(it -> it.dropRight(1))
+    def wes = inputSequencingTypes.filter{it[2].sequencingType == SequencingType.WES}.map(it -> it.dropRight(1))
 
     def wgs_filtered = VQSR(wgs)
     def wes_filtered = hardFiltering(wes, hardFilters)

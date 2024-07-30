@@ -328,8 +328,7 @@
           "description": "Truth-sensitivity filter level for Indels"
         },
         "hardFilters": {
-          "type": "string",
-          "default": "[[name:'QD2', expression:'QD < 2.0'], [name:'QD1', expression:'QD < 1.0'], [name:'QUAL30', expression:'QUAL < 30.0'], [name:'SOR3', expression:'SOR > 3.0'], [name:'FS60', expression:'FS > 60.0'], [name:'MQ40', expression:'MQ < 40.0'], [name:'MQRankSum-12.5', expression:'MQRankSum < -12.5'], [name:'ReadPosRankSum-8', expression:'ReadPosRankSum < -8.0']]",
+          "type": "array",
           "description": "Parameters for Hard-Filtering",
           "help_text": "Parameters for Hard-Filtering. Must be an array containing each desired filter. Each filter must be formatted with the desired name and expression, for example\\n[[name: 'QD1', expression: 'QD < 1.0'],[name: 'QD2', expression: 'QD < 2.0]]"
         }

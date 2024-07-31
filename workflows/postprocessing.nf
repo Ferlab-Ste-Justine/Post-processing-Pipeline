@@ -53,23 +53,19 @@ process excludeMNPs {
     def familyId = meta.familyId
     def sampleId = meta.sampleId
     def exactGvcfFile = gvcfFile.find { it.name.endsWith("vcf.gz") }
-    def uuid = UUID.randomUUID().toString()
-    // --regions chr1,chr2,chr3,chr4,chr5,chr6,chr7,chr8,chr9,chr10,chr11,chr12,chr13,chr14,chr15,chr16,chr17,chr18,chr19,chr20,chr21,chr22,chrX,chrY
-    // bcftools view --exclude-type mnps  ${exactGvcfFile} -O z -o ${familyId}.${uuid}.filtered.gvcf.gz
     """
     set -e
     echo $familyId > file
-    bcftools filter -e 'strlen(REF)>1 & strlen(REF)==strlen(ALT) & TYPE="snp"' ${exactGvcfFile} | bcftools norm -d any -O z -o ${familyId}.${sampleId}.${uuid}.filtered.vcf.gz
-    bcftools index -t ${familyId}.${sampleId}.${uuid}.filtered.vcf.gz
+    bcftools filter -e 'strlen(REF)>1 & strlen(REF)==strlen(ALT) & TYPE="snp"' ${exactGvcfFile} | bcftools norm -d any -O z -o ${familyId}.${sampleId}.filtered.vcf.gz
+    bcftools index -t ${familyId}.${sampleId}.filtered.vcf.gz
     """
     stub:
     def familyId = meta.familyId
     def sampleId = meta.sampleId
     def exactGvcfFile = gvcfFile.find { it.name.endsWith("vcf.gz") }
-    def uuid = UUID.randomUUID().toString()
     """
-    touch ${familyId}.${sampleId}.${uuid}.filtered.vcf.gz
-    touch ${familyId}.${sampleId}.${uuid}.filtered.vcf.gz.tbi
+    touch ${familyId}.${sampleId}.filtered.vcf.gz
+    touch ${familyId}.${sampleId}.filtered.vcf.gz.tbi
     """
 
 }

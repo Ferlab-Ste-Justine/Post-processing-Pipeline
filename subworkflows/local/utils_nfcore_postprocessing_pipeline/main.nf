@@ -77,26 +77,7 @@ workflow PIPELINE_INITIALISATION {
     //
     validateInputParameters()
 
-        //_________Local___________
-    //
-    // Create channel from input file provided through params.input
-    //
-    Channel.fromPath(file("$params.input"))
-        .splitCsv(sep: '\t', strip: true)
-        .map{rowMapperV2(it)}
-        .flatMap { it ->
-            return it.files.collect{f -> [familyId: it.familyId, sequencingType: it.sequencingType, size: it.files.size(), file: f]};
-        }.multiMap { it ->
-            meta: tuple(it.familyId, [size: it.size, sequencingType: it.sequencingType])
-            files: tuple(it.familyId, file("${it.file}*"))
-        }
-        .set { ch_sampleChannel}
-        emit:
-        sampleFiles = ch_sampleChannel.files
-        sampleMeta = ch_sampleChannel.meta
-        versions = ch_versions
 }
-
 /*
 ========================================================================================
     SUBWORKFLOW FOR PIPELINE COMPLETION
@@ -132,34 +113,6 @@ workflow PIPELINE_COMPLETION {
 */
 //
 //_____________Local functions_____________
-enum SequencingType {
-    WGS,
-    WES
-
-    public static boolean contains(String s) {
-        for(SequencingType sequencingType in SequencingType.values()){
-            if(sequencingType.name().equals(s)){
-                return true
-            }
-        }
-        return false
-    }
-}
-
-//Transform a row from the sample file in V2 format from a list structure to a map structure
-def rowMapperV2(columns) {
-    def sampleSeqType = columns[1].toUpperCase()
-    if (!(SequencingType.contains(sampleSeqType))){
-        error("Error: Second column of the sample sheet should be either 'WES' or 'WGS'")
-        exit(1)
-    }
-    return [
-        familyId: columns[0],
-        sequencingType: sampleSeqType.toUpperCase() as SequencingType,
-        files: columns[2..-1]
-    ]
-}
-
 //_____________Template functions_____________
 //
 // Check and validate pipeline parameters

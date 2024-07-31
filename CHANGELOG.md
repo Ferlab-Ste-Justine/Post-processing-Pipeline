@@ -10,6 +10,7 @@ Initial release of ferlab/postprocessing, created with the [nf-core](https://nf-
 ### `Added`
 [#2](https://github.com/FelixAntoineLeSieur/Post-processing-Pipeline/pull/2) Added tests and samplefile channel functions
 [#3](https://github.com/FelixAntoineLeSieur/Post-processing-Pipeline/pull/3) Added a test file for the test profile
+[#6](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/6) Added most functions and modules from previous pipeline to make it functional
 
 ### `Fixed`
 [#1](https://github.com/FelixAntoineLeSieur/Post-processing-Pipeline/pull/1) Fixed template schemas

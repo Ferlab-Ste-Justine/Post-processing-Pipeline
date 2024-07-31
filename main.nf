@@ -25,14 +25,7 @@ include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_post
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     GENOME PARAMETER VALUES
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
 
-// TODO nf-core: Remove this line if you don't need a FASTA file
-//   This is an example of how to use getGenomeAttribute() to fetch parameters
-//   from igenomes.config using `--genome`
-//params.fasta = getGenomeAttribute('fasta')
-
-/*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     NAMED WORKFLOWS FOR PIPELINE
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -56,8 +49,7 @@ workflow FERLAB_POSTPROCESSING {
     )
 
     emit:
-    multiqc_report = POSTPROCESSING.out.multiqc_report // channel: /path/to/multiqc_report.html
-
+    POSTPROCESSING.out
 }
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -72,6 +64,7 @@ workflow {
     //
     // SUBWORKFLOW: Run initialisation tasks
     //
+
     PIPELINE_INITIALISATION (
         params.version,
         params.help,
@@ -85,11 +78,9 @@ workflow {
     //
     // WORKFLOW: Run main workflow
     //
-    /* Skip for now
     FERLAB_POSTPROCESSING (
-        PIPELINE_INITIALISATION.out.samplesheet
+        params.input
     )
-*/
     //
     // SUBWORKFLOW: Run completion tasks
     //

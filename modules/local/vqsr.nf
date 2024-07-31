@@ -9,12 +9,12 @@ process variantRecalibratorSNP {
 
 
     input:
-    tuple val(prefix), path(vcf)
+    tuple val(prefix), val(meta), path(vcf)
     path referenceGenome
     path broadResource
 
     output:
-    tuple val(prefix), path("*.recal*"), path("*.tranches")
+    tuple val(prefix), val(meta), path("*.recal*"), path("*.tranches")
     
     script:
     def args = task.ext.args ?: ''
@@ -69,12 +69,12 @@ process variantRecalibratorIndel {
 
 
     input:
-    tuple val(prefix), path(vcf)
+    tuple val(prefix), val(meta), path(vcf)
     path referenceGenome
     path broadResource
 
     output:
-    tuple val(prefix), path("*.recal*"), path("*.tranches")
+    tuple val(prefix), val(meta), path("*.recal*"), path("*.tranches")
     
     script:
     def args = task.ext.args ?: ''
@@ -124,10 +124,10 @@ process applyVQSRSNP {
     
 
     input:
-    tuple val(prefix), path(recal), path(tranches), path(vcf)
+    tuple val(prefix),val(meta), path(recal), path(tranches), path(vcf)
 
     output:
-    tuple val(prefix), path("*.snp.vqsr_${params.TSfilterSNP}.vcf.gz*")
+    tuple val(prefix), val(meta),path("*.snp.vqsr_${params.TSfilterSNP}.vcf.gz*")
 
     script:
     def args = task.ext.args ?: ''
@@ -171,10 +171,10 @@ process applyVQSRIndel {
     container 'broadinstitute/gatk'
 
     input:
-    tuple val(prefix), path(recal), path(tranches), path(vcf)
+    tuple val(prefix), val(meta), path(recal), path(tranches), path(vcf)
 
     output:
-    tuple val(prefix), path("*.snpindel.vqsr_${params.TSfilterINDEL}.vcf.gz*")
+    tuple val(prefix), val(meta), path("*.snpindel.vqsr_${params.TSfilterINDEL}.vcf.gz*")
 
     script:
     def args = task.ext.args ?: ''

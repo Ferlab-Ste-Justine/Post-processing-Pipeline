@@ -2,11 +2,11 @@ process hardFiltering {
     label 'medium'
 
     input:
-    tuple val(prefixId), path(vcf)
+    tuple val(prefixId), val(meta), path(vcf)
     val(filters)
 
     output:
-    tuple val(prefixId), path("*.hardfilter.vcf.gz*")
+    tuple val(prefixId), val(meta), path("*.hardfilter.vcf.gz*")
 
     script:
     def args = task.ext.args ?: ''

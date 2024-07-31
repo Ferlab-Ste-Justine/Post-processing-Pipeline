@@ -10,19 +10,19 @@ All output files will be prefixed with the given prefixId.
 */
 workflow VQSR {
     take:
-        input // channel: (val(prefixId),  [.vcf.gz, .vcf.gz.tbi])
-
+        input // channel: (val(prefixId), va(meta),  [.vcf.gz, .vcf.gz.tbi])
     main:
+        ch_input = input.map{id,metas,files -> [id,files]}
         referenceGenome = file(params.referenceGenome)
         broad = file(params.broad)
 
 
         outputSNP = variantRecalibratorSNP(input, referenceGenome, broad)
-            | join(input)
+            | join(ch_input)
             | applyVQSRSNP
-
+        ch_outputSNP = outputSNP.map{id,metas,files -> [id,files]}
         output = variantRecalibratorIndel(input, referenceGenome, broad)
-            | join(outputSNP)
+            | join(ch_outputSNP)
             | applyVQSRIndel
 
     emit:

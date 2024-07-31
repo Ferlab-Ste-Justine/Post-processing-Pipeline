@@ -96,15 +96,13 @@ workflow PIPELINE_INITIALISATION {
             id,size,metasfile ->
                 [meta:
                     [familyId: id,
-                    sampleID: metasfile[0].sampleID,
+                    sampleId: metasfile[0].sampleID,
                     sequencingType: metasfile[0].sequencingType,
                     sampleSize: size],
                 file: metasfile[1]
                 ]
         }
-        .view{"final: ${it}"}
         .set {ch_samplesheet}
-    ch_samplesheet.view{"Channel: ${it}"}
     emit:
     samplesheet = ch_samplesheet
     versions    = ch_versions

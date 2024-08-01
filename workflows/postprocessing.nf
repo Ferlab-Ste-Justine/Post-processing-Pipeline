@@ -24,10 +24,10 @@ process excludeMNPs {
     label 'medium'
     
     input:
-    tuple val(meta), path(gvcfFile)
+    tuple val(metas), path(gvcfFile)
 
     output:
-    tuple val(meta), path("*filtered.vcf.gz*")
+    tuple val(metas), path("*filtered.vcf.gz*")
 
     script:
     def familyId = meta.familyId
@@ -81,13 +81,13 @@ process importGVCF {
 
 
     """
-    echo $familyId > file
+    echo $familyID > file
     gatk -version
     gatk --java-options "-Xmx${avail_mem}M -XX:-UsePerfData $argsjava" \\
         CombineGVCFs \\
         -R $referenceGenome/${params.referenceGenomeFasta} \\
         $exactGvcfFiles \\
-        -O ${familyId}.combined.gvcf.gz \\
+        -O ${familyID}.combined.gvcf.gz \\
         -L $broadResource/${params.intervalsFile} \\
         $args
     """ 
@@ -98,7 +98,7 @@ process importGVCF {
     def exactGvcfFiles = gvcfFiles.findAll { it.name.endsWith("vcf.gz") }.collect { "-V $it" }.join(' ')
 
     """
-    touch ${familyId}.combined.gvcf.gz
+    touch ${familyID}.combined.gvcf.gz
     """       
 
 }    
@@ -130,13 +130,13 @@ process genotypeGVCF {
         avail_mem = (task.memory.mega*0.8).intValue()
     }
     """
-    echo $familyId > file
+    echo $familyID > file
     gatk -version
     gatk --java-options "-Xmx${avail_mem}M -XX:-UsePerfData $argsjava" \\
         GenotypeGVCFs \\
         -R $referenceGenome/${params.referenceGenomeFasta} \\
         -V $exactGvcfFile \\
-        -O ${familyId}.genotyped.vcf.gz \\
+        -O ${familyID}.genotyped.vcf.gz \\
         $args
     """
 
@@ -145,7 +145,7 @@ process genotypeGVCF {
     def familyId = meta.familyId
     def exactGvcfFile = gvcfFile.find { it.name.endsWith("vcf.gz") }
     """
-    touch ${familyId}.genotyped.vcf.gz
+    touch ${familyID}.genotyped.vcf.gz
     """
 }
 

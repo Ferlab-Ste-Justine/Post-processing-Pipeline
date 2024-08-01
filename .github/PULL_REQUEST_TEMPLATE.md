@@ -8,8 +8,6 @@ Since this repository is in construction, some of the points below regarding tes
 to do the maximum possible.  For now, the tests are performed manually. Add a description of your tests in your pull request.
 You can ask help on the [#bioinfo](https://cr-ste-justine.slack.com/archives/C074VMACUD9slack) channel.
 These are the most common things requested on pull requests (PRs).
-
-Learn more about contributing: [CONTRIBUTING.md](https://github.com/ferlab/postprocessing/tree/master/.github/CONTRIBUTING.md)
 -->
 
 ## PR checklist

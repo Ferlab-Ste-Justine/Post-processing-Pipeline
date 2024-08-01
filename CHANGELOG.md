@@ -10,7 +10,7 @@ Initial release of ferlab/postprocessing, created with the [nf-core](https://nf-
 ### `Added`
 [#2](https://github.com/FelixAntoineLeSieur/Post-processing-Pipeline/pull/2) Added tests and samplefile channel functions
 [#3](https://github.com/FelixAntoineLeSieur/Post-processing-Pipeline/pull/3) Added a test file for the test profile
-[#6](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/6) Added most functions and modules from previous pipeline to make it functional
+[#7](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/7) Added most functions and modules from previous pipeline to make it functional
 
 ### `Fixed`
 [#1](https://github.com/FelixAntoineLeSieur/Post-processing-Pipeline/pull/1) Fixed template schemas
@@ -23,4 +23,4 @@ Initial release of ferlab/postprocessing, created with the [nf-core](https://nf-
 [#1](https://github.com/FelixAntoineLeSieur/Post-processing-Pipeline/pull/1) Removed input_schema
 [#2](https://github.com/FelixAntoineLeSieur/Post-processing-Pipeline/pull/2) Removed V1 format input. V2 is the only accepted format.
 [#5](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/5) Removed many files related to workflows and email notifications
-
+[#8](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/8) Removed remaining unnecessary workflows including the linting fix, the branch protection workflow and the "download pipeline" workflow

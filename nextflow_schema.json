@@ -238,13 +238,6 @@
           "default": "https://raw.githubusercontent.com/nf-core/test-datasets/",
           "hidden": true
         },
-        "sequencingType": {
-          "type": "string",
-          "default": "WGS",
-          "description": "\"Either \\\"WGS\\\" for Whole Genome Sequencing or \\\"WES\\\" for Whole Exome Sequencing\"",
-          "help_text": "\"Either \\\"WGS\\\" for Whole Genome Sequencing or \\\"WES\\\" for Whole Exome Sequencing\"",
-          "enum": ["WGS", "WES"]
-        },
         "TSfilterSNP": {
           "type": "string",
           "default": "99",

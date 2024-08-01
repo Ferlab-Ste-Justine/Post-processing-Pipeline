@@ -224,7 +224,7 @@ workflow POSTPROCESSING {
     filtered = excludeMNPs(ch_samplesheet)
                     .map{meta, files -> tuple( groupKey(meta.familyId, meta.sampleSize),meta,files)}
                     .groupTuple()
-                    .map{ familyId, meta, files -> 
+                    .map{ familyId, meta, files -> //now that samples are grouped together, we no longer follow sampleID in meta
                         [familyId: familyId, 
                             meta:[familyId: meta[0].familyId,
                             sequencingType: meta[0].sequencingType,

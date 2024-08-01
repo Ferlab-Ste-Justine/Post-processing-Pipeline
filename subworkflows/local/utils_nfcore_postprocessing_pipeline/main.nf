@@ -85,7 +85,7 @@ workflow PIPELINE_INITIALISATION {
             meta, file ->
             [meta.familyID, [meta, file]]
         }
-        .tap{ch_sample_simple}
+        .tap{ch_sample_simple} //Save this channel to join later
         .groupTuple()
         .map{
             family_sampleID, ch_items ->
@@ -93,7 +93,7 @@ workflow PIPELINE_INITIALISATION {
         }
         .combine(ch_sample_simple,by:0)
         .map {
-            id,size,metasfile ->
+            id,size,metasfile -> //include sample count in meta
                 [meta:
                     [familyId: id,
                     sampleId: metasfile[0].sampleID,
@@ -106,23 +106,6 @@ workflow PIPELINE_INITIALISATION {
     emit:
     samplesheet = ch_samplesheet
     versions    = ch_versions
-
-    /*
-    Channel.fromPath(file("$params.input"))
-        .splitCsv(sep: '\t', strip: true)
-        .map{rowMapperV2(it)}
-        .flatMap { it ->
-            return it.files.collect{f -> [familyId: it.familyId, sequencingType: it.sequencingType, size: it.files.size(), file: f]};
-        }.multiMap { it ->
-            meta: tuple(it.familyId, [size: it.size, sequencingType: it.sequencingType])
-            files: tuple(it.familyId, file("${it.file}*"))
-        }
-        .set { ch_sampleChannel}
-        emit:
-        sampleFiles = ch_sampleChannel.files
-        sampleMeta = ch_sampleChannel.meta
-        versions = ch_versions
-        */
 }
 
 /*

@@ -8,7 +8,7 @@
 
 ## Samplesheet input
 
-You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use the --input parameter to specify its location. The samplesheet has to be a tab-separated file (.tsv) with the first column being the family ID and the second being the sequencing type (either Whole Genome Sequencing (WGS) or Whole Exome Sequencing (WES)). Use the following columns to supply the paths to the gvcfs files for the same familyID. 
+You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use the --input parameter to specify its location. The samplesheet has to be a tab-separated file (.tsv) with the first column being the family ID and the second being the sequencing type (either Whole Genome Sequencing (WGS) or Whole Exome Sequencing (WES)). Use the following columns to supply the paths to the gvcfs files for the same familyId. 
 
 ```bash
 --input '[path to samplesheet file]'

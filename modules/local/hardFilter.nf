@@ -2,13 +2,14 @@ process hardFiltering {
     label 'medium'
 
     input:
-    tuple val(prefixId), val(meta), path(vcf)
+    tuple val(meta), path(vcf)
     val(filters)
 
     output:
-    tuple val(prefixId), val(meta), path("*.hardfilter.vcf.gz*")
+    tuple val(meta), path("*.hardfilter.vcf.gz*")
 
     script:
+    def prefixId = meta.familyId
     def args = task.ext.args ?: ''
     def argsjava = task.ext.args ?: ''
     def exactVcfFile = vcf.find { it.name.endsWith("vcf.gz") }
@@ -32,6 +33,7 @@ process hardFiltering {
         $args
     """
     stub:
+    def prefixId = meta.familyId
     """
     touch ${prefixId}.hardfilter.vcf.gz
     """

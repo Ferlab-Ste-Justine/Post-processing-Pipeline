@@ -14,31 +14,11 @@ include { splitMultiAllelics        } from '../modules/local/vep'
 include { vep                       } from '../modules/local/vep'
 include { tabix                     } from '../modules/local/vep'
 
-include { VQSR } from "../subworkflows/local/vqsr"
-include { hardFiltering } from '../modules/local/hardFilter'
-include { splitMultiAllelics        } from '../modules/local/vep'
-include { vep                       } from '../modules/local/vep'
-include { tabix                     } from '../modules/local/vep'
-
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-
-enum SequencingType {
-    WGS,
-    WES
-
-    public static boolean contains(String s) {
-        for(SequencingType sequencingType in SequencingType.values()){
-            if(sequencingType.name().equals(s)){
-                return true
-            }
-        }
-        return false
-    }
-}
 
 process excludeMNPs {
     label 'medium'
@@ -51,21 +31,22 @@ process excludeMNPs {
 
     script:
     def familyId = meta.familyId
-    def sampleId = meta.sampleId
+    print(familyId)
+    def sample = meta.sample
     def exactGvcfFile = gvcfFile.find { it.name.endsWith("vcf.gz") }
     """
     set -e
     echo $familyId > file
-    bcftools filter -e 'strlen(REF)>1 & strlen(REF)==strlen(ALT) & TYPE="snp"' ${exactGvcfFile} | bcftools norm -d any -O z -o ${familyId}.${sampleId}.filtered.vcf.gz
-    bcftools index -t ${familyId}.${sampleId}.filtered.vcf.gz
+    bcftools filter -e 'strlen(REF)>1 & strlen(REF)==strlen(ALT) & TYPE="snp"' ${exactGvcfFile} | bcftools norm -d any -O z -o ${familyId}.${sample}.filtered.vcf.gz
+    bcftools index -t ${familyId}.${sample}.filtered.vcf.gz
     """
     stub:
     def familyId = meta.familyId
-    def sampleId = meta.sampleId
+    def sample = meta.sample
     def exactGvcfFile = gvcfFile.find { it.name.endsWith("vcf.gz") }
     """
-    touch ${familyId}.${sampleId}.filtered.vcf.gz
-    touch ${familyId}.${sampleId}.filtered.vcf.gz.tbi
+    touch ${familyId}.${sample}.filtered.vcf.gz
+    touch ${familyId}.${sample}.filtered.vcf.gz.tbi
     """
 
 }
@@ -78,14 +59,15 @@ process importGVCF {
     label 'medium'
 
     input:
-    tuple val(familyId), val (meta), path(gvcfFiles)
+    tuple val (meta), path(gvcfFiles)
     path referenceGenome
     path broadResource
 
     output:
-    tuple val(familyId),val (meta), path("*combined.gvcf.gz*")
+    tuple val (meta), path("*combined.gvcf.gz*")
 
     script:
+    def familyId = meta.familyId
     def args = task.ext.args ?: ''
     def argsjava = task.ext.args ?: ''
     def exactGvcfFiles = gvcfFiles.findAll { it.name.endsWith("vcf.gz") }.collect { "-V $it" }.join(' ')
@@ -112,6 +94,7 @@ process importGVCF {
 
 
     stub:
+    def familyId = meta.familyId
     def exactGvcfFiles = gvcfFiles.findAll { it.name.endsWith("vcf.gz") }.collect { "-V $it" }.join(' ')
 
     """
@@ -128,13 +111,14 @@ process genotypeGVCF {
     label 'geno'
 
     input:
-    tuple val(familyId), val(meta), path(gvcfFile)
+    tuple val(meta), path(gvcfFile)
     path referenceGenome
 
     output:
-    tuple val(familyId),val(meta), path("*genotyped.vcf.gz*")
+    tuple val(meta), path("*genotyped.vcf.gz*")
 
     script:
+    def familyId = meta.familyId
     def args = task.ext.args ?: ''
     def argsjava = task.ext.args ?: ''
     def exactGvcfFile = gvcfFile.find { it.name.endsWith("vcf.gz") }
@@ -158,6 +142,7 @@ process genotypeGVCF {
 
 
     stub:
+    def familyId = meta.familyId
     def exactGvcfFile = gvcfFile.find { it.name.endsWith("vcf.gz") }
     """
     touch ${familyId}.genotyped.vcf.gz
@@ -172,8 +157,8 @@ For whole exome sequencing data, since the vqsr procedure is not supported, we u
 a hard filtering approach.
 */
 def tagArtifacts(inputChannel, hardFilters) {
-    def wgs = inputChannel.filter{it[1].sequencingType == SequencingType.WGS.toString()}
-    def wes = inputChannel.filter{it[1].sequencingType == SequencingType.WES.toString()}
+    def wgs = inputChannel.filter{it[0].sequencingType == "WGS"}
+    def wes = inputChannel.filter{it[0].sequencingType == "WES"}
     def wgs_filtered = VQSR(wgs)
     def wes_filtered = hardFiltering(wes, hardFilters)
 
@@ -220,20 +205,16 @@ workflow POSTPROCESSING {
     .collectFile(storeDir: "${params.outdir}/pipeline_info/configs",cache: false)
 
     writemeta()
-   
-    filtered = excludeMNPs(ch_samplesheet)
+    filtered = excludeMNPs(ch_samplesheet)    
                     .map{meta, files -> tuple( groupKey(meta.familyId, meta.sampleSize),meta,files)}
                     .groupTuple()
-                    .map{ familyId, meta, files -> //now that samples are grouped together, we no longer follow sampleID in meta
-                        [familyId: familyId, 
-                            meta:[familyId: meta[0].familyId,
-                            sequencingType: meta[0].sequencingType,
-                            sampleSize: meta[0].sampleSize],
-                        files: files.flatten()]}
+                    .map{ familyId, metas, files -> //now that samples are grouped together, we no longer follow sample in meta
+                        [
+                            meta: metas[0].findAll{it.key != "sample"},
+                            files: files.flatten()]}
     //Using 2 as threshold because we have 2 files per patient (gcvf.gz, gvcf.gz.tbi)
     filtered_one = filtered.filter{it.meta.sampleSize == 1}
     filtered_mult = filtered.filter{it.meta.sampleSize > 1}
-
     //Combine per-sample gVCF files into a multi-sample gVCF file
     DB = importGVCF(filtered_mult, referenceGenome,broad)
                     .concat(filtered_one)

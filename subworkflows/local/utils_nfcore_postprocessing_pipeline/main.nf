@@ -83,26 +83,22 @@ workflow PIPELINE_INITIALISATION {
         .fromSamplesheet("input")
         .map {
             meta, file ->
-            [meta.familyID, [meta, file]]
+            [meta.familyId, [meta, file]]
         }
         .tap{ch_sample_simple} //Save this channel to join later
         .groupTuple()
         .map{
-            family_sampleID, ch_items ->
-            [family_sampleID, ch_items.size()]
+            familyId, ch_items ->
+            [familyId, ch_items.size()]
         }
         .combine(ch_sample_simple,by:0)
         .map {
             id,size,metasfile -> //include sample count in meta
-                [meta:
-                    [familyId: id,
-                    sampleId: metasfile[0].sampleID,
-                    sequencingType: metasfile[0].sequencingType,
-                    sampleSize: size],
-                file: metasfile[1]
+                [
+                    meta: metasfile[0] + [sampleSize: size],
+                    file: metasfile[1]
                 ]
-        }
-        .set {ch_samplesheet}
+        }.set {ch_samplesheet}
     emit:
     samplesheet = ch_samplesheet
     versions    = ch_versions

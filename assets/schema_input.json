@@ -7,17 +7,17 @@
     "items": {
         "type": "object",
         "properties": {
-            "familyID": {
-                "type": "string",
-                "pattern": "^\\S+$",
-                "errorMessage": "familyID must be provided and cannot contain spaces",
-                "meta": ["familyID"]
-            },
-            "sampleID": {
+            "sample": {
                 "type": "string",
                 "pattern": "^\\S+$",
                 "errorMessage": "Sample ID must be provided and cannot contain spaces",
-                "meta": ["sampleID"]
+                "meta": ["sample"]
+            },
+            "familyId": {
+                "type": "string",
+                "pattern": "^\\S+$",
+                "errorMessage": "familyId must be provided and cannot contain spaces",
+                "meta": ["familyId"]
             },
             "sequencingType": {
                 "type": "string",
@@ -26,7 +26,7 @@
                 "default": "WGS",
                 "enum": ["WGS", "WES"]
             },
-            "file": {
+            "gvcf": {
                 "errorMessage": "Filename must have extension '.gvcf' or contain 'g' and end by 'vcf'",
                 "type": "string",
                 "pattern": "^\\S+\\.g(enome.)?vcf(.gz)?$",
@@ -34,6 +34,6 @@
                 "exists": true
             }
         },
-        "required": ["familyID", "sampleID", "sequencingType","file"]
+        "required": ["familyId", "sample", "sequencingType","gvcf"]
     }
 }

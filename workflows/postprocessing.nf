@@ -7,12 +7,12 @@
 include { paramsSummaryMap       } from 'plugin/nf-validation'
 include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-
-include { VQSR } from "../subworkflows/local/vqsr"
-include { hardFiltering } from '../modules/local/hardFilter'
-include { splitMultiAllelics        } from '../modules/local/vep'
-include { vep                       } from '../modules/local/vep'
-include { tabix                     } from '../modules/local/vep'
+include { EXCLUDE_MNPS           } from "../subworkflows/local/exclude_mnps"
+include { VQSR                   } from "../subworkflows/local/vqsr"
+include { hardFiltering          } from '../modules/local/hardFilter'
+include { splitMultiAllelics     } from '../modules/local/vep'
+include { vep                    } from '../modules/local/vep'
+include { tabix                  } from '../modules/local/vep'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -31,7 +31,6 @@ process excludeMNPs {
 
     script:
     def familyId = meta.familyId
-    print(familyId)
     def sample = meta.sample
     def exactGvcfFile = gvcfFile.find { it.name.endsWith("vcf.gz") }
     """
@@ -81,13 +80,13 @@ process importGVCF {
 
 
     """
-    echo $familyID > file
+    echo $familyId > file
     gatk -version
     gatk --java-options "-Xmx${avail_mem}M -XX:-UsePerfData $argsjava" \\
         CombineGVCFs \\
         -R $referenceGenome/${params.referenceGenomeFasta} \\
         $exactGvcfFiles \\
-        -O ${familyID}.combined.gvcf.gz \\
+        -O ${familyId}.combined.gvcf.gz \\
         -L $broadResource/${params.intervalsFile} \\
         $args
     """ 
@@ -98,7 +97,7 @@ process importGVCF {
     def exactGvcfFiles = gvcfFiles.findAll { it.name.endsWith("vcf.gz") }.collect { "-V $it" }.join(' ')
 
     """
-    touch ${familyID}.combined.gvcf.gz
+    touch ${familyId}.combined.gvcf.gz
     """       
 
 }    
@@ -130,13 +129,13 @@ process genotypeGVCF {
         avail_mem = (task.memory.mega*0.8).intValue()
     }
     """
-    echo $familyID > file
+    echo $familyId > file
     gatk -version
     gatk --java-options "-Xmx${avail_mem}M -XX:-UsePerfData $argsjava" \\
         GenotypeGVCFs \\
         -R $referenceGenome/${params.referenceGenomeFasta} \\
         -V $exactGvcfFile \\
-        -O ${familyID}.genotyped.vcf.gz \\
+        -O ${familyId}.genotyped.vcf.gz \\
         $args
     """
 
@@ -145,7 +144,7 @@ process genotypeGVCF {
     def familyId = meta.familyId
     def exactGvcfFile = gvcfFile.find { it.name.endsWith("vcf.gz") }
     """
-    touch ${familyID}.genotyped.vcf.gz
+    touch ${familyId}.genotyped.vcf.gz
     """
 }
 
@@ -205,8 +204,8 @@ workflow POSTPROCESSING {
     .collectFile(storeDir: "${params.outdir}/pipeline_info/configs",cache: false)
 
     writemeta()
-    filtered = excludeMNPs(ch_samplesheet)    
-                    .map{meta, files -> tuple( groupKey(meta.familyId, meta.sampleSize),meta,files)}
+    filtered = EXCLUDE_MNPS(ch_samplesheet)
+                    .map{metas, files -> tuple( groupKey(metas.familyId, metas.sampleSize),metas,files)}
                     .groupTuple()
                     .map{ familyId, metas, files -> //now that samples are grouped together, we no longer follow sample in meta
                         [

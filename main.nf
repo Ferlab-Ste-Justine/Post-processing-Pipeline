@@ -74,12 +74,11 @@ workflow {
         params.outdir,
         params.input
     )
-
     //
     // WORKFLOW: Run main workflow
     //
     FERLAB_POSTPROCESSING (
-        params.input
+        PIPELINE_INITIALISATION.out.samplesheet
     )
     //
     // SUBWORKFLOW: Run completion tasks

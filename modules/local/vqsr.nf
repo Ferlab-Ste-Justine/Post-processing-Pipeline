@@ -9,14 +9,15 @@ process variantRecalibratorSNP {
 
 
     input:
-    tuple val(prefix), path(vcf)
+    tuple val(meta), path(vcf)
     path referenceGenome
     path broadResource
 
     output:
-    tuple val(prefix), path("*.recal*"), path("*.tranches")
+    tuple val(meta), path("*.recal*"), path("*.tranches")
     
     script:
+    def prefix = meta.familyId
     def args = task.ext.args ?: ''
     def argsjava = task.ext.args ?: ''
     def exactVcfFile = vcf.find { it.name.endsWith("vcf.gz") }
@@ -53,6 +54,7 @@ process variantRecalibratorSNP {
     """
 
     stub:
+    def prefix = meta.familyId
     """
     touch ${prefix}.recal
     touch ${prefix}.tranches
@@ -69,14 +71,15 @@ process variantRecalibratorIndel {
 
 
     input:
-    tuple val(prefix), path(vcf)
+    tuple val(meta), path(vcf)
     path referenceGenome
     path broadResource
 
     output:
-    tuple val(prefix), path("*.recal*"), path("*.tranches")
+    tuple val(meta), path("*.recal*"), path("*.tranches")
     
     script:
+    def prefix = meta.familyId
     def args = task.ext.args ?: ''
     def argsjava = task.ext.args ?: ''
     def exactVcfFile = vcf.find { it.name.endsWith("vcf.gz") }
@@ -110,6 +113,7 @@ process variantRecalibratorIndel {
     """
 
     stub:
+    def prefix = meta.familyId
     """
     touch ${prefix}.recal
     touch ${prefix}.tranches
@@ -124,12 +128,13 @@ process applyVQSRSNP {
     
 
     input:
-    tuple val(prefix), path(recal), path(tranches), path(vcf)
+    tuple val(meta), path(recal), path(tranches), path(vcf)
 
     output:
-    tuple val(prefix), path("*.snp.vqsr_${params.TSfilterSNP}.vcf.gz*")
+    tuple val(meta),path("*.snp.vqsr_${params.TSfilterSNP}.vcf.gz*")
 
     script:
+    def prefix = meta.familyId
     def args = task.ext.args ?: ''
     def argsjava = task.ext.args ?: ''
     def exactVcfFile = vcf.find { it.name.endsWith("vcf.gz") }
@@ -156,6 +161,7 @@ process applyVQSRSNP {
         $args
     """
     stub:
+    def prefix = meta.familyId
     """
     touch ${prefix}.snp.vqsr_${params.TSfilterSNP}.vcf.gz
     """
@@ -171,12 +177,13 @@ process applyVQSRIndel {
     container 'broadinstitute/gatk'
 
     input:
-    tuple val(prefix), path(recal), path(tranches), path(vcf)
+    tuple val(meta), path(recal), path(tranches), path(vcf)
 
     output:
-    tuple val(prefix), path("*.snpindel.vqsr_${params.TSfilterINDEL}.vcf.gz*")
+    tuple val(meta), path("*.snpindel.vqsr_${params.TSfilterINDEL}.vcf.gz*")
 
     script:
+    def prefix = meta.familyId
     def args = task.ext.args ?: ''
     def argsjava = task.ext.args ?: ''
     def exactVcfFile = vcf.find { it.name.endsWith("vcf.gz") }
@@ -203,6 +210,7 @@ process applyVQSRIndel {
         $args
     """
     stub:
+    def prefix = meta.familyId
     """
     touch ${prefix}.snpindel.vqsr_${params.TSfilterINDEL}.vcf.gz
     """

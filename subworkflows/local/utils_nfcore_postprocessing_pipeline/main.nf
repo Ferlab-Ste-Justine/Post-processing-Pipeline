@@ -75,7 +75,35 @@ workflow PIPELINE_INITIALISATION {
     //
     validateInputParameters()
 
+        //_________Local___________
+    //
+    // Create channel from input file provided through params.input
+    //
+    Channel
+        .fromSamplesheet("input")
+        .map {
+            meta, file ->
+            [meta.familyId, [meta, file]]
+        }
+        .tap{ch_sample_simple} //Save this channel to join later
+        .groupTuple()
+        .map{
+            familyId, ch_items ->
+            [familyId, ch_items.size()]
+        }
+        .combine(ch_sample_simple,by:0)
+        .map {
+            id,size,metasfile -> //include sample count in meta
+                [
+                    metasfile[0] + [sampleSize: size], //meta
+                    metasfile[1]                       //file
+                ]
+        }.set {ch_samplesheet}
+    emit:
+    samplesheet = ch_samplesheet
+    versions    = ch_versions
 }
+
 /*
 ========================================================================================
     SUBWORKFLOW FOR PIPELINE COMPLETION

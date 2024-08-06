@@ -4,13 +4,14 @@ process splitMultiAllelics{
     container 'staphb/bcftools'
     
     input:
-    tuple val(familyId), path(vcfFile)
+    tuple val(meta), path(vcfFile)
     path referenceGenome
 
     output:
-    tuple val(familyId), path("*splitted.vcf*")
+    tuple val(meta), path("*splitted.vcf*")
 
     script:
+    def familyId = meta.familyId
     def exactVcfFile = vcfFile.find { it.name.endsWith("vcf.gz") }
     """
     set -e
@@ -21,6 +22,7 @@ process splitMultiAllelics{
     """
     
     stub:
+    def familyId = meta.familyId
     """
     touch ${familyId}.splitted.vcf.gz
     touch ${familyId}.splitted.vcf.gz.tbi
@@ -33,14 +35,15 @@ process vep {
     publishDir "${params.outdir}", mode: 'copy'
 
     input:
-    tuple val(familyId), path(vcfFile)
+    tuple val(meta), path(vcfFile)
     path referenceGenome
     path vepCache
 
     output:
-    tuple val(familyId), path("*vep.vcf.gz")
+    tuple val(meta), path("*vep.vcf.gz")
 
     script:
+    def familyId = meta.familyId
     def args = task.ext.args ?: ''
     def exactVcfFile = vcfFile.find { it.name.endsWith("vcf.gz") }
     """
@@ -69,6 +72,7 @@ process vep {
     """
 
     stub:
+    def familyId = meta.familyId
     """
     touch variants.${familyId}.vep.vcf.gz
     """
@@ -80,7 +84,7 @@ process tabix {
     publishDir "${params.outdir}", mode: 'copy'
 
     input:
-    tuple val(familyId), path(vcfFile)
+    tuple val(meta), path(vcfFile)
 
     output:
     path "*.tbi"

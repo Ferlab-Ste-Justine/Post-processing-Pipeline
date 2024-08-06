@@ -20,72 +20,33 @@ include { tabix                     } from '../modules/local/vep'
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-enum SequencingType {
-    WGS,
-    WES
-
-    public static boolean contains(String s) {
-        for(SequencingType sequencingType in SequencingType.values()){
-            if(sequencingType.name().equals(s)){
-                return true
-            }
-        }
-        return false
-    }
-}
-
-def sampleChannel() {    
-    return Channel.fromPath(file("$params.input"))
-        .splitCsv(sep: '\t', strip: true)
-        .map{rowMapperV2(it)}
-        .flatMap { it ->
-            return it.files.collect{f -> [familyId: it.familyId, sequencingType: it.sequencingType, size: it.files.size(), file: f]};             
-        }.multiMap { it ->
-            meta: tuple(it.familyId, [size: it.size, sequencingType: it.sequencingType])
-            files: tuple(it.familyId, file("${it.file}*"))
-        }
-}
-
-def rowMapperV2(columns) {
-    def sampleSeqType = columns[1].toUpperCase()
-    if (!(SequencingType.contains(sampleSeqType))){
-        error("Error: Second column of the sample sheet should be either 'WES' or 'WGS'")
-        exit(1)
-    }
-    return [
-        familyId: columns[0],
-        sequencingType: sampleSeqType.toUpperCase() as SequencingType,
-        files: columns[2..-1]
-    ]
-}
-
 process excludeMNPs {
     label 'medium'
     
     input:
-    tuple val(familyId), path(gvcfFile)
+    tuple val(meta), path(gvcfFile)
 
     output:
-    tuple val(familyId), path("*filtered.vcf.gz*")
+    tuple val(meta), path("*filtered.vcf.gz*")
 
     script:
+    def familyId = meta.familyId
+    print(familyId)
+    def sample = meta.sample
     def exactGvcfFile = gvcfFile.find { it.name.endsWith("vcf.gz") }
-    def uuid = UUID.randomUUID().toString()
-    // --regions chr1,chr2,chr3,chr4,chr5,chr6,chr7,chr8,chr9,chr10,chr11,chr12,chr13,chr14,chr15,chr16,chr17,chr18,chr19,chr20,chr21,chr22,chrX,chrY
-    // bcftools view --exclude-type mnps  ${exactGvcfFile} -O z -o ${familyId}.${uuid}.filtered.gvcf.gz
     """
     set -e
     echo $familyId > file
-    bcftools filter -e 'strlen(REF)>1 & strlen(REF)==strlen(ALT) & TYPE="snp"' ${exactGvcfFile} | bcftools norm -d any -O z -o ${familyId}.${uuid}.filtered.vcf.gz
-    bcftools index -t ${familyId}.${uuid}.filtered.vcf.gz
+    bcftools filter -e 'strlen(REF)>1 & strlen(REF)==strlen(ALT) & TYPE="snp"' ${exactGvcfFile} | bcftools norm -d any -O z -o ${familyId}.${sample}.filtered.vcf.gz
+    bcftools index -t ${familyId}.${sample}.filtered.vcf.gz
     """
     stub:
-
+    def familyId = meta.familyId
+    def sample = meta.sample
     def exactGvcfFile = gvcfFile.find { it.name.endsWith("vcf.gz") }
-    def uuid = UUID.randomUUID().toString()
     """
-    touch ${familyId}.${uuid}.filtered.vcf.gz
-    touch ${familyId}.${uuid}.filtered.vcf.gz.tbi
+    touch ${familyId}.${sample}.filtered.vcf.gz
+    touch ${familyId}.${sample}.filtered.vcf.gz.tbi
     """
 
 }
@@ -98,14 +59,15 @@ process importGVCF {
     label 'medium'
 
     input:
-    tuple val(familyId), path(gvcfFiles)
+    tuple val (meta), path(gvcfFiles)
     path referenceGenome
     path broadResource
 
     output:
-    tuple val(familyId), path("*combined.gvcf.gz*")
+    tuple val (meta), path("*combined.gvcf.gz*")
 
     script:
+    def familyId = meta.familyId
     def args = task.ext.args ?: ''
     def argsjava = task.ext.args ?: ''
     def exactGvcfFiles = gvcfFiles.findAll { it.name.endsWith("vcf.gz") }.collect { "-V $it" }.join(' ')
@@ -132,6 +94,7 @@ process importGVCF {
 
 
     stub:
+    def familyId = meta.familyId
     def exactGvcfFiles = gvcfFiles.findAll { it.name.endsWith("vcf.gz") }.collect { "-V $it" }.join(' ')
 
     """
@@ -148,13 +111,14 @@ process genotypeGVCF {
     label 'geno'
 
     input:
-    tuple val(familyId), path(gvcfFile)
+    tuple val(meta), path(gvcfFile)
     path referenceGenome
 
     output:
-    tuple val(familyId), path("*genotyped.vcf.gz*")
+    tuple val(meta), path("*genotyped.vcf.gz*")
 
     script:
+    def familyId = meta.familyId
     def args = task.ext.args ?: ''
     def argsjava = task.ext.args ?: ''
     def exactGvcfFile = gvcfFile.find { it.name.endsWith("vcf.gz") }
@@ -178,6 +142,7 @@ process genotypeGVCF {
 
 
     stub:
+    def familyId = meta.familyId
     def exactGvcfFile = gvcfFile.find { it.name.endsWith("vcf.gz") }
     """
     touch ${familyId}.genotyped.vcf.gz
@@ -191,12 +156,9 @@ In the case of whole genome sequencing data, we use the vqsr procedure.
 For whole exome sequencing data, since the vqsr procedure is not supported, we use
 a hard filtering approach.
 */
-def tagArtifacts(inputChannel, metadataChannel, hardFilters) {
-    def inputSequencingTypes = inputChannel.join(metadataChannel)
-    
-    def wgs = inputSequencingTypes.filter{it[2].sequencingType == SequencingType.WGS}.map(it -> it.dropRight(1))
-    def wes = inputSequencingTypes.filter{it[2].sequencingType == SequencingType.WES}.map(it -> it.dropRight(1))
-
+def tagArtifacts(inputChannel, hardFilters) {
+    def wgs = inputChannel.filter{it[0].sequencingType == "WGS"}
+    def wes = inputChannel.filter{it[0].sequencingType == "WES"}
     def wgs_filtered = VQSR(wgs)
     def wes_filtered = hardFiltering(wes, hardFilters)
 
@@ -232,49 +194,42 @@ workflow POSTPROCESSING {
     file(params.outdir).mkdirs()
 
     take:
-    input
+    ch_samplesheet
 
     main:
 
     ch_versions = Channel.empty()
-    ch_multiqc_files = Channel.empty()
 
     Channel
     .fromList(workflow.configFiles)
     .collectFile(storeDir: "${params.outdir}/pipeline_info/configs",cache: false)
 
     writemeta()
-
-    sampleChannel().set{ sampleFile }
-
-    filtered = excludeMNPs(sampleFile.files)
-                    .join(sampleFile.meta)
-                    .map{familyId, files, meta -> tuple( groupKey(familyId, meta.size), files)}
+    filtered = excludeMNPs(ch_samplesheet)    
+                    .map{meta, files -> tuple( groupKey(meta.familyId, meta.sampleSize),meta,files)}
                     .groupTuple()
-                    .map{ familyId, files -> tuple(familyId, files.flatten())}
-
+                    .map{ familyId, metas, files -> //now that samples are grouped together, we no longer follow sample in meta
+                        [
+                            metas[0].findAll{it.key != "sample"}, //meta
+                            files.flatten()]}                     //files
     //Using 2 as threshold because we have 2 files per patient (gcvf.gz, gvcf.gz.tbi)
-    filtered_one = filtered.filter{it[1].size() == 2}
-    filtered_mult = filtered.filter{it[1].size() > 2}
-
+    filtered_one = filtered.filter{it[0].sampleSize == 1}
+    filtered_mult = filtered.filter{it[0].sampleSize > 1}
     //Combine per-sample gVCF files into a multi-sample gVCF file
     DB = importGVCF(filtered_mult, referenceGenome,broad)
                     .concat(filtered_one)
 
-
     //Perform joint genotyping on one or more samples
     vcf = genotypeGVCF(DB, referenceGenome)
-
     //tag variants that are probable artifacts
-    vcfWithTags = tagArtifacts(vcf, sampleFile.meta, params.hardFilters)
-
+    vcfWithTags = tagArtifacts(vcf, params.hardFilters)
     //tag frequent mutations in the population
     s = splitMultiAllelics(vcfWithTags, referenceGenome) 
 
     //Annotating mutations
     vep(s, referenceGenome, vepCache)
     tabix(vep.out) 
-
+  
     emit:
     tabix.out
 

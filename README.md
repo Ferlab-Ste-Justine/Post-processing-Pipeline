@@ -29,14 +29,17 @@
 > If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline) with `-profile test` before running the workflow on actual data.
 
 ### Samples
-The workflow will accept sample data separated by tabs. The path to the sample file must be specified with the "**input**" parameter. The second column must be either WES (Whole Exome Sequencing) or WGS (Whole Genome Sequencing)
+The workflow will accept sample data separated by commas (CSV format). The path to the sample file must be specified with the "**input**" parameter. The column names are : familyId,sample,sequencingType,file. The sequencing type must be either WES (Whole Exome Sequencing) or WGS (Whole Genome Sequencing).
 
-**sample.tsv**
-
-_FAMILY_ID_ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; _SEQUENCING_TYPE_ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;_Patient1_File_&nbsp; &nbsp; &nbsp;&nbsp; &nbsp;_Patient2_File_&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;_Patient3_File_
-```tsv
-CONGE-XXX       WES       CONGE-XXX-01.hard-filtered.gvcf.gz   CONGE-XXX-02.hard-filtered.gvcf.gz   CONGE-XXX-03.hard-filtered.gvcf.gz
-CONGE-YYY       WES       CONGE-YYY-01.hard-filtered.gvcf.gz   CONGE-YYY-02.hard-filtered.gvcf.gz   CONGE-YYY-03.hard-filtered.gvcf.gz
+**sample.csv**
+```csv
+**familyId**,**sample**,**sequencingType**,**file**
+CONGE-XXX,01,WES,CONGE-XXX-01.hard-filtered.gvcf.gz
+CONGE-XXX,02,WES,CONGE-XXX-02.hard-filtered.gvcf.gz
+CONGE-XXX,03,WES,CONGE-XXX-03.hard-filtered.gvcf.gz
+CONGE-YYY,01,WGS,CONGE-YYY-01.hard-filtered.gvcf.gz
+CONGE-YYY,02,WGS,CONGE-YYY-02.hard-filtered.gvcf.gz
+CONGE-YYY,03,WGS,CONGE-YYY-03.hard-filtered.gvcf.gz
 ```
 
 

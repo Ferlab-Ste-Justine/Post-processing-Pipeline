@@ -1,0 +1,39 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://raw.githubusercontent.com/nf-core/sarek/master/assets/schema_input.json",
+    "title": "ferlab/Post-processingPipeline - params.input schema",
+    "description": "Schema for the file provided with params.input",
+    "type": "array",
+    "items": {
+        "type": "object",
+        "properties": {
+            "sample": {
+                "type": "string",
+                "pattern": "^\\S+$",
+                "errorMessage": "Sample ID must be provided and cannot contain spaces",
+                "meta": ["sample"]
+            },
+            "familyId": {
+                "type": "string",
+                "pattern": "^\\S+$",
+                "errorMessage": "familyId must be provided and cannot contain spaces",
+                "meta": ["familyId"]
+            },
+            "sequencingType": {
+                "type": "string",
+                "errorMessage": "SequencingType must either be 'WGS' or 'WES'. Defaults to WGS, if none is supplied.",
+                "meta": ["sequencingType"],
+                "default": "WGS",
+                "enum": ["WGS", "WES"]
+            },
+            "gvcf": {
+                "errorMessage": "Filename must have extension '.gvcf' or contain 'g' and end by 'vcf'",
+                "type": "string",
+                "pattern": "^\\S+\\.g(enome.)?vcf(.gz)?$",
+                "format": "file-path",
+                "exists": true
+            }
+        },
+        "required": ["familyId", "sample", "sequencingType","gvcf"]
+    }
+}

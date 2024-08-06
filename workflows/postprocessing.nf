@@ -213,8 +213,8 @@ workflow POSTPROCESSING {
                             metas[0].findAll{it.key != "sample"}, //meta
                             files.flatten()]}                     //files
     //Using 2 as threshold because we have 2 files per patient (gcvf.gz, gvcf.gz.tbi)
-    filtered_one = filtered.filter{it.meta.sampleSize == 1}
-    filtered_mult = filtered.filter{it.meta.sampleSize > 1}
+    filtered_one = filtered.filter{it[0].sampleSize == 1}
+    filtered_mult = filtered.filter{it[0].sampleSize > 1}
     //Combine per-sample gVCF files into a multi-sample gVCF file
     DB = importGVCF(filtered_mult, referenceGenome,broad)
                     .concat(filtered_one)

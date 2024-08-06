@@ -95,8 +95,8 @@ workflow PIPELINE_INITIALISATION {
         .map {
             id,size,metasfile -> //include sample count in meta
                 [
-                    meta: metasfile[0] + [sampleSize: size],
-                    file: metasfile[1]
+                    metasfile[0] + [sampleSize: size], //meta
+                    metasfile[1]                       //file
                 ]
         }.set {ch_samplesheet}
     emit:

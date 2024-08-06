@@ -210,8 +210,8 @@ workflow POSTPROCESSING {
                     .groupTuple()
                     .map{ familyId, metas, files -> //now that samples are grouped together, we no longer follow sample in meta
                         [
-                            meta: metas[0].findAll{it.key != "sample"},
-                            files: files.flatten()]}
+                            metas[0].findAll{it.key != "sample"}, //meta
+                            files.flatten()]}                     //files
     //Using 2 as threshold because we have 2 files per patient (gcvf.gz, gvcf.gz.tbi)
     filtered_one = filtered.filter{it.meta.sampleSize == 1}
     filtered_mult = filtered.filter{it.meta.sampleSize > 1}

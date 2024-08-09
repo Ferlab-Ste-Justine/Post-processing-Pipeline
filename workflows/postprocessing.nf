@@ -19,37 +19,6 @@ include { tabix                  } from '../modules/local/vep'
     RUN MAIN WORKFLOW
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-
-process excludeMNPs {
-    label 'medium'
-    
-    input:
-    tuple val(metas), path(gvcfFile)
-
-    output:
-    tuple val(metas), path("*filtered.vcf.gz*")
-
-    script:
-    def familyId = meta.familyId
-    def sample = meta.sample
-    def exactGvcfFile = gvcfFile.find { it.name.endsWith("vcf.gz") }
-    """
-    set -e
-    echo $familyId > file
-    bcftools filter -e 'strlen(REF)>1 & strlen(REF)==strlen(ALT) & TYPE="snp"' ${exactGvcfFile} | bcftools norm -d any -O z -o ${familyId}.${sample}.filtered.vcf.gz
-    bcftools index -t ${familyId}.${sample}.filtered.vcf.gz
-    """
-    stub:
-    def familyId = meta.familyId
-    def sample = meta.sample
-    def exactGvcfFile = gvcfFile.find { it.name.endsWith("vcf.gz") }
-    """
-    touch ${familyId}.${sample}.filtered.vcf.gz
-    touch ${familyId}.${sample}.filtered.vcf.gz.tbi
-    """
-
-}
-
 /**
 Combine per-sample gVCF files into a multi-sample gVCF file 
 */

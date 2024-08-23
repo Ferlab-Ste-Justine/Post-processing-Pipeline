@@ -81,7 +81,7 @@
           "format": "file-path"
         }
       },
-      "required": ["intervalsFile"]
+      "required": ["broad", "intervalsFile", "referenceGenome", "referenceGenomeFasta", "vepCache"]
     },
     "institutional_config_options": {
       "title": "Institutional config options",

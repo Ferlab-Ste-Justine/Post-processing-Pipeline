@@ -18,11 +18,41 @@ include { nfCoreLogo                } from '../../nf-core/utils_nfcore_pipeline'
 include { UTILS_NFCORE_PIPELINE     } from '../../nf-core/utils_nfcore_pipeline'
 include { workflowCitation          } from '../../nf-core/utils_nfcore_pipeline'
 
+
+/*
+========================================================================================
+    PROCESSES (local)
+========================================================================================
+*/
+
+process writemeta{
+
+    publishDir "${params.outdir}/pipeline_info/", mode: 'copy', overwrite: 'true'
+    output:
+    path("metadata.txt")
+
+    script:
+    """
+    cat <<EOF > metadata.txt
+    Work Dir : ${workflow.workDir}
+    UserName : ${workflow.userName}
+    ConfigFiles : ${workflow.configFiles}
+    Container : ${workflow.container}
+    Start date : ${workflow.start}
+    Command Line : ${workflow.commandLine}
+    Revision : ${workflow.revision}
+    CommitId : ${workflow.commitId}
+    """
+}
+
+
 /*
 ========================================================================================
     SUBWORKFLOW TO INITIALISE PIPELINE
 ========================================================================================
 */
+
+
 
 workflow PIPELINE_INITIALISATION {
 
@@ -75,8 +105,19 @@ workflow PIPELINE_INITIALISATION {
     //
     validateInputParameters()
 
-        //_________Local___________
-    //
+
+    //_________Local___________
+
+    // Create the output directory if it doesn't exist
+    file(outdir).mkdirs()
+
+    writemeta()
+
+    // Copy config files to output directory
+    Channel
+    .fromList(workflow.configFiles)
+    .collectFile(storeDir: "${outdir}/pipeline_info/configs", cache: false)
+
     // Create channel from input file provided through params.input
     //
     Channel
@@ -115,6 +156,7 @@ workflow PIPELINE_COMPLETION {
     take:
     outdir          //    path: Path to output directory where results will be published
     monochrome_logs // boolean: Disable ANSI colour codes in log output
+    command_line // nextflow command line
 
     main:
 
@@ -125,6 +167,11 @@ workflow PIPELINE_COMPLETION {
     //
     workflow.onComplete {
         completionSummary(monochrome_logs)
+
+        // Copy the nextflow log file to the output directory
+        def log_file_path = getLogFile(command_line)
+        def dst_path = "${outdir}/pipeline_info/nextflow.log"
+        file(log_file_path).copyTo(dst_path)
     }
 
     workflow.onError {
@@ -137,8 +184,26 @@ workflow PIPELINE_COMPLETION {
     FUNCTIONS
 ========================================================================================
 */
-//
+
 //_____________Local functions_____________
+//
+// Extracts the log file path from the given command line arguments.
+// If the '-log' option is present, it returns the specified log file path.
+// Otherwise, it defaults to '.nextflow.log'.
+ //
+def getLogFile(command_line) {
+    // Tokenize the command line while preserving quoted arguments as single tokens.
+    // For example, the command line 'arg1 "arg2 with spaces"' will be parsed into two tokens: 'arg1' and 'arg2 with spaces'.
+    def matcher = command_line =~ /"([^"]+)"|'([^']+)'|(\S+)/
+    def tokens = []
+    matcher.each { match ->
+        tokens << (match[1] ?: match[2] ?: match[3])
+    }
+
+    def log_option_index = tokens.lastIndexOf("-log")
+    return log_option_index >= 0 ? tokens[log_option_index + 1] : '.nextflow.log'
+}
+
 //_____________Template functions_____________
 //
 // Check and validate pipeline parameters

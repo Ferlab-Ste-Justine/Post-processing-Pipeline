@@ -165,25 +165,6 @@ def tagArtifacts(inputChannel, hardFilters) {
     return wgs_filtered.concat(wes_filtered)
 }
 
-process writemeta{
-
-    publishDir "${params.outdir}/pipeline_info/", mode: 'copy', overwrite: 'true'
-    output:
-    path("metadata.txt")
-
-    script:
-    """
-    cat <<EOF > metadata.txt
-    Work Dir : ${workflow.workDir}
-    UserName : ${workflow.userName}
-    ConfigFiles : ${workflow.configFiles}
-    Container : ${workflow.container}
-    Start date : ${workflow.start}
-    Command Line : ${workflow.commandLine}
-    Revision : ${workflow.revision}
-    CommitId : ${workflow.commitId}
-    """
-}
 
 workflow POSTPROCESSING {
 
@@ -200,11 +181,6 @@ workflow POSTPROCESSING {
 
     ch_versions = Channel.empty()
 
-    Channel
-    .fromList(workflow.configFiles)
-    .collectFile(storeDir: "${params.outdir}/pipeline_info/configs",cache: false)
-
-    writemeta()
     filtered = excludeMNPs(ch_samplesheet)    
                     .map{meta, files -> tuple( groupKey(meta.familyId, meta.sampleSize),meta,files)}
                     .groupTuple()

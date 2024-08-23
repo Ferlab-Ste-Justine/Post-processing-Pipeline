@@ -12,11 +12,15 @@ Initial release of ferlab/postprocessing, created with the [nf-core](https://nf-
 [#3](https://github.com/FelixAntoineLeSieur/Post-processing-Pipeline/pull/3) Added a test file for the test profile
 [#7](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/7) Added most functions and modules from previous pipeline to make it functional
 [#9](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/9) New format "V3" is now supported. Includes metadata propagation. 
+[#12](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/12) Copy nextflow log file to output directory
 
 ### `Fixed`
 [#1](https://github.com/FelixAntoineLeSieur/Post-processing-Pipeline/pull/1) Fixed template schemas
+[#12](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/12) Ensure ci tests pass in stub mode
+[#12](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/12) Add missing docker image for process writemeta
 
 ### `Dependencies`
+[#12](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/12) bump nextflow minimal version to 23.10.1
 
 ### `Deprecated`
 Format "V1" and "V2" are now deprecated as of [#9](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/9)
@@ -25,3 +29,4 @@ Format "V1" and "V2" are now deprecated as of [#9](https://github.com/Ferlab-Ste
 [#2](https://github.com/FelixAntoineLeSieur/Post-processing-Pipeline/pull/2) Removed V1 format input. V2 is the only accepted format.
 [#5](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/5) Removed many files related to workflows and email notifications
 [#8](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/8) Removed remaining unnecessary workflows including the linting fix, the branch protection workflow and the "download pipeline" workflow
+[#12](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/12) Deactivate linter tests for github workflows

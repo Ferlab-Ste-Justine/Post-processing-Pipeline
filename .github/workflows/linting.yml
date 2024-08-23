@@ -5,10 +5,10 @@ name: nf-core linting
 on:
   push:
     branches:
-      - dev
+      - main
+    tags:
+      - v*
   pull_request:
-  release:
-    types: [published]
 
 jobs:
   pre-commit:

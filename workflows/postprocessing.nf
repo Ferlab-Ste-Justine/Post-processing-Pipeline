@@ -173,7 +173,7 @@ workflow POSTPROCESSING {
     .collectFile(storeDir: "${params.outdir}/pipeline_info/configs",cache: false)
 
     writemeta()
-    filtered = EXCLUDE_MNPS(ch_samplesheet)
+    filtered = EXCLUDE_MNPS(ch_samplesheet).ch_output_excludemnps
                     .map{metas, files -> tuple( groupKey(metas.familyId, metas.sampleSize),metas,files)}
                     .groupTuple()
                     .map{ familyId, metas, files -> //now that samples are grouped together, we no longer follow sample in meta

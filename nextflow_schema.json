@@ -274,5 +274,11 @@
     {
       "$ref": "#/definitions/generic_options"
     }
-  ]
+  ],
+  "properties": {
+    "modules_testdata_base_path": {
+      "type": "string",
+      "default": "s3://ngi-igenomes/testdata/nf-core/modules/"
+    }
+  }
 }

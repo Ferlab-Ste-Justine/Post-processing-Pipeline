@@ -120,7 +120,7 @@ process genotypeGVCF {
     script:
     def familyId = meta.familyId
     def args = task.ext.args ?: ''
-    def argsjava = task.ext.args ?: ''
+    def argsjava = task.ext.argsjava ?: ''
     def exactGvcfFile = gvcfFile.find { it.name.endsWith("vcf.gz") }
 
     def avail_mem = 3072

@@ -1,14 +1,13 @@
 name: nf-core linting
-# This workflow is triggered on pushes and PRs to the repository.
-# It runs the `nf-core lint` and markdown lint tests to ensure
-# that the code meets the nf-core guidelines.
+# This workflow runs the `nf-core lint` and markdown lint tests to ensure
+# code quality and adherence to relevant nf-core guidelines.
 on:
   push:
     branches:
-      - dev
+      - main
+    tags:
+      - v*
   pull_request:
-  release:
-    types: [published]
 
 jobs:
   pre-commit:

@@ -81,7 +81,13 @@
           "format": "file-path"
         }
       },
-      "required": ["broad", "intervalsFile", "referenceGenome", "referenceGenomeFasta", "vepCache"]
+      "required": [
+        "broad",
+        "intervalsFile",
+        "referenceGenome",
+        "referenceGenomeFasta",
+        "vepCache"
+      ]
     },
     "institutional_config_options": {
       "title": "Institutional config options",
@@ -275,10 +281,5 @@
       "$ref": "#/definitions/generic_options"
     }
   ],
-  "properties": {
-    "modules_testdata_base_path": {
-      "type": "string",
-      "default": "s3://ngi-igenomes/testdata/nf-core/modules/"
-    }
-  }
+  "properties": {}
 }

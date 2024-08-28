@@ -12,13 +12,12 @@ workflow EXCLUDE_MNPS {
         input // channel: (val(metas),  [.gvcf.gz])
     main:
     versions = Channel.empty()
-    referencepath = file("${params.referenceGenome}/${params.referenceGenomeFasta}")
-    ch_bcftoolsfilter_input = input.map{meta,file -> [meta + [id: meta.familyId + "." + meta.sample],file]} //meta.id is referenced in modules
-    ch_reference = input.map{meta,file -> [meta,referencepath]}
-    BCFTOOLS_FILTER(ch_bcftoolsfilter_input)
+    def reference_path = file("${params.referenceGenome}/${params.referenceGenomeFasta}")
+    BCFTOOLS_FILTER(input)
 
-    ch_bcftoolsfilter_for_bcftoolsnorm = BCFTOOLS_FILTER.out.vcf.join(BCFTOOLS_FILTER.out.tbi)
+    def ch_bcftoolsfilter_for_bcftoolsnorm = BCFTOOLS_FILTER.out.vcf.join(BCFTOOLS_FILTER.out.tbi)
 
+    ch_reference = input.map{meta,file -> [meta,reference_path]}
     BCFTOOLS_NORM(ch_bcftoolsfilter_for_bcftoolsnorm,ch_reference)
     ch_output_excludemnps = BCFTOOLS_NORM.out.vcf.join(BCFTOOLS_NORM.out.tbi)
         .map{meta, vcf, tbi ->[meta,[vcf,tbi]]}

@@ -174,11 +174,11 @@ workflow POSTPROCESSING {
 
     writemeta()
     filtered = EXCLUDE_MNPS(ch_samplesheet).ch_output_excludemnps
-                    .map{metas, files -> tuple( groupKey(metas.familyId, metas.sampleSize),metas,files)}
+                    .map{meta, files -> tuple( groupKey(meta.familyId, meta.sampleSize),meta,files)}
                     .groupTuple()
-                    .map{ familyId, metas, files -> //now that samples are grouped together, we no longer follow sample in meta
+                    .map{ familyId, meta, files -> //now that samples are grouped together, we no longer follow sample in meta
                         [
-                            metas[0].findAll{it.key != "sample"}, //meta
+                            meta[0].findAll{it.key != "sample"}, //meta
                             files.flatten()]}                     //files
     //Using 2 as threshold because we have 2 files per patient (gcvf.gz, gvcf.gz.tbi)
     filtered_one = filtered.filter{it[0].sampleSize == 1}

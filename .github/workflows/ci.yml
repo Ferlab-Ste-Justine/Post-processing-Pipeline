@@ -44,4 +44,4 @@ jobs:
 
         # Using the stub mode until our test data setup is ready
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -stub -profile test,docker
+          nextflow run ${GITHUB_WORKSPACE} -stub -profile test,docker --input assets/TestSampleSheet.csv

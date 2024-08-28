@@ -94,8 +94,9 @@ workflow PIPELINE_INITIALISATION {
         .combine(ch_sample_simple,by:0)
         .map {
             id,size,metasfile -> //include sample count in meta
+                def meta = metasfile[0]
                 [
-                    metasfile[0] + [sampleSize: size], //meta
+                    meta + [sampleSize: size] + [id: meta.familyId + "." + meta.sample], //meta.id is referenced in modules
                     metasfile[1]                       //file
                 ]
         }.set {ch_samplesheet}

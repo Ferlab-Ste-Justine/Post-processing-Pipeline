@@ -86,6 +86,7 @@ workflow {
     PIPELINE_COMPLETION (
         params.outdir,
         params.monochrome_logs,
+        workflow.commandLine
     )
 }
 

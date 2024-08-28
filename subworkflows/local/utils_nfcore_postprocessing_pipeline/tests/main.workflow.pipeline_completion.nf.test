@@ -1,0 +1,34 @@
+nextflow_workflow {
+
+    name "Test Workflow UTILS_NFCORE_POSTPROCESSING_PIPELINE PIPELINE_COMPLETION"
+    script "subworkflows/local/utils_nfcore_postprocessing_pipeline/main.nf"
+
+    workflow "PIPELINE_COMPLETION "
+    tag 'local'
+ 
+    test("Should write log file to outdir") {
+
+        when {
+
+            workflow {
+                """
+                outdir = "${outputDir}"
+                monochrome_logs = false
+                command_line = workflow.commandLine
+
+
+                input[0] = outdir
+                input[1] = monochrome_logs
+                input[2] = command_line
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert file("${outputDir}/pipeline_info/nextflow.log").exists() } 
+            )
+        }
+    }
+}

@@ -1,0 +1,49 @@
+name: nf-test CI
+# Run nf-test
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+
+
+jobs:
+  test:
+    name: nf-test, NF ${{ matrix.NXF_VER }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        NXF_VER:
+          - "23.10.1"  
+    steps:
+      - name: Check out pipeline code
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
+        with:
+          fetch-depth: 2  # Fetch enough history to detect changed files for nf-test
+
+      - name: Install Nextflow
+        uses: nf-core/setup-nextflow@v2
+        with:
+          version: "${{ matrix.NXF_VER }}"
+
+      - name: Install nf-test
+        run: |
+          wget -qO- https://code.askimed.com/install/nf-test | bash
+          sudo mv nf-test /usr/local/bin/
+
+      - name: Disk space cleanup
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
+        
+      - name: Run nf-test
+        run: |
+          nf-test test \
+            --tag=local \
+            --changed-since="HEAD^1" \
+            --tap=test.tap \
+            --verbose
+        # Notes:
+        #  - The --tag option must appear before the --changed-since option to be applied
+        #    correctly.
+        #  - The --verbose option is required for some nf-core tests to pass. It's not 
+        #    needed now as we only run local tests, but we mention for future use.

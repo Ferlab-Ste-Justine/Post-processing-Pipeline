@@ -8,3 +8,5 @@ testing*
 *.pyc
 localTest/
 data-test/
+.nf-test.log
+.nf-test/

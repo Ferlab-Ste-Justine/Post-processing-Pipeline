@@ -3,65 +3,64 @@
 Hi there!
 Many thanks for taking an interest in improving ferlab/postprocessing.
 
-We try to manage the required tasks for ferlab/postprocessing using GitHub issues, you probably came to this page when creating one.
-Please use the pre-filled template to save time.
+If you haven't already, we recommend creating a GitHub issue to describe your task. Please use the pre-filled template to save time.
 
-However, don't be put off by this template - other more general issues and suggestions are welcome!
-Contributions to the code are even more welcome ;)
-
-Since this repository is in construction, some of the points below might not apply yet (ex: tests, linter, naming conventions, versioning).
-Make sure to do the maximum possible. If you are not sure about current standards or need support, you can ask help on the [#bioinfo](https://cr-ste-justine.slack.com/archives/C074VMACUD9slack) slack channel.
+Please do your best to follow the guidelines defined here. If you are unsure about the current standards or need support, feel free to ask for help in the [#bioinfo](https://cr-ste-justine.slack.com/archives/C074VMACUD9slack) Slack channel.
 
 We also hold a few notion pages as documentation:
-[Nf-core guidelines](https://www.notion.so/ferlab/Nf-core-guidelines-43b08da49e8f49b2968f17a34adc783a)
-[Help with samplesheet and schemas](https://www.notion.so/ferlab/Nf-core-schema-input-and-parsing-Samplesheet-files-29603f232c7f4f018fc337f2d1d16a4c)
-[Notes for module/subworkflow building](https://www.notion.so/ferlab/Notes-for-nf-core-modules-subworkflows-1cb401615ea149278b87c12e9284745d)
+- [Nf-core guidelines](https://www.notion.so/ferlab/Nf-core-guidelines-43b08da49e8f49b2968f17a34adc783a)
+- [Help with samplesheet and schemas](https://www.notion.so/ferlab/Nf-core-schema-input-and-parsing-Samplesheet-files-29603f232c7f4f018fc337f2d1d16a4c)
+- [Notes for module/subworkflow building](https://www.notion.so/ferlab/Notes-for-nf-core-modules-subworkflows-1cb401615ea149278b87c12e9284745d)
+
 ## Contribution workflow
 
-If you'd like to write some code for ferlab/postprocessing, the standard workflow is as follows:
+We follows the guidelines outlined by Ferlab for our git flow, which are detailed in the [Developer Handbook](https://www.notion.so/ferlab/Developer-Handbook-ca9d689d8aca4412a78eafa2dfa0f8a8).
 
-1. Check that there isn't already an issue about your idea in the [ferlab/postprocessing issues](https://github.com/ferlab/postprocessing/issues) to avoid duplicating work. If there isn't one already, please create one so that others know you're working on this
-2. Create a separate branch
-3. Make the necessary changes / additions within your branch
-4. Use `nf-core schema build` and add any new parameters to the pipeline JSON schema (requires [nf-core tools](https://github.com/nf-core/tools) >= 1.10).
-5. Submit a Pull Request against the main branch and wait for the code to be reviewed and merged
+Please ensure that you adhere to the conventions for branch names and commit messages.
 
-If you're not used to this workflow with git, you can start with some [docs from GitHub](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests) or even their [excellent `git` resources](https://try.github.io/).
+If applicable, use `nf-core schema build` to add new parameters to the pipeline JSON schema. This requires [nf-core tools](https://github.com/nf-core/tools) version 1.10 or higher.
 
 ## Tests
 
 When you create a pull request with changes, [GitHub Actions](https://github.com/features/actions) will run automatic tests.
-Typically, pull-requests are only fully reviewed when these tests are passing, though of course we can help out before then.
 
-There are typically two types of tests that run:
+A pull-request should only be merged when all these tests are passing.
+
+There are 3 types of tests run, that are described below.
 
 ### Lint tests
 
-`nf-core` has a [set of guidelines](https://nf-co.re/developers/guidelines) which all pipelines must adhere to.
-To enforce these and ensure that all pipelines stay in sync, we have developed a helper tool which runs checks on the pipeline code. This is in the [nf-core/tools repository](https://github.com/nf-core/tools) and once installed can be run locally with the `nf-core lint <pipeline-directory>` command.
+The lint test will run the nf-core linter, i.e. the following command and check for errors/warnings.
+`nf-core lint`
 
-If any failures or warnings are encountered, please follow the listed URL for more documentation.
+It is currently deactivated, but we highly recommend to run it locally. Ensure that no lint test fails and that no additional warnings appear compared to the main branch.
 
-**However**, here at ferlab, we don't enforce all the linting rules. If a test should be ignored, it should be added to .nf-core.yml.
+At Ferlab, we don't enforce all linting rules. If a test should be ignored, it should be added to .nf-core.yml.
+
 
 ### Pipeline tests
 
-Each `nf-core` pipeline should be set up with a minimal set of test-data.
-`GitHub Actions` then runs the pipeline on this data to ensure that it exits successfully.
-If there are any failures then the automated tests fail.
+This test runs the pipeline with a minimal set of test data. It only checks that the pipeline can run successfully. Since our test setup is not fully ready yet, it runs in stub mode at the moment.
+
 These tests are run both with the latest available version of `Nextflow` and also the minimum required version that is stated in the pipeline code.
 
-## Hotfix
+You are encouraged to test in non-stub mode locally and in integration environments. Reach out to the Ferlab bioinformatics team if you need help with this. You can find example commands in the test.config
+configuration file.
 
-:warning: Only in the unlikely and regretful event of a release happening with a bug.
 
-- On your own fork, make a new branch `fix` based on `origin/main`.
-- Fix the bug, and bump version (X.Y.Z+1).
-- A PR should be made on `main` from fix to directly this particular bug.
+### nf-test tests
+
+This test runs unit tests with nf-test. For now, for performance reasons, it only runs tests applicable to the submitted changes and tests tagged with the keyword "local".
+
+The tests are only run with the Nextflow version expected in production, also for performance reasons.
+
 
 ## Pipeline contribution conventions
 
-To make the ferlab/postprocessing code and processing logic more understandable for new contributors and to ensure quality, we semi-standardise the way the code and other contributions are written.
+To make the ferlab/postprocessing code and processing logic more understandable for new contributors and to ensure quality, we try to follow nf-core standards as much as possible.
+
+They are described below. Try to follow them as much as possible. If you are unsure, feel free to reach out to the bioinformatics team.
+
 
 ### Adding a new step
 
@@ -75,7 +74,8 @@ If you wish to contribute a new step, please use the following coding standards:
 6. Add sanity checks and validation for all relevant parameters.
 7. Perform local tests to validate that the new code works as expected.
 8. If applicable, add a new test command in `.github/workflow/ci.yml`.
-9. Add a description of the output files if relevant to `docs/output.md`.
+9. If applicable, write nf-test unit tests
+10. Add a description of the output files if relevant to `docs/output.md`.
 
 ### Default values
 
@@ -99,4 +99,3 @@ Please use the following naming schemes, to make it easy to understand what is g
 ### Nextflow version bumping
 
 If you are using a new feature from core Nextflow, you may bump the minimum required version of nextflow in the pipeline with: `nf-core bump-version --nextflow . [min-nf-version]`
-

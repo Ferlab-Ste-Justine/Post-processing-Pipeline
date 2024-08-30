@@ -12,13 +12,17 @@ Contributions to the code are even more welcome ;)
 Since this repository is in construction, some of the points below might not apply yet (ex: tests, linter, naming conventions, versioning).
 Make sure to do the maximum possible. If you are not sure about current standards or need support, you can ask help on the [#bioinfo](https://cr-ste-justine.slack.com/archives/C074VMACUD9slack) slack channel.
 
+We also hold a few notion pages as documentation:
+[Nf-core guidelines](https://www.notion.so/ferlab/Nf-core-guidelines-43b08da49e8f49b2968f17a34adc783a)
+[Help with samplesheet and schemas](https://www.notion.so/ferlab/Nf-core-schema-input-and-parsing-Samplesheet-files-29603f232c7f4f018fc337f2d1d16a4c)
+[Notes for module/subworkflow building](https://www.notion.so/ferlab/Notes-for-nf-core-modules-subworkflows-1cb401615ea149278b87c12e9284745d)
 ## Contribution workflow
 
 If you'd like to write some code for ferlab/postprocessing, the standard workflow is as follows:
 
 1. Check that there isn't already an issue about your idea in the [ferlab/postprocessing issues](https://github.com/ferlab/postprocessing/issues) to avoid duplicating work. If there isn't one already, please create one so that others know you're working on this
-2. [Fork](https://help.github.com/en/github/getting-started-with-github/fork-a-repo) the [ferlab/postprocessing repository](https://github.com/ferlab/postprocessing) to your GitHub account
-3. Make the necessary changes / additions within your forked repository following [Pipeline conventions](#pipeline-contribution-conventions)
+2. Create a separate branch
+3. Make the necessary changes / additions within your branch
 4. Use `nf-core schema build` and add any new parameters to the pipeline JSON schema (requires [nf-core tools](https://github.com/nf-core/tools) >= 1.10).
 5. Submit a Pull Request against the main branch and wait for the code to be reviewed and merged
 

@@ -32,8 +32,6 @@ process splitMultiAllelics{
 process vep {
     label 'vep'
 
-    publishDir "${params.outdir}", mode: 'copy'
-
     input:
     tuple val(meta), path(vcfFile)
     path referenceGenome
@@ -80,8 +78,6 @@ process vep {
 
 process tabix {
     label 'tiny'
-
-    publishDir "${params.outdir}", mode: 'copy'
 
     input:
     tuple val(meta), path(vcfFile)

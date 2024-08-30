@@ -1,28 +1,66 @@
-# ferlab/postprocessing: Usage
+# Ferlab-Ste-Justine/Post-processing-Pipeline: Usage
 
-> _Documentation of pipeline parameters is generated automatically from the pipeline schema and can no longer be found in markdown files._
+>  _Parameters documentation is available in the [pipeline schema](../nextflow_schema.json)._
+> _You can use the command `nf-core schema docs` to output parameters documentation._
+> _To avoid duplication of information, we minimize parameters details in markdown files._
+> _Currently, we only add context for the reference data parameters and provide parameter summaries for convenience._
 
 ## Introduction
 
-<!-- TODO nf-core: Add documentation about anything specific to running your pipeline. For general topics, please point to (and add to) the main nf-core website. -->
+The Ferlab-Ste-Justine/Post-processing-Pipeline is a bioinformatics pipeline designed for family-based analysis of GVCFs from multiple samples. It performs joint genotyping, tags low-quality variants, and optionally annotates the final VCF using VEP and/or Exomiser. This document provides instructions on how to prepare input files, run the pipeline, and understand the output.
+
 
 ## Samplesheet input
 
-You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use the --input parameter to specify its location. The samplesheet has to be a tab-separated file (.tsv) with the first column being the family ID and the second being the sequencing type (either Whole Genome Sequencing (WGS) or Whole Exome Sequencing (WES)). Use the following columns to supply the paths to the gvcfs files for the same familyId. 
+You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use the `--input` parameter to specify its location. The samplesheet has to be a comma separated file (.csv).
 
-```bash
---input '[path to samplesheet file]'
+The samplesheet must contains the following columns at the minimum: 
+- *familyId*: The identifier used for the sample family
+- *sample*: The identifier used for the sample
+- *sequencingType*: Must be either WES (Whole Exome Sequencing) or WGS (Whole Genome Sequencing)
+- *gvcf*: Path to the sample .gvcf file
+
+Additionnally, there is an optional *phenoFamily* column that can contain a .yml/.json file providing phenotype 
+information on the family in phenopacket format. This column is only necessary if using the exomiser tool.
+
+
+**sample.csv**
+```csv
+**familyId**,**sample**,**sequencingType**,**gvcf**,**phenoFamily**
+CONGE-XXX,01,WES,CONGE-XXX-01.hard-filtered.gvcf.gz,CONGE-XXX.pheno.yml
+CONGE-XXX,02,WES,CONGE-XXX-02.hard-filtered.gvcf.gz,CONGE-XXX.pheno.yml
+CONGE-XXX,03,WES,CONGE-XXX-03.hard-filtered.gvcf.gz,CONGE-XXX.pheno.yml
+CONGE-YYY,01,WGS,CONGE-YYY-01.hard-filtered.gvcf.gz,CONGE-YYY.pheno.yml
+CONGE-YYY,02,WGS,CONGE-YYY-02.hard-filtered.gvcf.gz,CONGE-YYY.pheno.yml
+CONGE-YYY,03,WGS,CONGE-YYY-03.hard-filtered.gvcf.gz,CONGE-YYY.pheno.yml
 ```
+
+> [!NOTE]
+> The sequencing type (WES or WGS) will determine the variant filtering approach used by the pipeline.
+> In the case of Whole Genome Sequencing, VQSR (Variant Quality Score Recalibration) is used.
+> In the case of Whole Exome Sequencing, VQSR is replaced by a hard filtering approach as VQSR cannot be applied in this case.
+> Additionally, a different analysis file will be used when running the exomiser tool based on the sequencing type.
+
+## Reference Data
+
+Reference files are essential at various stages of the workflow, including joint-genotyping, VQSR, the Variant Effect Predictor (VEP), and exomiser. 
+
+These files must be correctly downloaded and specified through pipeline parameters. For more details about how to this, see 
+[reference_data.md](reference_data.md).
+
 
 ## Running the pipeline
 
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run ferlab/postprocessing --input ./samplesheet.tsv --outdir ./results --genome GRCh37 -profile docker
+nextflow run -c cluster.config Ferlab-Ste-Justine/Post-processing-Pipeline -r "v2.0.0" \
+    -params-file params.json  \
+   --input samplesheet.csv \
+   --outdir results/dir \
+   --tools vep,exomiser
 ```
 
-This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
 
 Note that the pipeline will create the following files in your working directory:
 
@@ -33,30 +71,35 @@ work                # Directory containing the nextflow working files
 # Other nextflow hidden files, eg. history of pipeline runs and old logs.
 ```
 
-If you wish to repeatedly use the same parameters for multiple runs, rather than specifying each flag in the command, you can specify these in a params file.
-
-Pipeline settings can be provided in a `yaml` or `json` file via `-params-file <file>`.
+If you wish to repeatedly use the same parameters for multiple runs, rather than specifying each flag in the command, you can specify these in a params file (json or yaml).
 
 :::warning
 Do not use `-c <file>` to specify parameters as this will result in errors. Custom config files specified with `-c` must only be used for [tuning process resource specifications](https://nf-co.re/docs/usage/configuration#tuning-workflow-resources), other infrastructural tweaks (such as output directories), or module arguments (args).
 :::
 
-The above pipeline run specified with a params file in yaml format:
 
-```bash
-nextflow run ferlab/postprocessing -profile docker -params-file params.yaml
-```
+### Tools
 
-with `params.yaml` containing:
+You can include additional analysis in your pipeline  via the `tools` parameter. Currently, the pipeline supports 
+two tools: `vep` (Variant Effect Predictor) and `exomizer`. 
 
-```yaml
-input: './samplesheet.csv'
-outdir: './results/'
-genome: 'GRCh37'
-<...>
-```
+VEP is a widely used tool for annotating genetic variants with information such as gene names, 
+variant consequences, and population frequencies. It provides valuable insights into the functional impact 
+of genetic variants.
 
-You can also generate such `YAML`/`JSON` files via [nf-core/launch](https://nf-co.re/launch).
+Exomiser, on the other hand, is a tool specifically designed for the analysis of rare genetic diseases. It 
+integrates phenotype data with variant information to prioritize variants that are likely to be disease-causing. 
+This can greatly assist in the identification of potential disease-causing variants in exome sequencing data.
+
+
+### Stub mode and quick tests
+
+The `-stub` (or `-stub-run`) option can be added to run the "stub" block of processes instead of the "script" block. This can be helpful for testing.
+
+
+To test your setup in stub mode, simply run `nextflow run Ferlab-Ste-Justine/Post-processing-Pipeline -profile test,docker -stub`. 
+
+For tests with real data, see documentation in the [test configuration profile](conf/test.config)
 
 ### Updating the pipeline
 
@@ -80,96 +123,16 @@ To further assist in reproducbility, you can use share and re-use [parameter fil
 If you wish to share such profile (such as upload as supplementary material for academic publications), make sure to NOT include cluster specific paths to files, nor institutional specific profiles.
 :::
 
-## Core Nextflow arguments
 
-:::note
-These options are part of Nextflow and use a _single_ hyphen (pipeline parameters use a double-hyphen).
-:::
+### Core Nextflow arguments
+- Use the `-profile` parameter to choose a configuration profile. Profiles can give configuration presets for different compute environments (e.g., docker, singularity, conda). Multiple profiles can be loaded in sequence, e.g., `-profile test,docker`.
+- Use the `-resume` parameter to restart a pipeline from where it left off. This can save time by using cached results from previous runs.
+- You can specify a custom configuration file using the `-c` parameter. This is useful to set configuration specific to your execution environment and change requested resources for a process.
 
-### `-profile`
+For more detailed information, please refer to the [official Nextflow documentation](https://www.nextflow.io/docs/latest/index.html).
 
-Use this parameter to choose a configuration profile. Profiles can give configuration presets for different compute environments.
 
-Several generic profiles are bundled with the pipeline which instruct the pipeline to use software packaged using different methods (Docker, Singularity, Podman, Shifter, Charliecloud, Apptainer, Conda) - see below.
-
-:::info
-We highly recommend the use of Docker or Singularity containers for full pipeline reproducibility, however when this is not possible, Conda is also supported.
-:::
-
-The pipeline also dynamically loads configurations from [https://github.com/nf-core/configs](https://github.com/nf-core/configs) when it runs, making multiple config profiles for various institutional clusters available at run time. For more information and to see if your system is available in these configs please see the [nf-core/configs documentation](https://github.com/nf-core/configs#documentation).
-
-Note that multiple profiles can be loaded, for example: `-profile test,docker` - the order of arguments is important!
-They are loaded in sequence, so later profiles can overwrite earlier profiles.
-
-If `-profile` is not specified, the pipeline will run locally and expect all software to be installed and available on the `PATH`. This is _not_ recommended, since it can lead to different results on different machines dependent on the computer enviroment.
-
-- `test`
-  - A profile with a complete configuration for automated testing
-  - Includes links to test data so needs no other parameters
-- `docker`
-  - A generic configuration profile to be used with [Docker](https://docker.com/)
-- `singularity`
-  - A generic configuration profile to be used with [Singularity](https://sylabs.io/docs/)
-- `podman`
-  - A generic configuration profile to be used with [Podman](https://podman.io/)
-- `shifter`
-  - A generic configuration profile to be used with [Shifter](https://nersc.gitlab.io/development/shifter/how-to-use/)
-- `charliecloud`
-  - A generic configuration profile to be used with [Charliecloud](https://hpc.github.io/charliecloud/)
-- `apptainer`
-  - A generic configuration profile to be used with [Apptainer](https://apptainer.org/)
-- `wave`
-  - A generic configuration profile to enable [Wave](https://seqera.io/wave/) containers. Use together with one of the above (requires Nextflow ` 24.03.0-edge` or later).
-- `conda`
-  - A generic configuration profile to be used with [Conda](https://conda.io/docs/). Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker, Singularity, Podman, Shifter, Charliecloud, or Apptainer.
-
-### `-resume`
-
-Specify this when restarting a pipeline. Nextflow will use cached results from any pipeline steps where the inputs are the same, continuing from where it got to previously. For input to be considered the same, not only the names must be identical but the files' contents as well. For more info about this parameter, see [this blog post](https://www.nextflow.io/blog/2019/demystifying-nextflow-resume.html).
-
-You can also supply a run name to resume a specific run: `-resume [run-name]`. Use the `nextflow log` command to show previous run names.
-
-### `-c`
-
-Specify the path to a specific config file (this is a core Nextflow command). See the [nf-core website documentation](https://nf-co.re/usage/configuration) for more information.
-
-## Custom configuration
-
-### Resource requests
-
-Whilst the default requirements set within the pipeline will hopefully work for most people and with most input data, you may find that you want to customise the compute resources that the pipeline requests. Each step in the pipeline has a default set of requirements for number of CPUs, memory and time. For most of the steps in the pipeline, if the job exits with any of the error codes specified [here](https://github.com/nf-core/rnaseq/blob/4c27ef5610c87db00c3c5a3eed10b1d161abf575/conf/base.config#L18) it will automatically be resubmitted with higher requests (2 x original, then 3 x original). If it still fails after the third attempt then the pipeline execution is stopped.
-
-To change the resource requests, please see the [max resources](https://nf-co.re/docs/usage/configuration#max-resources) and [tuning workflow resources](https://nf-co.re/docs/usage/configuration#tuning-workflow-resources) section of the nf-core website.
-
-### Custom Containers
-
-In some cases you may wish to change which container or conda environment a step of the pipeline uses for a particular tool. By default nf-core pipelines use containers and software from the [biocontainers](https://biocontainers.pro/) or [bioconda](https://bioconda.github.io/) projects. However in some cases the pipeline specified version maybe out of date.
-
-To use a different container from the default container or conda environment specified in a pipeline, please see the [updating tool versions](https://nf-co.re/docs/usage/configuration#updating-tool-versions) section of the nf-core website.
-
-### Custom Tool Arguments
-
-A pipeline might not always support every possible argument or option of a particular tool used in pipeline. Fortunately, nf-core pipelines provide some freedom to users to insert additional parameters that the pipeline does not include by default.
-
-To learn how to provide additional arguments to a particular tool of the pipeline, please see the [customising tool arguments](https://nf-co.re/docs/usage/configuration#customising-tool-arguments) section of the nf-core website.
-
-### nf-core/configs
-
-In most cases, you will only need to create a custom config as a one-off but if you and others within your organisation are likely to be running nf-core pipelines regularly and need to use the same settings regularly it may be a good idea to request that your custom config file is uploaded to the `nf-core/configs` git repository. Before you do this please can you test that the config file works with your pipeline of choice using the `-c` parameter. You can then create a pull request to the `nf-core/configs` repository with the addition of your config file, associated documentation file (see examples in [`nf-core/configs/docs`](https://github.com/nf-core/configs/tree/master/docs)), and amending [`nfcore_custom.config`](https://github.com/nf-core/configs/blob/master/nfcore_custom.config) to include your custom profile.
-
-See the main [Nextflow documentation](https://www.nextflow.io/docs/latest/config.html) for more information about creating your own configuration files.
-
-If you have any questions or issues please send us a message on [Slack](https://nf-co.re/join/slack) on the [`#configs` channel](https://nfcore.slack.com/channels/configs).
-
-## Azure Resource Requests
-
-To be used with the `azurebatch` profile by specifying the `-profile azurebatch`.
-We recommend providing a compute `params.vm_type` of `Standard_D16_v3` VMs by default but these options can be changed if required.
-
-Note that the choice of VM size depends on your quota and the overall workload during the analysis.
-For a thorough list, please refer the [Azure Sizes for virtual machines in Azure](https://docs.microsoft.com/en-us/azure/virtual-machines/sizes).
-
-## Running in the background
+### Running in the background
 
 Nextflow handles job submissions and supervises the running jobs. The Nextflow process must run until the pipeline is finished.
 
@@ -178,11 +141,35 @@ The Nextflow `-bg` flag launches Nextflow in the background, detached from your 
 Alternatively, you can use `screen` / `tmux` or similar tool to create a detached session which you can log back into at a later time.
 Some HPC setups also allow you to run nextflow within a cluster job submitted your job scheduler (from where it submits more jobs).
 
-## Nextflow memory requirements
+### Nextflow memory requirements
 
 In some cases, the Nextflow Java virtual machines can start to request a large amount of memory.
-We recommend adding the following line to your environment to limit this (typically in `~/.bashrc` or `~./bash_profile`):
+To limit this, you can use the `NXF_OPTS` environment variable:
 
 ```bash
 NXF_OPTS='-Xms1g -Xmx4g'
 ```
+
+Parameters summary
+-----
+
+| Parameter name | Required? | Description |
+| --- | --- | --- |
+| `input` | _Required_ | Path to the input file |
+| `outdir` | _Required_ | Path to the output directoy |
+| `referenceGenome` |  _Required_ | Path to the directory containing the reference genome data |
+| `referenceGenomeFasta` | _Required_ | Filename of the reference genome .fasta file, within the specified `referenceGenome` directory |
+| `broad` | _Required_ | Path to the directory containing Broad reference data |
+| `intervalsFile` | _Required_ | Filename of the genome intervals list, within the specified `broad` directory |
+| `tools` | _Optional_ | Additional tools to run separated by commas. Supported tools are `vep` and `exomiser` |
+| `vepCache` | _Optional_ | Path to the vep cache data directory |
+| `exomiser_data_dir` | _Optional_ | Path to the exomiser reference data directory |
+| `exomiser_genome` | _Optional_ | Genome assembly version to be used by exomiser(`hg19` or `hg38`) |
+| `exomiser_data_version` | _Optional_ | Exomiser data version (e.g., `2402`)|
+| `exomiser_cadd_version` | _Optional_ | Version of the CADD data to be used by exomiser (e.g., `1.7`) |
+| `exomiser_cadd_indel_filename`|	_Optional_ | Filename of the exomiser CADD indel data file (e.g., `gnomad.genomes.r4.0.indel.tsv.gz`) |
+| `exomiser_cadd_snv_filename`|	_Optional_ | Filename of the exomiser CADD snv data file (e.g., `whole_genome_SNVs.tsv.gz`) |
+| `exomiser_remm_version` | _Optional_ | Version of the REMM data to be used by exomiser (e.g., `0.3.1.post1`)|
+| `exomiser_remm_filename` | _Optional_	| Filename of the exomiser REMM data file (e.g., `ReMM.v0.3.1.post1.hg38.tsv.gz`) |
+| `exomiser_analysis_wes` | _Optional_ | Path to the exomiser analysis file for WES data, if different from the default |
+| `exomiser_analysis_wgs` | _Optional_ | Path to the exomiser analysis file for WGS data, if different from the default |

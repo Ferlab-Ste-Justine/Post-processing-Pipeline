@@ -1,0 +1,14 @@
+{
+    "Test Process EXOMISER": {
+        "content": [
+            [
+                "versions.yml:md5,30273ee35fb4cdba2d84b2740861902b"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.0",
+            "nextflow": "23.10.1"
+        },
+        "timestamp": "2024-09-23T15:44:00.728501"
+    }
+}

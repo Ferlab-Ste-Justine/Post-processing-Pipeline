@@ -1,0 +1,105 @@
+nextflow_function {
+
+    name "Test Subworkflow UTILS_NFCORE_POSTPROCESSING_PIPELINE isToolIncluded function"
+    script "subworkflows/local/utils_nfcore_postprocessing_pipeline/utils.nf"
+    tag "local"
+    
+    function "isToolIncluded"
+
+    test("Test Function isToolIncluded - with multiple tools specified - tool present") {
+        when {
+            params {
+                tools = "toolA,toolB"
+            }
+            function {
+                """
+                input[0] = "toolB"
+                """
+            }
+            then {
+                assertAll(
+                    { assert function.success },
+                    { assert function.result == true }
+                )
+            } 
+        }
+    }
+
+    test("Test Function isToolIncluded - with multiple tools specified - tool absent") {
+        when {
+            params {
+                tools = "toolA,toolB"
+            }
+            function {
+                """
+                input[0] = "toolC"
+                """
+            }
+            then {
+                assertAll(
+                    { assert function.success },
+                    { assert function.result == false }
+                )
+            } 
+        }
+    }
+
+    test("Test Function isToolIncluded - with single tool - tool absent") {
+        when {
+            params {
+                tools = "toolA"
+            }
+            function {
+                """
+                input[0] = "toolC"
+                """
+            }
+            then {
+                assertAll(
+                    { assert function.success },
+                    { assert function.result == false }
+                )
+            } 
+        }
+    }
+
+    test("Test Function isToolIncluded - empty tools") {
+        when {
+            params {
+                tools = ""
+            }
+
+            function {
+                """
+                input[0] = "toolA"
+                """
+            }
+            then {
+                assertAll(
+                    { assert function.success },
+                    { assert function.result == false }
+                )
+            } 
+        }
+    }
+
+    test("Test Function isToolIncluded - null tools") {
+        when {
+            params {
+                tools = null
+            }
+            function {
+                """
+                input[0] = "toolA"
+                """
+            }
+            then {
+                assertAll(
+                    { assert function.success },
+                    { assert function.result == false }
+                )
+            } 
+        }
+    }
+
+}

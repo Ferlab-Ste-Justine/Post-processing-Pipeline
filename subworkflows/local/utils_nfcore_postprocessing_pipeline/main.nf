@@ -17,6 +17,7 @@ include { dashedLine                } from '../../nf-core/utils_nfcore_pipeline'
 include { nfCoreLogo                } from '../../nf-core/utils_nfcore_pipeline'
 include { UTILS_NFCORE_PIPELINE     } from '../../nf-core/utils_nfcore_pipeline'
 include { workflowCitation          } from '../../nf-core/utils_nfcore_pipeline'
+include { isExomiserToolIncluded } from './utils'
 
 /*
 ========================================================================================
@@ -83,6 +84,11 @@ workflow PIPELINE_INITIALISATION {
         .fromSamplesheet("input")
         .map {
             meta, file ->
+                if (isExomiserToolIncluded()) {
+                    if (!meta.familypheno) {
+                        error("Samplesheet must contains familyPheno file for each sample when using exomiser tool")
+                    }
+                }
             [meta.familyId, [meta, file]]
         }
         .tap{ch_sample_simple} //Save this channel to join later

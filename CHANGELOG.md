@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## v2.0.0dev - [date]
 
 ### `Added`
+- [#25](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/25) Added exomiser module and introduced `tools` parameter to control the execution of VEP and Exomiser.
+- [#25](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/25) Group vep output files in subfolder `vep`.
 - [#26](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/26) Add version file in exomiser docker image
 
 ### `Known issues`

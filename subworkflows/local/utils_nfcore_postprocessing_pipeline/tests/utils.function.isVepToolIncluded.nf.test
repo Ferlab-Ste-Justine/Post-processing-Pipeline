@@ -1,0 +1,80 @@
+nextflow_function {
+
+    name "Test Subworkflow UTILS_NFCORE_POSTPROCESSING_PIPELINE isVepToolIncluded function"
+    script "subworkflows/local/utils_nfcore_postprocessing_pipeline/utils.nf"
+    tag "local"
+    
+    function "isVepToolIncluded"
+
+    test("Test Function isVepToolIncluded - both vep and exomiser") {
+        when {
+            params {
+                tools = "vep,exomiser"
+            }
+            function {
+                """
+                """
+            }
+            then {
+                assertAll(
+                    { assert function.success },
+                    { assert function.result == true }
+                )
+            } 
+        }
+    }
+
+    test("Test Function isVepToolIncluded - only vep") {
+        when {
+            params {
+                tools = "vep"
+            }
+            function {
+                """
+                """
+            }
+            then {
+                assertAll(
+                    { assert function.success },
+                    { assert function.result == true }
+                )
+            } 
+        }
+    }
+
+    test("Test Function isVepToolIncluded - only exomiser") {
+        when {
+            params {
+                tools = "exomiser"
+            }
+            function {
+                """
+                """
+            }
+            then {
+                assertAll(
+                    { assert function.success },
+                    { assert function.result == false }
+                )
+            } 
+        }
+    }
+
+    test("Test Function isVepToolIncluded - no tools") {
+        when {
+            params {
+                tools = null
+            }
+            function {
+                """
+                """
+            }
+            then {
+                assertAll(
+                    { assert function.success },
+                    { assert function.result == false }
+                )
+            } 
+        }
+    }
+}

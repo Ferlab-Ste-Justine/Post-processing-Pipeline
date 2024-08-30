@@ -81,7 +81,13 @@
           "format": "file-path"
         }
       },
-      "required": ["broad", "intervalsFile", "referenceGenome", "referenceGenomeFasta", "vepCache"]
+      "required": [
+        "broad",
+        "intervalsFile",
+        "referenceGenome",
+        "referenceGenomeFasta",
+        "vepCache"
+      ]
     },
     "institutional_config_options": {
       "title": "Institutional config options",
@@ -274,5 +280,6 @@
     {
       "$ref": "#/definitions/generic_options"
     }
-  ]
+  ],
+  "properties": {}
 }

@@ -7,50 +7,18 @@
 include { paramsSummaryMap       } from 'plugin/nf-validation'
 include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-
-include { VQSR } from "../subworkflows/local/vqsr"
-include { hardFiltering } from '../modules/local/hardFilter'
-include { splitMultiAllelics        } from '../modules/local/vep'
-include { vep                       } from '../modules/local/vep'
-include { tabix                     } from '../modules/local/vep'
+include { EXCLUDE_MNPS           } from "../subworkflows/local/exclude_mnps"
+include { VQSR                   } from "../subworkflows/local/vqsr"
+include { hardFiltering          } from '../modules/local/hardFilter'
+include { splitMultiAllelics     } from '../modules/local/vep'
+include { vep                    } from '../modules/local/vep'
+include { tabix                  } from '../modules/local/vep'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-
-process excludeMNPs {
-    label 'medium'
-    
-    input:
-    tuple val(meta), path(gvcfFile)
-
-    output:
-    tuple val(meta), path("*filtered.vcf.gz*")
-
-    script:
-    def familyId = meta.familyId
-    print(familyId)
-    def sample = meta.sample
-    def exactGvcfFile = gvcfFile.find { it.name.endsWith("vcf.gz") }
-    """
-    set -e
-    echo $familyId > file
-    bcftools filter -e 'strlen(REF)>1 & strlen(REF)==strlen(ALT) & TYPE="snp"' ${exactGvcfFile} | bcftools norm -d any -O z -o ${familyId}.${sample}.filtered.vcf.gz
-    bcftools index -t ${familyId}.${sample}.filtered.vcf.gz
-    """
-    stub:
-    def familyId = meta.familyId
-    def sample = meta.sample
-    def exactGvcfFile = gvcfFile.find { it.name.endsWith("vcf.gz") }
-    """
-    touch ${familyId}.${sample}.filtered.vcf.gz
-    touch ${familyId}.${sample}.filtered.vcf.gz.tbi
-    """
-
-}
-
 /**
 Combine per-sample gVCF files into a multi-sample gVCF file 
 */
@@ -205,12 +173,12 @@ workflow POSTPROCESSING {
     .collectFile(storeDir: "${params.outdir}/pipeline_info/configs",cache: false)
 
     writemeta()
-    filtered = excludeMNPs(ch_samplesheet)    
+    filtered = EXCLUDE_MNPS(ch_samplesheet).ch_output_excludemnps
                     .map{meta, files -> tuple( groupKey(meta.familyId, meta.sampleSize),meta,files)}
                     .groupTuple()
-                    .map{ familyId, metas, files -> //now that samples are grouped together, we no longer follow sample in meta
+                    .map{ familyId, meta, files -> //now that samples are grouped together, we no longer follow sample in meta
                         [
-                            metas[0].findAll{it.key != "sample"}, //meta
+                            meta[0].findAll{it.key != "sample"}, //meta
                             files.flatten()]}                     //files
     //Using 2 as threshold because we have 2 files per patient (gcvf.gz, gvcf.gz.tbi)
     filtered_one = filtered.filter{it[0].sampleSize == 1}

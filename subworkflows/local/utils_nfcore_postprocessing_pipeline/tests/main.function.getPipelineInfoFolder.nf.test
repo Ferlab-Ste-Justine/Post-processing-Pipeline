@@ -1,0 +1,39 @@
+nextflow_function {
+
+    name "Test Subworkflow UTILS_NFCORE_POSTPROCESSING_PIPELINE getPipelineInfoFolder function"
+    script "subworkflows/local/utils_nfcore_postprocessing_pipeline/main.nf"
+    tag "local"
+    
+    function "getPipelineInfoFolder"
+
+    test("Test Function getPipelineInfoFolder") {
+        when {
+            function {
+                """
+                input[0] = "path/to/output/directory"
+                """
+            }
+            then {
+                assertAll(
+                    { assert function.success },
+                    { assert function.result == "path/to/output/directory/pipeline_info" }
+                )
+            } 
+        }
+    }
+
+    test("Test Function getPipelineInfoFolder with null input") {
+        when {
+            function {
+                """
+                input[0] = null
+                """
+            }
+            then {
+                assertAll(
+                    { assert function.failed }
+                )
+            } 
+        }
+    }
+}

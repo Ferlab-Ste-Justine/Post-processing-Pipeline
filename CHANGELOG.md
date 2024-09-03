@@ -13,14 +13,17 @@ Initial release of ferlab/postprocessing, created with the [nf-core](https://nf-
 - [#7](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/7) Added most functions and modules from previous pipeline to make it functional
 - [#9](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/9) New format "V3" is now supported. Includes metadata propagation. 
 - [#10](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/10) Converted the exclude_MNPs function into a nf-core subworkflow containing 2 nf-core modules. Also added test profile test data (but it fails at VQSR for now)
+- [#17](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/17) Save nextflow log file to output directory on workflow completion
+- [#17](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/17) Allow to run nf-tests check in github workflow
+
 ### `Fixed`
 - [#1](https://github.com/FelixAntoineLeSieur/Post-processing-Pipeline/pull/1) Fixed template schemas
 - [#13](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/13) Run test in stub mode in GitLab workflow with necessary adjustments
 - [#13](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/13) Add missing docker image for process writemeta
 - [#13](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/13) Fix bug with extra java arguments in process genotypeGVCF
 
-
 ### `Dependencies`
+- [#17](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/17) Updated nf-core subworkflows utils_nextflow_pipeline and utils_nfcore_pipeline
 
 ### `Deprecated`
 - Format "V1" and "V2" are now deprecated as of [#9](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/9)

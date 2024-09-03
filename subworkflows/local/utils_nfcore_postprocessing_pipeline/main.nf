@@ -116,6 +116,7 @@ workflow PIPELINE_COMPLETION {
     take:
     outdir          //    path: Path to output directory where results will be published
     monochrome_logs // boolean: Disable ANSI colour codes in log output
+    command_line    //  string: Command line used to run the pipeline
 
     main:
 
@@ -126,6 +127,12 @@ workflow PIPELINE_COMPLETION {
     //
     workflow.onComplete {
         completionSummary(monochrome_logs)
+
+        // Copy the nextflow log file to the pipeline info folder
+        def log_file = getLogFile(command_line)
+        def destination = getPipelineInfoFolder(outdir) + "/nextflow.log"
+        log.info "Copying nextflow log file ${log_file} to ${destination}"
+        file(log_file).copyTo(destination)
     }
 
     workflow.onError {
@@ -140,6 +147,40 @@ workflow PIPELINE_COMPLETION {
 */
 //
 //_____________Local functions_____________
+//
+// Extracts the nextflow log file path from the given command line string.
+// If the '-log' option is present, it returns the specified log file path.
+// Otherwise, it defaults to '.nextflow.log'.
+ //
+def getLogFile(command_line) {
+    if (!command_line) {
+        error "Command line not provided"
+    }
+
+    // Tokenize the command line while preserving quoted arguments as single tokens.
+    // For example, the command line 'arg1 "arg2 with spaces"' will be parsed into two tokens: 'arg1' and 'arg2 with spaces'.
+    def matcher = command_line =~ /"([^"]+)"|'([^']+)'|(\S+)/
+    def tokens = []
+    matcher.each { match ->
+        tokens << (match[1] ?: match[2] ?: match[3])
+    }
+
+    def log_option_index = tokens.lastIndexOf("-log")
+    return log_option_index >= 0 ? tokens[log_option_index + 1] : '.nextflow.log'
+}
+
+//
+// Returns the path to the pipeline info folder within the specified output directory.
+// We encourage you to reuse this function instead of hardcoding the path to ease maintenance in
+// case the folder structure changes in the future.
+//
+def getPipelineInfoFolder(outdir) {
+    if (!outdir) {
+        error "Output directory not provided"
+    }
+    return "${outdir}/pipeline_info"
+}
+
 //_____________Template functions_____________
 //
 // Check and validate pipeline parameters

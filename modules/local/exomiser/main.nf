@@ -15,8 +15,8 @@ process exomiser {
 
     output:
     tuple val(meta)
-    path("results/*vcf.gz")         , emit: vcf
-    path("results/*vcf.gz.tbi")     , emit: tbi
+    path("results/*vcf.gz")         , optional:true, emit: vcf
+    path("results/*vcf.gz.tbi")     , optional:true, emit: tbi
     path("results/*html")           , optional:true, emit: html
     path("results/*json")           , optional:true, emit: json
     path("results/*genes.tsv")      , optional:true, emit: genetsv
@@ -29,23 +29,22 @@ process exomiser {
     script:
     def args = task.ext.args ?: ''
     def exactVcfFile = vcfFile.find { it.name.endsWith("vcf.gz") }
-    def pedigree_command = pedigree_file ? "--ped $pedigree_file" : ""
+    def pedigree_command = pedigree_file ? "--sample $pedigree_file" : ""
     """
     #!/bin/bash -eo pipefail
-    ls
+
     java -cp \$( cat /app/jib-classpath-file ) \$( cat /app/jib-main-class-file ) \\
         --vcf ${exactVcfFile} \\
         --assembly "${genome}"  \\
         --analysis ${analysis_file} \\
+        ${pedigree_command} \\
         --exomiser.data-directory=/`pwd`/${datadir} \\
         --exomiser.hg19.data-version=${dataversion} \\
         --exomiser.hg38.data-version=${dataversion} \\
         --exomiser.phenotype.data-version=${dataversion} \\
-        --
-        ${pedigree_command} \\
+        --output-format HTML,JSON,TSV_GENE,TSV_VARIANT,VCF  \\
         ${args}
-
-    ls
+    
     """
 
     stub:

@@ -108,7 +108,9 @@ workflow POSTPROCESSING {
     def pathReferenceGenomeFasta = file(params.referenceGenome + "/" + params.referenceGenomeFasta)
     def pathReferenceGenomeFai = file(pathReferenceGenomeFasta + ".fai")
     def broad = file(params.broad)
-    def pathIntervalFile = file(broad + "/" + params.intervalsFile)
+    def pathIntervalFile = file(params.broad + "/" + params.intervalsFile)
+    println pathIntervalFile
+    println pathReferenceGenomeFasta
     def vepCache = file(params.vepCache)
     def pathReferenceDict = file(params.referenceGenome + "/" + params.referenceGenomeFasta.substring(0,params.referenceGenomeFasta.indexOf(".")) + ".dict")
     file(params.outdir).mkdirs()
@@ -144,7 +146,7 @@ workflow POSTPROCESSING {
     filtered_mult = filtered.filter{it[0].sampleSize > 1}
     //Combine per-sample gVCF files into a multi-sample gVCF file
     
-    DB = COMBINEGVCFS(filtered_mult, pathReferenceGenomeFasta,pathReferenceGenomeFai,pathReferenceDict)
+    DB = COMBINEGVCFS(filtered_mult, pathReferenceGenomeFasta,pathReferenceGenomeFai,pathReferenceDict,pathIntervalFile)
                     .combined_gvcf.join(COMBINEGVCFS.out.tbi)
                     .map{meta, gvcf,tbi -> [meta,[gvcf, tbi]]}
                     .concat(filtered_one)

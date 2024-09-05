@@ -12,6 +12,7 @@ process COMBINEGVCFS {
     path  fasta
     path  fai
     path  dict
+    path interval
 
     output:
     tuple val(meta), path("*.combined.g.vcf.gz"), emit: combined_gvcf
@@ -39,6 +40,7 @@ process COMBINEGVCFS {
         --output ${prefix}.combined.g.vcf.gz \\
         --reference ${fasta} \\
         --tmp-dir . \\
+        --intervals $interval \\
         $args
 
     cat <<-END_VERSIONS > versions.yml

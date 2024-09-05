@@ -13,7 +13,7 @@ include { hardFiltering          } from '../modules/local/hardFilter'
 include { splitMultiAllelics     } from '../modules/local/vep'
 include { vep                    } from '../modules/local/vep'
 include { tabix                  } from '../modules/local/vep'
-include { COMBINEGVCFS           } from '../modules/local/combinegvcfs'
+include { COMBINEGVCFS           } from '../modules/local/combine_gvcfs'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -109,8 +109,6 @@ workflow POSTPROCESSING {
     def pathReferenceGenomeFai = file(pathReferenceGenomeFasta + ".fai")
     def broad = file(params.broad)
     def pathIntervalFile = file(params.broad + "/" + params.intervalsFile)
-    println pathIntervalFile
-    println pathReferenceGenomeFasta
     def vepCache = file(params.vepCache)
     def pathReferenceDict = file(params.referenceGenome + "/" + params.referenceGenomeFasta.substring(0,params.referenceGenomeFasta.indexOf(".")) + ".dict")
     file(params.outdir).mkdirs()
@@ -128,19 +126,14 @@ workflow POSTPROCESSING {
 
     writemeta()
     filtered = EXCLUDE_MNPS(ch_samplesheet).ch_output_excludemnps
+    //Create groupkey for the grouptuple and separate the vcf (file[0]) and the index (files[1])
         .map{meta, files -> tuple(groupKey(meta.familyId, meta.sampleSize),meta,files[0],files[1])}
         .groupTuple()
         .map{ familyId, meta, vcf, tbi -> 
         //now that samples are grouped together, we no longer follow sample in meta, and the id no longer needs the sampleId
-            [
-                meta[0].findAll{it.key != "sample"}.findAll{it.key != "id"}, //meta
-                vcf.flatten(),
-                tbi.flatten(),                                               //files
-            ]}
-        .map{meta,vcf,tbi -> 
-            [
-                meta+[id: meta.familyId],vcf,tbi               //we replace the sampleID that was removed
-            ]}
+            def updated_meta = meta[0].findAll{!["sample", "id"].contains(it.key) }
+            updated_meta["id"] = updated_meta.familyId
+            [updated_meta, vcf.flatten(), tbi.flatten()]}
     
     filtered_one = filtered.filter{it[0].sampleSize == 1}.map{meta,vcf,tbi -> [meta,[vcf[0],tbi[0]]]}
     filtered_mult = filtered.filter{it[0].sampleSize > 1}

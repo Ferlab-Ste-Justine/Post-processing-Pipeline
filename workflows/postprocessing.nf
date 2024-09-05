@@ -13,65 +13,13 @@ include { hardFiltering          } from '../modules/local/hardFilter'
 include { splitMultiAllelics     } from '../modules/local/vep'
 include { vep                    } from '../modules/local/vep'
 include { tabix                  } from '../modules/local/vep'
+include { COMBINEGVCFS           } from '../modules/local/combinegvcfs'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-/**
-Combine per-sample gVCF files into a multi-sample gVCF file 
-*/
-process importGVCF {
-
-    label 'medium'
-
-    input:
-    tuple val (meta), path(gvcfFiles)
-    path referenceGenome
-    path broadResource
-
-    output:
-    tuple val (meta), path("*combined.gvcf.gz*")
-
-    script:
-    def familyId = meta.familyId
-    def args = task.ext.args ?: ''
-    def argsjava = task.ext.args ?: ''
-    def exactGvcfFiles = gvcfFiles.findAll { it.name.endsWith("vcf.gz") }.collect { "-V $it" }.join(' ')
-
-    def avail_mem = 3072
-    if (!task.memory) {
-        log.info '[GATK CombineGVCFs] Available memory not known - defaulting to 3GB. Specify process memory requirements to change this.'
-    } else {
-        avail_mem = (task.memory.mega*0.8).intValue()
-    }
-
-
-    """
-    echo $familyId > file
-    gatk -version
-    gatk --java-options "-Xmx${avail_mem}M -XX:-UsePerfData $argsjava" \\
-        CombineGVCFs \\
-        -R $referenceGenome/${params.referenceGenomeFasta} \\
-        $exactGvcfFiles \\
-        -O ${familyId}.combined.gvcf.gz \\
-        -L $broadResource/${params.intervalsFile} \\
-        $args
-    """ 
-
-
-    stub:
-    def familyId = meta.familyId
-    def exactGvcfFiles = gvcfFiles.findAll { it.name.endsWith("vcf.gz") }.collect { "-V $it" }.join(' ')
-
-    """
-    touch ${familyId}.combined.gvcf.gz
-    """       
-
-}    
-
-
+*
 /**
 Keep only SNP and Indel 
 */
@@ -156,9 +104,13 @@ process writemeta{
 workflow POSTPROCESSING {
 
 //Local Temp Params
-    referenceGenome = file(params.referenceGenome)
-    broad = file(params.broad)
-    vepCache = file(params.vepCache)
+    def referenceGenome = file(params.referenceGenome)
+    def pathReferenceGenomeFasta = file(params.referenceGenome + "/" + params.referenceGenomeFasta)
+    def pathReferenceGenomeFai = file(pathReferenceGenomeFasta + ".fai")
+    def broad = file(params.broad)
+    def pathIntervalFile = file(broad + "/" + params.intervalsFile)
+    def vepCache = file(params.vepCache)
+    def pathReferenceDict = file(params.referenceGenome + "/" + params.referenceGenomeFasta.substring(0,params.referenceGenomeFasta.indexOf(".")) + ".dict")
     file(params.outdir).mkdirs()
 
     take:
@@ -174,17 +126,27 @@ workflow POSTPROCESSING {
 
     writemeta()
     filtered = EXCLUDE_MNPS(ch_samplesheet).ch_output_excludemnps
-                    .map{meta, files -> tuple( groupKey(meta.familyId, meta.sampleSize),meta,files)}
-                    .groupTuple()
-                    .map{ familyId, meta, files -> //now that samples are grouped together, we no longer follow sample in meta
-                        [
-                            meta[0].findAll{it.key != "sample"}, //meta
-                            files.flatten()]}                     //files
-    //Using 2 as threshold because we have 2 files per patient (gcvf.gz, gvcf.gz.tbi)
-    filtered_one = filtered.filter{it[0].sampleSize == 1}
+        .map{meta, files -> tuple(groupKey(meta.familyId, meta.sampleSize),meta,files[0],files[1])}
+        .groupTuple()
+        .map{ familyId, meta, vcf, tbi -> 
+        //now that samples are grouped together, we no longer follow sample in meta, and the id no longer needs the sampleId
+            [
+                meta[0].findAll{it.key != "sample"}.findAll{it.key != "id"}, //meta
+                vcf.flatten(),
+                tbi.flatten(),                                               //files
+            ]}
+        .map{meta,vcf,tbi -> 
+            [
+                meta+[id: meta.familyId],vcf,tbi               //we replace the sampleID that was removed
+            ]}
+    
+    filtered_one = filtered.filter{it[0].sampleSize == 1}.map{meta,vcf,tbi -> [meta,[vcf[0],tbi[0]]]}
     filtered_mult = filtered.filter{it[0].sampleSize > 1}
     //Combine per-sample gVCF files into a multi-sample gVCF file
-    DB = importGVCF(filtered_mult, referenceGenome,broad)
+    
+    DB = COMBINEGVCFS(filtered_mult, pathReferenceGenomeFasta,pathReferenceGenomeFai,pathReferenceDict)
+                    .combined_gvcf.join(COMBINEGVCFS.out.tbi)
+                    .map{meta, gvcf,tbi -> [meta,[gvcf, tbi]]}
                     .concat(filtered_one)
 
     //Perform joint genotyping on one or more samples

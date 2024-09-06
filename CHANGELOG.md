@@ -15,6 +15,7 @@ Initial release of ferlab/postprocessing, created with the [nf-core](https://nf-
 - [#10](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/10) Converted the exclude_MNPs function into a nf-core subworkflow containing 2 nf-core modules. Also added test profile test data (but it fails at VQSR for now)
 - [#17](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/17) Save nextflow log file to output directory on workflow completion
 - [#17](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/17) Allow to run nf-tests check in github workflow
+- [#18](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/19) Added local module COMBINEGVCFS to replace local function importGVCFs, mostly equivalent to nf-core module GATK4_COMBINEGVCFS
 
 ### `Fixed`
 - [#1](https://github.com/FelixAntoineLeSieur/Post-processing-Pipeline/pull/1) Fixed template schemas

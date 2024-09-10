@@ -260,6 +260,45 @@
           "type": "array",
           "description": "Parameters for Hard-Filtering",
           "help_text": "Parameters for Hard-Filtering. Must be an array containing each desired filter. Each filter must be formatted with the desired name and expression, for example\\n[[name: 'QD1', expression: 'QD < 1.0'],[name: 'QD2', expression: 'QD < 2.0]]"
+        },
+        "tools": {
+          "type": "string",
+          "enum": ["exomiser", "vep"],
+          "description": "List of tools to use separate with comma.  Available tools [vep, exomiser]"
+        }
+      }
+    },
+    "exomiser_option": {
+      "title": "Exomiser option",
+      "type": "object",
+      "description": "",
+      "default": "",
+      "properties": {
+        "exomiser_version": {
+          "type": "string"
+        },
+        "exomiser_analysis": {
+          "type": "string",
+          "description": "Path to an Exomiser analysis file in yml",
+          "format": "file-path",
+          "mimetype": "yml"
+        },
+        "exomiser_data_dir": {
+          "type": "string",
+          "format": "directory-path",
+          "description": "Path to the  exomiser data directory"
+        },
+        "exomiser_data_version": {
+          "type": "string",
+          "description": "Exomiser data version"
+        },
+        "exomiser_cadd_version": {
+          "type": "string",
+          "description": "Version of cadd data"
+        },
+        "exomiser_remm_version": {
+          "type": "string",
+          "description": "Version of remm data"
         }
       }
     }
@@ -279,6 +318,9 @@
     },
     {
       "$ref": "#/definitions/generic_options"
+    },
+    {
+      "$ref": "#/definitions/exomiser_option"
     }
   ],
   "properties": {}

@@ -7,7 +7,6 @@
 include { paramsSummaryMap       } from 'plugin/nf-validation'
 include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-
 include { EXCLUDE_MNPS           } from "../subworkflows/local/exclude_mnps"
 include { VQSR                   } from "../subworkflows/local/vqsr"
 include { hardFiltering          } from '../modules/local/hardFilter'
@@ -15,8 +14,7 @@ include { splitMultiAllelics     } from '../modules/local/vep'
 include { vep                    } from '../modules/local/vep'
 include { tabix                  } from '../modules/local/vep'
 include { COMBINEGVCFS           } from '../modules/local/combine_gvcfs'
-include { exomiser                  } from '../modules/local/exomiser'
-
+include { EXOMISER                  } from '../modules/local/exomiser'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -162,10 +160,14 @@ workflow POSTPROCESSING {
         emit:
         tabix.out
     }
+
     if (params.tools && params.tools.split(',').contains('exomiser')) {
+        s = s.map{meta, files -> 
+                tuple (meta,files,meta.familypheno)}
+
         exomiser_analysis_file = file(params.exomiser_analysis)
-        exomiser_data_dir = file(params.exomiser_data)
-        exomiser(s,exomiser_analysis_file,exomiser_data_dir,params.exomiser_version,params.exomiser_data_version,params.genome,params.pedigree)        
+        exomiser_data_dir = file(params.exomiser_data_dir)
+        EXOMISER(s,exomiser_analysis_file,exomiser_data_dir)        
     }
 
 }

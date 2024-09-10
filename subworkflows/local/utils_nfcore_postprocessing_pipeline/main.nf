@@ -83,6 +83,11 @@ workflow PIPELINE_INITIALISATION {
         .fromSamplesheet("input")
         .map {
             meta, file ->
+                if (params.tools && params.tools.split(',').contains('exomiser')) {
+                    if (!meta.familypheno) {
+                        error("Samplesheet must contains familyPheno file for each sample when using exomiser tool")
+                    }
+                }
             [meta.familyId, [meta, file]]
         }
         .tap{ch_sample_simple} //Save this channel to join later

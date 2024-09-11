@@ -14,6 +14,7 @@ include { splitMultiAllelics     } from '../modules/local/vep'
 include { vep                    } from '../modules/local/vep'
 include { tabix                  } from '../modules/local/vep'
 include { COMBINEGVCFS           } from '../modules/local/combine_gvcfs'
+include { GATK4_GENOTYPEGVCFS     } from '../modules/nf-core/gatk4/genotypegvcfs'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -135,19 +136,27 @@ workflow POSTPROCESSING {
             updated_meta["id"] = updated_meta.familyId
             [updated_meta, vcf.flatten(), tbi.flatten()]}
     
-    filtered_one = filtered.filter{it[0].sampleSize == 1}.map{meta,vcf,tbi -> [meta,[vcf[0],tbi[0]]]}
+    filtered_one = filtered.filter{it[0].sampleSize == 1}//.map{meta,vcf,tbi -> [meta,[vcf[0],tbi[0]]]}
     filtered_mult = filtered.filter{it[0].sampleSize > 1}
     //Combine per-sample gVCF files into a multi-sample gVCF file
     
-    DB = COMBINEGVCFS(filtered_mult, pathReferenceGenomeFasta,pathReferenceGenomeFai,pathReferenceDict,pathIntervalFile)
+    ch_combined_gvcf = COMBINEGVCFS(filtered_mult, pathReferenceGenomeFasta,pathReferenceGenomeFai,pathReferenceDict,pathIntervalFile)
                     .combined_gvcf.join(COMBINEGVCFS.out.tbi)
-                    .map{meta, gvcf,tbi -> [meta,[gvcf, tbi]]}
                     .concat(filtered_one)
 
+    geno_input_files = ch_combined_gvcf.map{meta,vcf,tbi -> [meta, vcf, tbi, [], []]}
+    geno_input_fasta = ch_combined_gvcf.map{meta,vcf,tbi -> [meta,pathReferenceGenomeFasta]}
+    geno_input_fai = ch_combined_gvcf.map{meta,vcf,tbi -> [meta,pathReferenceGenomeFai]}
+    geno_input_dict = ch_combined_gvcf.map{meta,vcf,tbi -> [meta,pathReferenceDict]}
+    geno_input_dbsnp = ch_combined_gvcf.map{meta,vcf,tbi -> [meta,[]]}
+    geno_input_dbsnpidx = ch_combined_gvcf.map{meta,vcf,tbi -> [meta,[]]}
     //Perform joint genotyping on one or more samples
-    vcf = genotypeGVCF(DB, referenceGenome)
+    genotypegvcf_output = GATK4_GENOTYPEGVCFS(geno_input_files,geno_input_fasta,geno_input_fai,geno_input_dict,geno_input_dbsnp,geno_input_dbsnpidx).vcf
+    .join(GATK4_GENOTYPEGVCFS.out.tbi)
+    .map{ meta, vcf, tbi -> [meta, [vcf,tbi]]}
+
     //tag variants that are probable artifacts
-    vcfWithTags = tagArtifacts(vcf, params.hardFilters)
+    vcfWithTags = tagArtifacts(genotypegvcf_output, params.hardFilters)
     //tag frequent mutations in the population
     s = splitMultiAllelics(vcfWithTags, referenceGenome) 
 

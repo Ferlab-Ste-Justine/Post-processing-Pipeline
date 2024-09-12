@@ -32,6 +32,14 @@
                 "pattern": "^\\S+\\.g(enome)?(\\.)?vcf(\\.gz)?$",
                 "format": "file-path",
                 "exists": true
+            },
+            "familyPhenotype":  {
+                "errorMessage": "Filename must have extension '.yaml' or '.yml'",
+                "type": "string",
+                "pattern": "^\\S+\\.y(a)?ml$",
+                "format": "file-path",
+                "exists": true,
+                "meta": ["familyPhenotype"]
             }
         },
         "required": ["familyId", "sample", "sequencingType","gvcf"]

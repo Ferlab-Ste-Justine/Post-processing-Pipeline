@@ -11,7 +11,6 @@ process exomiser {
     val(exomiserversion)
     val(dataversion)
     val(genome)
-    path(pedigree_file)
 
     output:
     tuple val(meta)
@@ -29,18 +28,17 @@ process exomiser {
     script:
     def args = task.ext.args ?: ''
     def exactVcfFile = vcfFile.find { it.name.endsWith("vcf.gz") }
-    def pedigree_command = pedigree_file ? "--sample $pedigree_file" : ""
+    def sampleFile = file(meta.familyPhenotype)
     """
     #!/bin/bash -eo pipefail
 
     java -cp \$( cat /app/jib-classpath-file ) \$( cat /app/jib-main-class-file ) \\
+        --sample ${sampleFile} \\
         --vcf ${exactVcfFile} \\
         --assembly "${genome}"  \\
         --analysis ${analysis_file} \\
-        ${pedigree_command} \\
         --exomiser.data-directory=/`pwd`/${datadir} \\
-        --exomiser.hg19.data-version=${dataversion} \\
-        --exomiser.hg38.data-version=${dataversion} \\
+        --exomiser.${genome}.data-version=${dataversion} \\
         --exomiser.phenotype.data-version=${dataversion} \\
         --output-format HTML,JSON,TSV_GENE,TSV_VARIANT,VCF  \\
         ${args}

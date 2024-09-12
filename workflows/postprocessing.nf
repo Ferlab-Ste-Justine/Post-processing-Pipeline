@@ -154,6 +154,7 @@ workflow POSTPROCESSING {
     s = splitMultiAllelics(vcfWithTags, referenceGenome) 
 
     //Annotating mutations
+    //TODO: code duplication for the tools check, we should refactor this
     if (params.tools && params.tools.split(',').contains('vep')) {
         vep(s, referenceGenome, vepCache)
         tabix(vep.out)
@@ -164,7 +165,9 @@ workflow POSTPROCESSING {
     if (params.tools && params.tools.split(',').contains('exomiser')) {
         exomiser_analysis_file = file(params.exomiser_analysis)
         exomiser_data_dir = file(params.exomiser_data)
-        exomiser(s,exomiser_analysis_file,exomiser_data_dir,params.exomiser_version,params.exomiser_data_version,params.genome,params.pedigree)        
+        //TODO: avoid using pedigree passed as parameter ...
+        //TODO: add the pedigree file to the meta?
+        exomiser(s,exomiser_analysis_file,exomiser_data_dir,params.exomiser_version,params.exomiser_data_version,params.genome)        
     }
 
 }

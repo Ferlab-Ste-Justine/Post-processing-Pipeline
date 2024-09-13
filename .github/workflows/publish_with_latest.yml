@@ -33,4 +33,4 @@ jobs:
             image: ferlabcrsj/exomiser
             location: containers/exomiser
             dockerfile: containers/exomiser/Dockerfile
-            tag_format: "{semver}"
+            tag_format: "latest"

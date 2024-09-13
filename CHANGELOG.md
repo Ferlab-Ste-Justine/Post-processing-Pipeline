@@ -16,6 +16,8 @@ Initial release of ferlab/postprocessing, created with the [nf-core](https://nf-
 - [#17](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/17) Save nextflow log file to output directory on workflow completion
 - [#17](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/17) Allow to run nf-tests check in github workflow
 - [#18](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/19) Added local module COMBINEGVCFS to replace local function importGVCFs, mostly equivalent to nf-core module GATK4_COMBINEGVCFS
+- [#21](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/21) Added nextflow docker image
+- [#22](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/22) Added exomiser docker image
 
 ### `Fixed`
 - [#1](https://github.com/FelixAntoineLeSieur/Post-processing-Pipeline/pull/1) Fixed template schemas

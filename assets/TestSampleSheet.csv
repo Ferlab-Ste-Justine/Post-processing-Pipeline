@@ -1,3 +1,4 @@
-familyId,sample,sequencingType,gvcf
-Family1,Test1,WES,https://github.com/nf-core/test-datasets/raw/modules/data/genomics/homo_sapiens/illumina/gvcf/test.genome.vcf.gz
-Family1,Test2,WGS,https://github.com/nf-core/test-datasets/raw/modules/data/genomics/homo_sapiens/illumina/gvcf/test2.genome.vcf.gz
+familyId,sample,sequencingType,gvcf,familyPheno
+Family1,Test1,WES,https://github.com/nf-core/test-datasets/raw/modules/data/genomics/homo_sapiens/illumina/gvcf/test.genome.vcf.gz,assets/exomiser/pheno/family1.yml
+Family1,Test2,WES,https://github.com/nf-core/test-datasets/raw/modules/data/genomics/homo_sapiens/illumina/gvcf/test2.genome.vcf.gz,assets/exomiser/pheno/family1.yml
+Family2,Test1,WGS,https://github.com/nf-core/test-datasets/raw/modules/data/genomics/homo_sapiens/illumina/gvcf/test.genome.vcf.gz,assets/exomiser/pheno/family2.yml

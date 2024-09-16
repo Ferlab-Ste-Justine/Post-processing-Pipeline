@@ -163,7 +163,7 @@ workflow POSTPROCESSING {
 
     if (params.tools && params.tools.split(',').contains('exomiser')) {
         s = s.map{meta, files -> 
-                tuple (meta,files,meta.familypheno)}
+                [meta,files,meta.familypheno]}
 
         exomiser_analysis_file = file(params.exomiser_analysis)
         exomiser_data_dir = file(params.exomiser_data_dir)

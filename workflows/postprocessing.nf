@@ -22,51 +22,6 @@ include { GATK4_GENOTYPEGVCFS     } from '../modules/nf-core/gatk4/genotypegvcfs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 *
 /**
-Keep only SNP and Indel 
-*/
-process genotypeGVCF {
-    label 'geno'
-
-    input:
-    tuple val(meta), path(gvcfFile)
-    path referenceGenome
-
-    output:
-    tuple val(meta), path("*genotyped.vcf.gz*")
-
-    script:
-    def familyId = meta.familyId
-    def args = task.ext.args ?: ''
-    def argsjava = task.ext.argsjava ?: ''
-    def exactGvcfFile = gvcfFile.find { it.name.endsWith("vcf.gz") }
-
-    def avail_mem = 3072
-    if (!task.memory) {
-        log.info '[GATK GenotypeGVCFs] Available memory not known - defaulting to 3GB. Specify process memory requirements to change this.'
-    } else {
-        avail_mem = (task.memory.mega*0.8).intValue()
-    }
-    """
-    echo $familyId > file
-    gatk -version
-    gatk --java-options "-Xmx${avail_mem}M -XX:-UsePerfData $argsjava" \\
-        GenotypeGVCFs \\
-        -R $referenceGenome/${params.referenceGenomeFasta} \\
-        -V $exactGvcfFile \\
-        -O ${familyId}.genotyped.vcf.gz \\
-        $args
-    """
-
-
-    stub:
-    def familyId = meta.familyId
-    def exactGvcfFile = gvcfFile.find { it.name.endsWith("vcf.gz") }
-    """
-    touch ${familyId}.genotyped.vcf.gz
-    """
-}
-
-/**
 Tag variants that are probable artifacts
 
 In the case of whole genome sequencing data, we use the vqsr procedure.
@@ -136,22 +91,24 @@ workflow POSTPROCESSING {
             updated_meta["id"] = updated_meta.familyId
             [updated_meta, vcf.flatten(), tbi.flatten()]}
     
-    filtered_one = filtered.filter{it[0].sampleSize == 1}//.map{meta,vcf,tbi -> [meta,[vcf[0],tbi[0]]]}
+    filtered_one = filtered.filter{it[0].sampleSize == 1}
     filtered_mult = filtered.filter{it[0].sampleSize > 1}
     //Combine per-sample gVCF files into a multi-sample gVCF file
     
     ch_combined_gvcf = COMBINEGVCFS(filtered_mult, pathReferenceGenomeFasta,pathReferenceGenomeFai,pathReferenceDict,pathIntervalFile)
                     .combined_gvcf.join(COMBINEGVCFS.out.tbi)
                     .concat(filtered_one)
-
     geno_input_files = ch_combined_gvcf.map{meta,vcf,tbi -> [meta, vcf, tbi, [], []]}
-    geno_input_fasta = ch_combined_gvcf.map{meta,vcf,tbi -> [meta,pathReferenceGenomeFasta]}
-    geno_input_fai = ch_combined_gvcf.map{meta,vcf,tbi -> [meta,pathReferenceGenomeFai]}
-    geno_input_dict = ch_combined_gvcf.map{meta,vcf,tbi -> [meta,pathReferenceDict]}
-    geno_input_dbsnp = ch_combined_gvcf.map{meta,vcf,tbi -> [meta,[]]}
-    geno_input_dbsnpidx = ch_combined_gvcf.map{meta,vcf,tbi -> [meta,[]]}
+    
     //Perform joint genotyping on one or more samples
-    genotypegvcf_output = GATK4_GENOTYPEGVCFS(geno_input_files,geno_input_fasta,geno_input_fai,geno_input_dict,geno_input_dbsnp,geno_input_dbsnpidx).vcf
+    genotypegvcf_output = GATK4_GENOTYPEGVCFS(
+    geno_input_files,
+    [[:], pathReferenceGenomeFasta],
+    [[:], pathReferenceGenomeFai],
+    [[:], pathReferenceDict],
+    [[:], []], //leaving empty as we don't use dbsnp
+    [[:], []]  //leaving empty as we don't use dbsnp
+    ).vcf
     .join(GATK4_GENOTYPEGVCFS.out.tbi)
     .map{ meta, vcf, tbi -> [meta, [vcf,tbi]]}
 

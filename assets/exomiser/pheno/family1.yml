@@ -1,0 +1,30 @@
+---
+id: family1
+proband:
+  subject:
+    id: testN
+    sex: FEMALE
+  phenotypicFeatures:
+    - type:
+        id: HP:0001159
+        label: Syndactyly
+
+pedigree:
+  persons:
+    - individualId: testN
+      paternalId: testT
+      sex: FEMALE
+      affectedStatus: AFFECTED
+    - individualId: testT
+      sex: MALE
+      affectedStatus: UNAFFECTED
+
+metaData:
+  resources:
+    - id: hp
+      name: human phenotype ontology
+      url: http://purl.obolibrary.org/obo/hp.owl
+      version: hp/releases/2019-11-08
+      namespacePrefix: HP
+      iriPrefix: 'http://purl.obolibrary.org/obo/HP_'
+  phenopacketSchemaVersion: 2.0

@@ -1,0 +1,32 @@
+# This exomiser analysis file is used for quick testing with a minimal amount of reference data
+# It uses only one frequency source and only one pathogenicity source.
+---
+analysisMode: PASS_ONLY
+inheritanceModes: {
+  AUTOSOMAL_DOMINANT: 0.1,
+  AUTOSOMAL_RECESSIVE_HOM_ALT: 0.1,
+  AUTOSOMAL_RECESSIVE_COMP_HET: 2.0,
+  X_DOMINANT: 0.1,
+  X_RECESSIVE_HOM_ALT: 0.1,
+  X_RECESSIVE_COMP_HET: 2.0,
+  MITOCHONDRIAL: 0.2
+}
+frequencySources: [
+    UK10K
+]
+pathogenicitySources: [ REVEL]
+# this is the recommended order for a genome-sized analysis.
+steps: [
+    hiPhivePrioritiser: { },
+  # running the prioritiser followed by a priorityScoreFilter will remove genes
+  # which are least likely to contribute to the phenotype defined in hpoIds, this will
+  # dramatically reduce the time and memory required to analyse a genome.
+  # 0.501 is a good compromise to select good phenotype matches and the best protein-protein interactions hits from hiPhive
+    priorityScoreFilter: { priorityType: HIPHIVE_PRIORITY, minPriorityScore: 0.501 },
+    failedVariantFilter: { },
+    regulatoryFeatureFilter: { },
+    frequencyFilter: { maxFrequency: 2.0 },
+    pathogenicityFilter: { keepNonPathogenic: true },
+    inheritanceFilter: { },
+    omimPrioritiser: { }
+]

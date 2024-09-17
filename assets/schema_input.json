@@ -36,17 +36,9 @@
             "familyPheno": {
                 "errorMessage": "Filename of the pedigree file, mandatory for exomiser",
                 "meta": ["familypheno"],
-                "anyOf": [
-                    {
-                        "type": "string",
-                        "pattern": "^\\S+$"
-                    },
-                    {
-                        "type": "string",
-                        "maxLength": 0
-                    }
-                ],
-                "default": ""
+                "format": "file-path",
+                "pattern": "^\\S*.y(a)?ml$",
+                "exists": true
 
             }
         },

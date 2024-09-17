@@ -27,6 +27,8 @@ process EXOMISER {
     script:
     def args = task.ext.args ?: ''
     def exactVcfFile = vcfFile.find { it.name.endsWith("vcf.gz") }
+    def remm_args = params.exomiser_remm_version ? "--exomiser.remm.version=\"${params.exomiser_remm_version}\"": ""
+    def cadd_args = params.exomiser_cadd_version ? "--cadd.version=\"${params.exomiser_cadd_version}\"": ""
 
     """
     #!/bin/bash -eo pipefail
@@ -38,8 +40,9 @@ process EXOMISER {
         --sample ${phenofile} \\
         --output-format=HTML,JSON,TSV_GENE,TSV_VARIANT,VCF \\
         --exomiser.data-directory=/`pwd`/${datadir} \\
-        --exomiser.hg19.data-version="${params.exomiser_data_version}" \\
-        --exomiser.hg38.data-version="${params.exomiser_data_version}" \\
+        ${remm_args} \\
+        ${cadd_args} \\
+        --exomiser.${params.genome}.data-version="${params.exomiser_data_version}" \\
         --exomiser.phenotype.data-version="${params.exomiser_data_version}" \\
         ${args}
     

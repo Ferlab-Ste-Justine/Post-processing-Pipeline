@@ -38,8 +38,7 @@ process EXOMISER {
         --sample ${phenofile} \\
         --output-format=HTML,JSON,TSV_GENE,TSV_VARIANT,VCF \\
         --exomiser.data-directory=/`pwd`/${datadir} \\
-        --exomiser.hg19.data-version="${params.exomiser_data_version}" \\
-        --exomiser.hg38.data-version="${params.exomiser_data_version}" \\
+        --exomiser.${params.genome}.data-version="${params.exomiser_data_version}" \\
         --exomiser.phenotype.data-version="${params.exomiser_data_version}" \\
         ${args}
     

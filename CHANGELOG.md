@@ -31,6 +31,7 @@ Initial release of ferlab/postprocessing, created with the [nf-core](https://nf-
 - [#20](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/20) Added nf-core module GATK4_GENOTYPEGVCFS to replace local function genotype_gvcf
 - [#21](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/21) Added nextflow docker image
 - [#22](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/22) Added exomiser docker image
+- [#27](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/27) Added nf-core module GATK4_VARIANTFILTRATION to replace local module hardFilters.nf
 
 ### `Fixed`
 - [#1](https://github.com/FelixAntoineLeSieur/Post-processing-Pipeline/pull/1) Fixed template schemas

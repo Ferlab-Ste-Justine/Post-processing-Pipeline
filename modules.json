@@ -14,6 +14,11 @@
             "branch": "master",
             "git_sha": "33ef773a7ea36e88323902f63662aa53c9b88988",
             "installed_by": ["modules"]
+          },
+          "gatk4/genotypegvcfs": {
+            "branch": "master",
+            "git_sha": "06c8865e36741e05ad32ef70ab3fac127486af48",
+            "installed_by": ["modules"]
           }
         }
       },

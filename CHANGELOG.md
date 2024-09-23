@@ -5,9 +5,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## v2.0.0dev - [date]
-### Known issues:
 
-[#20](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/20) The nf-core module genotypeGVCFs has a potential performance flaw. The output glob specifies for vcf and tbi *.vcf and *.vcf.tbi respectively. This regex will also include the inputs, which can cause unnecessary file transfers. This has already proven to cause issues on fusion. One fix could be to transfer the whole module to local to perform the small change necessary to fix this (change the globs to *${prefix}.vcf)
+### `Added`
+- [#26](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/26) Add version file in exomiser docker image
+
+### `Known issues`
+- [#20](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/20) The nf-core module genotypeGVCFs has a potential performance flaw. The output glob specifies for vcf and tbi *.vcf and *.vcf.tbi respectively. This regex will also include the inputs, which can cause unnecessary file transfers. This has already proven to cause issues on fusion. One fix could be to transfer the whole module to local to perform the small change necessary to fix this (change the globs to *${prefix}.vcf)
 
 
 ## v1.0dev

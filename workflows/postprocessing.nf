@@ -26,19 +26,7 @@ include { isVepToolIncluded } from '../subworkflows/local/utils_nfcore_postproce
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*
-/**
-Tag variants that are probable artifacts
-
-In the case of whole genome sequencing data, we use the vqsr procedure.
-For whole exome sequencing data, since the vqsr procedure is not supported, we use
-a hard filtering approach.
 */
-def tagArtifacts(inputChannel, hardFilters) {
-    def wgs = inputChannel.filter{it[0].sequencingType == "WGS"}
-    def wes = inputChannel.filter{it[0].sequencingType == "WES"}
-    def wgs_filtered = VQSR(wgs)
-    def wes_filtered = hardFiltering(wes, hardFilters)
 
     return wgs_filtered.concat(wes_filtered)
 }

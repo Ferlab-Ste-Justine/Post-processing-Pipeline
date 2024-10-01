@@ -10,9 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#25](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/25) Added exomiser module and introduced `tools` parameter to control the execution of VEP and Exomiser.
 - [#25](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/25) Group vep output files in subfolder `vep`.
 - [#26](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/26) Add version file in exomiser docker image
+- [#27](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/27) Added nf-core module GATK4_VARIANTFILTRATION to replace local module hardFilters.nf
 
 ### `Known issues`
-- [#20](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/20) The nf-core module genotypeGVCFs has a potential performance flaw. The output glob specifies for vcf and tbi *.vcf and *.vcf.tbi respectively. This regex will also include the inputs, which can cause unnecessary file transfers. This has already proven to cause issues on fusion. One fix could be to transfer the whole module to local to perform the small change necessary to fix this (change the globs to *${prefix}.vcf)
+- [#20](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/20) [#27](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/27) The nf-core modules genotypeGVCFs and VARIANTFILTRATION have a potential performance flaw. The output glob specifies for vcf and tbi *.vcf and *.vcf.tbi respectively. This regex will also include the inputs, which can cause unnecessary file transfers. This has already proven to cause issues on fusion. One fix could be to transfer the whole modules to local to perform the small change necessary to fix this (change the globs to *${prefix}.vcf)
 
 
 ## v1.0dev
@@ -31,7 +32,7 @@ Initial release of ferlab/postprocessing, created with the [nf-core](https://nf-
 - [#20](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/20) Added nf-core module GATK4_GENOTYPEGVCFS to replace local function genotype_gvcf
 - [#21](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/21) Added nextflow docker image
 - [#22](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/22) Added exomiser docker image
-- [#27](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/27) Added nf-core module GATK4_VARIANTFILTRATION to replace local module hardFilters.nf
+
 
 ### `Fixed`
 - [#1](https://github.com/FelixAntoineLeSieur/Post-processing-Pipeline/pull/1) Fixed template schemas

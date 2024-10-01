@@ -32,6 +32,14 @@
                 "pattern": "^\\S+\\.g(enome)?(\\.)?vcf(\\.gz)?$",
                 "format": "file-path",
                 "exists": true
+            },
+            "familyPheno": {
+                "errorMessage": "Filename of the pedigree file, mandatory for exomiser",
+                "meta": ["familypheno"],
+                "format": "file-path",
+                "pattern": "^\\S+\\.(yml|yaml|json){1}$",
+                "exists": true
+
             }
         },
         "required": ["familyId", "sample", "sequencingType","gvcf"]

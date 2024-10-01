@@ -1,0 +1,70 @@
+nextflow_process {
+
+    name "Test Process EXOMISER"
+    script "modules/local/exomiser/main.nf"
+    process "EXOMISER"
+
+    // Using stub mode until we can download a test dataset and write a more elaborated test
+    options "-stub"
+
+    tag "local"
+    tag "modules"
+    tag "exomiser"
+
+    test("Test Process EXOMISER") {
+        
+        when {
+            process {
+                """
+                input[0] = [ [familyId: "family1"],
+                 file("https://github.com/nf-core/test-datasets/raw/modules/data/genomics/homo_sapiens/illumina/gvcf/test.genome.vcf.gz"), 
+                 file("assets/exomiser/pheno/family1.yml"),
+                 file("assets/exomiser/default_exomiser_WGS_analysis.yml")]
+                input[1] = file("data-test/reference/exomiser")
+                input[2] = "hg38"
+                input[3] = "2402"
+                input[4] = "1.7"
+                input[5] = "1.3.1"
+                """
+            }
+        }
+        then{
+
+            def expected_meta = [familyId: "family1"]
+            with(process.out) {
+                // vcf channel
+                assert vcf.size() == 1
+                assert vcf.get(0)[0] == expected_meta
+                assert file(vcf.get(0)[1]).name == "family1.splitted-exomiser.vcf.gz"
+
+                // tbi channel
+                assert tbi.size() == 1
+                assert tbi.get(0)[0] == expected_meta
+                assert file(tbi.get(0)[1]).name == "family1.splitted-exomiser.vcf.gz.tbi"
+
+                // html channel
+                assert html.size() == 1
+                assert html.get(0)[0] == expected_meta
+                assert file(html.get(0)[1]).name == "family1.splitted-exomiser.html"
+
+                // json channel
+                assert json.size() == 1
+                assert json.get(0)[0] == expected_meta
+                assert file(json.get(0)[1]).name == "family1.splitted-exomiser.json"
+
+                // genetsv channel
+                assert genetsv.size() == 1
+                assert genetsv.get(0)[0] == expected_meta
+                assert file(genetsv.get(0)[1]).name == "family1.splitted-exomiser.genes.tsv"
+
+                // variantstsv channel
+                assert variantstsv.size() == 1
+                assert variantstsv.get(0)[0] == expected_meta
+                assert file(variantstsv.get(0)[1]).name == "family1.splitted-exomiser.variants.tsv"
+
+                // versions channel
+                assert snapshot(versions).match()
+            }
+        }
+    }
+}

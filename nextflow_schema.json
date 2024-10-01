@@ -41,7 +41,8 @@
           "type": "string",
           "description": "Name of iGenomes reference.",
           "fa_icon": "fas fa-book",
-          "help_text": "If using a reference genome configured in the pipeline using iGenomes, use this parameter to give the ID for the reference. This is then used to build the full paths for all required reference genome files e.g. `--genome GRCh38`. \n\nSee the [nf-core website docs](https://nf-co.re/usage/reference_genomes) for more details."
+          "help_text": "If using a reference genome configured in the pipeline using iGenomes, use this parameter to give the ID for the reference. This is then used to build the full paths for all required reference genome files e.g. `--genome GRCh38`. \n\nSee the [nf-core website docs](https://nf-co.re/usage/reference_genomes) for more details.",
+          "enum": ["hg19", "hg38"]
         },
         "igenomes_ignore": {
           "type": "boolean",
@@ -56,6 +57,12 @@
           "help_text": "Path to the directory containing 5 important files: \\n1. The intervalsFile whose name is defined in the intervalsFile parameter\\n2. The Hapmap file for vqsr training\\n3. The omni2.5 file for vqsr training\\n4. The 1000G SNP reference file for vqsr training\\n5. The dbsnp database for vqsr training",
           "format": "directory-path"
         },
+        "intervalsFile": {
+          "type": "string",
+          "description": "Namefile of the genome interval we want to use",
+          "help_text": "Namefile of the genome interval. Used during the CombineGVCFs step to indicate the regions of interest",
+          "format": "file-path"
+        },
         "referenceGenome": {
           "type": "string",
           "description": "Directory containing the referenceGenomeFasta",
@@ -67,26 +74,13 @@
           "description": "Name of the fasta file for the genome",
           "help_text": "Name of the fasta file for the genome we usually apply \"Homo_sapiens_assembly38.fasta\"",
           "format": "file-path"
-        },
-        "vepCache": {
-          "type": "string",
-          "help_text": "Path to the vepCache directory, which is usually installed by vep by default. It should contain at least the homo_sapien/111_GRCh38/ directory. ",
-          "description": "Directory of the Vep Cache",
-          "format": "directory-path"
-        },
-        "intervalsFile": {
-          "type": "string",
-          "description": "Namefile of the genome interval we want to use",
-          "help_text": "Namefile of the genome interval. Used during the CombineGVCFs step to indicate the regions of interest",
-          "format": "file-path"
         }
       },
       "required": [
         "broad",
         "intervalsFile",
         "referenceGenome",
-        "referenceGenomeFasta",
-        "vepCache"
+        "referenceGenomeFasta"
       ]
     },
     "institutional_config_options": {
@@ -157,10 +151,6 @@
           "pattern": "^(\\d+\\.?\\s*(s|m|h|d|day)\\s*)+$",
           "hidden": true,
           "help_text": "Use to set an upper-limit for the time requirement for each process. Should be a string in the format integer-unit e.g. `--max_time '2.h'`"
-        },
-        "vepCpu": {
-          "type": "integer",
-          "default": 4
         },
         "max_disk": {
           "type": "string",
@@ -260,8 +250,151 @@
           "type": "array",
           "description": "Parameters for Hard-Filtering",
           "help_text": "Parameters for Hard-Filtering. Must be an array containing each desired filter. Each filter must be formatted with the desired name and expression, for example\\n[[name: 'QD1', expression: 'QD < 1.0'],[name: 'QD2', expression: 'QD < 2.0]]"
+        },
+        "tools": {
+          "type": "string",
+          "pattern": "^(vep|exomiser)?(,(vep|exomiser))*$",
+          "description": "List of tools to use separate with comma.  Available tools: [vep, exomiser]"
         }
       }
+    },
+    "vep": {
+      "title": "vep",
+      "type": "object",
+      "description": "vep parameters",
+      "default": "",
+      "properties": {
+        "vepCpu": {
+          "type": "integer",
+          "default": 4
+        },
+        "vepCache": {
+          "type": "string",
+          "help_text": "Path to the vepCache directory, which is usually installed by vep by default. It should contain at least the homo_sapien/111_GRCh38/ directory. ",
+          "description": "Directory of the Vep Cache",
+          "format": "directory-path"
+        }
+      },
+      "if": {
+        "properties": {
+          "tools": {
+            "pattern": "vep"
+          }
+        },
+        "required": ["tools"]
+      },
+      "then": {
+        "required": ["vepCache"]
+      }
+    },
+    "exomiser_option": {
+      "title": "Exomiser option",
+      "type": "object",
+      "description": "",
+      "default": "",
+      "properties": {
+        "exomiser_analysis_wes": {
+          "type": "string",
+          "format": "file-path",
+          "description": "Path to the exomiser analysis file (.yml) to use for whole exome sequencing input",
+          "default": "${projectDir}/assets/exomiser/default_exomiser_WES_analysis.yml",
+          "pattern": "^\\S+\\.(yml|yaml|json){1}$",
+          "exists": true
+        },
+        "exomiser_analysis_wgs": {
+          "type": "string",
+          "format": "file-path",
+          "default": "${projectDir}/assets/exomiser/default_exomiser_WGS_analysis.yml",
+          "pattern": "^\\S+\\.(yml|yaml|json){1}$",
+          "description": "Path to the exomiser analysis file (.yml) to use for whole genome sequencing input",
+          "exists": true
+        },
+        "exomiser_data_dir": {
+          "type": "string",
+          "format": "directory-path",
+          "description": "Path to the  exomiser data directory"
+        },
+        "exomiser_data_version": {
+          "type": "string",
+          "description": "Exomiser data version"
+        },
+        "exomiser_genome": {
+          "type": "string",
+          "enum": ["hg38", "hg19"],
+          "description": "Genome assembly version to be used by exomiser (e.g., hg38 or hg19)"
+        },
+        "exomiser_cadd_version": {
+          "type": "string",
+          "description": "Version of cadd data"
+        },
+        "exomiser_cadd_indel_filename": {
+          "type": "string",
+          "format": "file-path",
+          "description": "The filename of the exomiser CADD indel data file (e.g., gnomad.genomes.r4.0.indel.tsv.gz)",
+          "pattern": "^\\S+\\.tsv.gz$"
+        },
+        "exomiser_cadd_snv_filename": {
+          "type": "string",
+          "description": "The filename of the exomiser CADD snv data file (e.g., whole_genome_SNVs.tsv.gz)",
+          "format": "file-path",
+          "pattern": "^\\S+\\.tsv.gz$"
+        },
+        "exomiser_remm_version": {
+          "type": "string",
+          "description": "Version of remm data"
+        },
+        "exomiser_remm_filename": {
+          "type": "string",
+          "description": "The filename of the exomiser REMM data file (e.g., ReMM.v0.3.1.post1.hg38.tsv.gz)",
+          "format": "file-path",
+          "pattern": "^\\S+\\.tsv.gz$"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "tools": {
+                "pattern": "exomiser"
+              }
+            },
+            "required": ["exomiser_remm_version", "tools"]
+          },
+          "then": {
+            "required": ["exomiser_remm_filename"]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "tools": {
+                "pattern": "exomiser"
+              }
+            },
+            "required": ["exomiser_cadd_version", "tools"]
+          },
+          "then": {
+            "required": ["exomiser_cadd_indel_filename", "exomiser_cadd_snv_filename"]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "tools": {
+                "pattern": "exomiser"
+              }
+            },
+            "required": ["tools"]
+          },
+          "then": {
+            "required": [
+              "exomiser_genome",
+              "exomiser_data_dir",
+              "exomiser_data_version"
+            ]
+          }
+        }
+      ]
     }
   },
   "allOf": [
@@ -279,7 +412,12 @@
     },
     {
       "$ref": "#/definitions/generic_options"
+    },
+    {
+      "$ref": "#/definitions/vep"
+    },
+    {
+      "$ref": "#/definitions/exomiser_option"
     }
-  ],
-  "properties": {}
+  ]
 }

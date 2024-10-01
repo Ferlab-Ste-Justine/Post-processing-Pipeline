@@ -1,0 +1,104 @@
+name: "exomiser"
+description: Exomiser  annotates, filters and prioritises likely causative variants
+keywords:
+  - variant prioritization
+  - disease phenotype
+  - genomics
+tools:
+  - "exomiser":
+      description: "Exomiser - A Tool to Annotate and Prioritize Exome Variants"
+      homepage: "https://bioconda.github.io/recipes/exomiser-rest-prioritiser/README.html"
+      documentation: "https://exomiser.readthedocs.io/en/latest/"
+      tool_dev_url: "https://github.com/exomiser/Exomiser"
+      doi: "https://doi.org/10.1038%2Fnprot.2015.124"
+      licence: "['AGPL v3']"
+
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing family information
+        e.g. [ id:'family1', sequencing_type:'WES' ]
+
+  - vcfFile:
+      type: file
+      description: combined vcf file containing all samples in the family
+      pattern: "*.{vcf.gz,vcf}"
+
+  - phenoFile:
+      type: file
+      description: Phenopacket file containing phenotypic information about the family
+      pattern: "*.{yaml,yml,json}"
+
+  - analysisFile:
+      type: file
+      description: File containing the exomiser analysis configuration
+      pattern: "*.{yaml,yml}"
+
+  - dataDir:
+      type: directory
+      description: Path to the directory containing the exomiser data
+
+  - exomiserGenome:
+      type: string
+      description: The genome assembly to use with exomiser
+
+  - exomiserDataVersion:
+      type: string
+      description: The version of the exomiser data to use
+
+  - remmVersion:
+      type: string
+      description: The version of the REMM pathogenicity data source to use
+
+  - caddVersion:
+      type: string
+      description: The version of the CADD pathongenicity data source to use
+
+
+output:
+  #Only when we have meta
+  - meta:
+      type: map
+      description: |
+         Groovy Map containing family information
+         e.g. [ id:'family1', sequencing_type:'WES' ]
+
+  - vcf:
+      type: file
+      description: exomiser output vcf file
+      pattern: "*.{vcf.gz}"
+
+  - tbi:
+      type: file
+      description: index of exomiser output vcf file
+      pattern: "*.{vcf.gz.tbi}"
+
+  - html:
+      type: file
+      description: exomiser output html file
+      pattern: "*.{html}"
+
+  - json:
+      type: file
+      description: exomiser output json file
+      pattern: "*.{json}"
+
+  - genetsv:
+      type: file
+      description: exomiser output genes.tsv file
+      pattern: "*.{genes.tsv}"
+
+  - variantstsv:
+      type: file
+      description: exomiser output variants.tsv file
+      pattern: "*.{variants.tsv}"
+
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+
+
+authors:
+  - "@ferlab"

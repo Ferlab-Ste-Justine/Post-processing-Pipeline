@@ -38,12 +38,10 @@ jobs:
       - name: Run nf-test
         run: |
           nf-test test \
-            --tag=local \
+            --ci \
             --changed-since="HEAD^1" \
             --tap=test.tap \
             --verbose
         # Notes:
-        #  - The --tag option must appear before the --changed-since option to be applied
-        #    correctly.
         #  - The --verbose option is required for some nf-core tests to pass. It's not 
         #    needed now as we only run local tests, but we mention for future use.

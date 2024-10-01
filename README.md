@@ -1,16 +1,18 @@
 [![nf-test](https://img.shields.io/badge/unit_tests-nf--test-337ab7.svg)](https://www.nf-test.com)
 
 [![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A523.10.1-23aa62.svg)](https://www.nextflow.io/)
-[![run with conda](http://img.shields.io/badge/run%20with-conda-3EB049?labelColor=000000&logo=anaconda)](https://docs.conda.io/en/latest/)
 [![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed?labelColor=000000&logo=docker)](https://www.docker.com/)
 [![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)
-[![Launch on Seqera Platform](https://img.shields.io/badge/Launch%20%F0%9F%9A%80-Seqera%20Platform-%234256e7)](https://cloud.seqera.io/launch?pipeline=https://github.com/ferlab/postprocessing)
+
+<!-- HIDDING BECAUSE NOT SUPPORTED YET
+[![run with conda](http://img.shields.io/badge/run%20with-conda-3EB049?labelColor=000000&logo=anaconda)](https://docs.conda.io/en/latest/)
+-->
 
 ## Introduction
 
-**ferlab/postprocessing** is a bioinformatics pipeline that takes GVCFs from several samples to combine, perform joint genotyping, tag low quality variant and annotate a final vcf version.
+**Ferlab-Ste-Justine/Post-processing-Pipeline** is a bioinformatics pipeline designed for family-based analysis of GVCFs from multiple samples. 
+It performs joint genotyping, tags low-quality variants, and optionally annotates the final vcf data using vep and/or prioritize variant using exomiser.
 
-<!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
 ###  Summary:
 1. Remove MNPs using bcftools 
 2. Normalize .gvcf
@@ -19,104 +21,62 @@
 5. Tag false positive variants with either:
   - For whole genome sequencing data: [Variant quality score recalibration (VQSR)](https://gatk.broadinstitute.org/hc/en-us/articles/360036510892-VariantRecalibrator)
   - For whole exome sequencing data: [Hard-Filtering](https://gatk.broadinstitute.org/hc/en-us/articles/360036733451-VariantFiltration)
-6. Annotate variants with [Variant effect predictor (VEP)](https://useast.ensembl.org/info/docs/tools/vep/index.html)
+6. Optionnally annotate variants with [Variant effect predictor (VEP)](https://useast.ensembl.org/info/docs/tools/vep/index.html)
+7. Optionnally integrate phenotype data to annotate, filter and prioritise variants likely to be disease-causing with [exomiser](https://www.sanger.ac.uk/tool/exomiser/)
 
-![PostProcessingDiagram](assets/PostProcessingImage.png?raw=true)
+
+
+### Workflow subway schema
+
+The full Ferlab workflow is shown in the image below, including the steps applicable prior to this pipeline. The steps relevant to the Ferlab-Ste-Justine/Post-processing-Pipeline correspond to the post-processing block.
+![PostProcessingDiagram](docs/images/ferlab_workflow.png)
+
+This schema was done using [inkscape](https://inkscape.org/) with the good pratices recommended by the nf-core community. See [nf-core Graphic Design](https://nf-co.re/docs/guidelines/graphic_design).
 
 ## Usage
 
-> [!NOTE]
-> If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline) with `-profile test` before running the workflow on actual data.
-
-### Samples
-The workflow will accept sample data separated by commas (CSV format). The path to the sample file must be specified with the "**input**" parameter. The column names are : familyId,sample,sequencingType,file. The sequencing type must be either WES (Whole Exome Sequencing) or WGS (Whole Genome Sequencing).
-
-**sample.csv**
-```csv
-**familyId**,**sample**,**sequencingType**,**file**
-CONGE-XXX,01,WES,CONGE-XXX-01.hard-filtered.gvcf.gz
-CONGE-XXX,02,WES,CONGE-XXX-02.hard-filtered.gvcf.gz
-CONGE-XXX,03,WES,CONGE-XXX-03.hard-filtered.gvcf.gz
-CONGE-YYY,01,WGS,CONGE-YYY-01.hard-filtered.gvcf.gz
-CONGE-YYY,02,WGS,CONGE-YYY-02.hard-filtered.gvcf.gz
-CONGE-YYY,03,WGS,CONGE-YYY-03.hard-filtered.gvcf.gz
-```
-
-
-> [!NOTE]
-> The sequencing type also determines the type of variant filtering the pipeline will use.
-> 
-> In the case of Whole Genome Sequencing, VQSR (Variant Quality Score Recalibration) is used (preferred method).
-> 
-> In the case of Whole Exome Sequencing, Hard-filtering needs to be used.
-
-Now, you can run the pipeline using:
-
-<!-- TODO nf-core: update the following command to include all required parameters for a minimal example -->
+Here is an example nextflow command to run the pipeline:
 
 ```bash
-nextflow run ferlab/postprocessing \
-   -profile <docker/singularity/.../> \
+nextflow run -c cluster.config Ferlab-Ste-Justine/Post-processing-Pipeline -r "v2.0.0" \
+    -params-file params.json  \
    --input samplesheet.csv \
-   --outdir <OUTDIR>
+   --outdir results/dir \
+   --tools vep,exomiser
 ```
 
+> [!NOTE]
+> If you are new to nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how to set-up nextflow.
+
 > [!WARNING]
-> Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_;
+> Please provide pipeline parameters via the CLI or nextflow `-params-file` option. Custom config files including those provided by the `-c` nextflow option can be used to provide any configuration _**except for parameters**_;
 > see [docs](https://nf-co.re/usage/configuration#custom-configuration-files).
 
-### References
-Reference files are necessary at multiple steps of the workflow, notably for joint-genotyping,the variant effect predictor (VEP) and VQSR. 
-Using igenome, we can retrieve the relevant files for the desired version of the human genome.
-Specifically, we specifiy the igenome version with the **genome** parameter. Most likely this value will be *'GRCh38'*
+
+For more details, see [docs/usage.md](docs/usage.md) and [docs/reference_data.md](docs/reference_data.md).
 
 
-Next, we also need broader references, which are contained in a path defined by the **broad** parameter.
+### Stub mode and quick tests
 
-The broad directory must contain the following files:
+The `-stub` (or `-stub-run`) option can be added to run the "stub" block of processes instead of the "script" block. This can be helpful for testing.
 
-- The interval list which determines the genomic interval(s) over which we operate: filename of this list must be defined with the **intervalsFile** parameter
-- Highly validated variance ressources currently required by VQSR. ***These are currently hard coded in the pipeline!***
-  - HapMap file : hapmap_3.3.hg38.vcf.gz
-  - 1000G omni2.5 file : 1000G_omni2.5.hg38.vcf.gz
-  - 1000G reference file : 1000G_phase1.snps.high_confidence.hg38.vcf.gz
-  - SNP database : Homo_sapiens_assembly38.dbsnp138.vcf.gz
 
- 
-Finally, the vep cache directory must be specified with **vepCache**, which is usually created by vep itself on first installation.
-Generally, we only need the human files obtainable from https://ftp.ensembl.org/pub/release-112/variation/vep/homo_sapiens_vep_112_GRCh38.tar.gz
+To test your setup in stub mode, simply run `nextflow run Ferlab-Ste-Justine/Post-processing-Pipeline -profile test,docker -stub`. 
 
-### Stub run
-The -stub-run option can be added to run the "stub" block of processes instead of the "script" block. This can be helpful for testing.
-
-🚧
-
-Parameters summary
------
-
-| Parameter name | Required? | Accepted input |
-| --- | --- | --- |
-| `input` | _Required_ | file |
-| `outdir` | _Required_ | path |
-| `genome` | _Required_ | igenome version, ie 'GRCh38'|
-| `broad` | _Required_ | path |
-| `intervalsFile` | _Required_ | list of genome intervals |
-| `vepCache` | _Required_ | path |
+For tests with real data, see documentation in the [test configuration profile](conf/test.config)
 
 
 Pipeline Output
 -----
-Path to output directory must be specified in **outdir** parameter.
-🚧
+Path to output directory must be specified via the `outdir` parameter.
+
+See [docs/output.md](docs/output.md) for more details about pipeline outputs.
 
 
 ## Credits
 
-ferlab/postprocessing was originally written by Damien Geneste, David Morais, Felix-Antoine Le Sieur, Jeremy Costanza, Lysiane Bouchard.
+Ferlab-Ste-Justine/Post-processing-Pipeline was originally written by Damien Geneste, David Morais, Felix-Antoine Le Sieur, Jeremy Costanza, Lysiane Bouchard.
 
-We thank the following people for their extensive assistance in the development of this pipeline:
-
-<!-- TODO nf-core: If applicable, make list of people who have also contributed -->
 
 ## Contributions and Support
 
@@ -136,15 +96,15 @@ The documentation of the various tools used in this workflow are available here:
 - [CombineGVCFs](https://gatk.broadinstitute.org/hc/en-us/articles/360037593911-CombineGVCFs)
 - [GenotypeGVCFs](https://gatk.broadinstitute.org/hc/en-us/articles/360037057852-GenotypeGVCFs)
 - [VariantRecalibrator](https://gatk.broadinstitute.org/hc/en-us/articles/360035531612-Variant-Quality-Score-Recalibration-VQSR)
-- [VariantFiltration](https://gatk.broadinstitute.org/hc/enus/articles/360041850471-VariantFiltration))
+- [VariantFiltration](https://gatk.broadinstitute.org/hc/enus/articles/360041850471-VariantFiltration)
+- [HardFiltering](https://gatk.broadinstitute.org/hc/en-us/articles/360035531112--How-to-Filter-variants-either-with-VQSR-or-by-hard-filtering)
 
 [VEP](https://useast.ensembl.org/info/docs/tools/vep/script/vep_options.html)
 
+[EXOMISER](https://exomiser.readthedocs.io/en/latest/)
+
+
 ## Citations
-
-<!-- TODO nf-core: Add bibliography of tools and data used in your pipeline -->
-
-An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md) file.
 
 This pipeline uses code and infrastructure developed and maintained by the [nf-core](https://nf-co.re) community, reused here under the [MIT license](https://github.com/nf-core/tools/blob/master/LICENSE).
 

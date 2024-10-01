@@ -47,9 +47,6 @@ workflow FERLAB_POSTPROCESSING {
     POSTPROCESSING (
         samplesheet
     )
-
-    emit:
-    POSTPROCESSING.out
 }
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

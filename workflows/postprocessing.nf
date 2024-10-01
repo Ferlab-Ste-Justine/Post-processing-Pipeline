@@ -4,17 +4,23 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+//modules and subworkflows
 include { paramsSummaryMap       } from 'plugin/nf-validation'
 include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { EXCLUDE_MNPS           } from "../subworkflows/local/exclude_mnps"
 include { VQSR                   } from "../subworkflows/local/vqsr"
+include { EXOMISER                  } from '../modules/local/exomiser'
 include { hardFiltering          } from '../modules/local/hardFilter'
 include { splitMultiAllelics     } from '../modules/local/vep'
 include { vep                    } from '../modules/local/vep'
 include { tabix                  } from '../modules/local/vep'
 include { COMBINEGVCFS           } from '../modules/local/combine_gvcfs'
 include { GATK4_GENOTYPEGVCFS     } from '../modules/nf-core/gatk4/genotypegvcfs'
+
+//functions
+include { isExomiserToolIncluded } from '../subworkflows/local/utils_nfcore_postprocessing_pipeline/utils'
+include { isVepToolIncluded } from '../subworkflows/local/utils_nfcore_postprocessing_pipeline/utils'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -37,6 +43,41 @@ def tagArtifacts(inputChannel, hardFilters) {
     return wgs_filtered.concat(wes_filtered)
 }
 
+def exomiser(inputChannel, 
+    exomiser_genome,
+    exomiser_data_version,
+    exomiser_data_dir, 
+    analysis_wes_path, 
+    analysis_wgs_path,
+    remm_version,
+    remm_filename,
+    cadd_version,
+    cadd_snv_filename,
+    cadd_indel_filename
+    ) {
+    def ch_input_for_exomiser = inputChannel.map{meta, files -> [
+        meta,
+        files,
+        meta.familypheno, 
+        meta.sequencingType == "WES"? file(analysis_wes_path) : file(analysis_wgs_path)
+    ]}
+    def remm_input = ["", ""]
+    if (remm_version) {
+        remm_input = [remm_version, remm_filename]
+    }
+    def cadd_input = ["", "", ""]
+    if (cadd_version) {
+        cadd_input = [cadd_version, cadd_snv_filename, cadd_indel_filename]
+    }
+    EXOMISER(ch_input_for_exomiser,
+        file(exomiser_data_dir),
+        exomiser_genome,
+        exomiser_data_version,
+        remm_input,
+        cadd_input
+    )  
+}
+
 process writemeta{
 
     publishDir "${params.outdir}/pipeline_info/", mode: 'copy', overwrite: 'true'
@@ -57,15 +98,14 @@ process writemeta{
     """
 }
 
-workflow POSTPROCESSING {
 
-//Local Temp Params
+workflow POSTPROCESSING {
+    //Local Temp Params
     def referenceGenome = file(params.referenceGenome)
     def pathReferenceGenomeFasta = file(params.referenceGenome + "/" + params.referenceGenomeFasta)
     def pathReferenceGenomeFai = file(pathReferenceGenomeFasta + ".fai")
     def broad = file(params.broad)
     def pathIntervalFile = file(params.broad + "/" + params.intervalsFile)
-    def vepCache = file(params.vepCache)
     def pathReferenceDict = file(params.referenceGenome + "/" + params.referenceGenomeFasta.substring(0,params.referenceGenomeFasta.indexOf(".")) + ".dict")
     file(params.outdir).mkdirs()
 
@@ -81,7 +121,7 @@ workflow POSTPROCESSING {
     .collectFile(storeDir: "${params.outdir}/pipeline_info/configs",cache: false)
 
     writemeta()
-    filtered = EXCLUDE_MNPS(ch_samplesheet).ch_output_excludemnps
+    def ch_output_from_excludemnps = EXCLUDE_MNPS(ch_samplesheet).ch_output_excludemnps
     //Create groupkey for the grouptuple and separate the vcf (file[0]) and the index (files[1])
         .map{meta, files -> tuple(groupKey(meta.familyId, meta.sampleSize),meta,files[0],files[1])}
         .groupTuple()
@@ -91,18 +131,19 @@ workflow POSTPROCESSING {
             updated_meta["id"] = updated_meta.familyId
             [updated_meta, vcf.flatten(), tbi.flatten()]}
     
-    filtered_one = filtered.filter{it[0].sampleSize == 1}
-    filtered_mult = filtered.filter{it[0].sampleSize > 1}
+
+
     //Combine per-sample gVCF files into a multi-sample gVCF file
-    
-    ch_combined_gvcf = COMBINEGVCFS(filtered_mult, pathReferenceGenomeFasta,pathReferenceGenomeFai,pathReferenceDict,pathIntervalFile)
-                    .combined_gvcf.join(COMBINEGVCFS.out.tbi)
-                    .concat(filtered_one)
-    geno_input_files = ch_combined_gvcf.map{meta,vcf,tbi -> [meta, vcf, tbi, [], []]}
-    
-    //Perform joint genotyping on one or more samples
-    genotypegvcf_output = GATK4_GENOTYPEGVCFS(
-    geno_input_files,
+    def filtered_one = ch_output_from_excludemnps.filter{it[0].sampleSize == 1}
+    def ch_input_for_combinegvcf = ch_output_from_excludemnps.filter{it[0].sampleSize > 1}    
+    def ch_output_from_combinegvcf = COMBINEGVCFS(ch_input_for_combinegvcf , pathReferenceGenomeFasta,pathReferenceGenomeFai,pathReferenceDict,pathIntervalFile).combined_gvcf
+    .join(COMBINEGVCFS.out.tbi)
+    .concat(filtered_one)
+
+    //Perform joint genotyping on one or more samples  
+    def ch_input_for_genotypegvcf = ch_output_from_combinegvcf.map{meta,vcf,tbi -> [meta,vcf,tbi, [], []]}
+    def ch_output_from_genotypegvcf = GATK4_GENOTYPEGVCFS(
+    ch_input_for_genotypegvcf,
     [[:], pathReferenceGenomeFasta],
     [[:], pathReferenceGenomeFai],
     [[:], pathReferenceDict],
@@ -113,17 +154,35 @@ workflow POSTPROCESSING {
     .map{ meta, vcf, tbi -> [meta, [vcf,tbi]]}
 
     //tag variants that are probable artifacts
-    vcfWithTags = tagArtifacts(genotypegvcf_output, params.hardFilters)
+    def ch_output_from_tagArtifacts = tagArtifacts(ch_output_from_genotypegvcf, params.hardFilters)
     //tag frequent mutations in the population
-    s = splitMultiAllelics(vcfWithTags, referenceGenome) 
+    def ch_output_from_splitMultiAllelics = splitMultiAllelics(ch_output_from_tagArtifacts, referenceGenome)
 
     //Annotating mutations
-    vep(s, referenceGenome, vepCache)
-    tabix(vep.out) 
-  
-    emit:
-    tabix.out
+    if (isVepToolIncluded()) {
+        def vepCache = file(params.vepCache)
 
+        vep(ch_output_from_splitMultiAllelics, referenceGenome, vepCache)
+        tabix(vep.out)
+    }
+
+    if (isExomiserToolIncluded()) {
+        exomiser(ch_output_from_splitMultiAllelics, 
+            params.exomiser_genome,
+            params.exomiser_data_version,
+            params.exomiser_data_dir,
+            params.exomiser_analysis_wes,
+            params.exomiser_analysis_wgs,
+            params.exomiser_remm_version,
+            params.exomiser_remm_filename,
+            params.exomiser_cadd_version,
+            params.exomiser_cadd_snv_filename,
+            params.exomiser_cadd_indel_filename
+        )
+    }
+
+    emit:
+    versions = ch_versions
 }
 
 /*

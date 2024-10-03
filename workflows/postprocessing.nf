@@ -10,13 +10,13 @@ include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pi
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { EXCLUDE_MNPS           } from "../subworkflows/local/exclude_mnps"
 include { VQSR                   } from "../subworkflows/local/vqsr"
-include { EXOMISER                  } from '../modules/local/exomiser'
-include { hardFiltering          } from '../modules/local/hardFilter'
+include { EXOMISER               } from '../modules/local/exomiser'
 include { splitMultiAllelics     } from '../modules/local/vep'
 include { vep                    } from '../modules/local/vep'
 include { tabix                  } from '../modules/local/vep'
 include { COMBINEGVCFS           } from '../modules/local/combine_gvcfs'
-include { GATK4_GENOTYPEGVCFS     } from '../modules/nf-core/gatk4/genotypegvcfs'
+include { GATK4_GENOTYPEGVCFS    } from '../modules/nf-core/gatk4/genotypegvcfs'
+include { GATK4_VARIANTFILTRATION} from '../modules/nf-core/gatk4/variantfiltration'
 
 //functions
 include { isExomiserToolIncluded } from '../subworkflows/local/utils_nfcore_postprocessing_pipeline/utils'
@@ -26,21 +26,29 @@ include { isVepToolIncluded } from '../subworkflows/local/utils_nfcore_postproce
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*
+*/
 /**
 Tag variants that are probable artifacts
-
 In the case of whole genome sequencing data, we use the vqsr procedure.
 For whole exome sequencing data, since the vqsr procedure is not supported, we use
 a hard filtering approach.
 */
-def tagArtifacts(inputChannel, hardFilters) {
-    def wgs = inputChannel.filter{it[0].sequencingType == "WGS"}
-    def wes = inputChannel.filter{it[0].sequencingType == "WES"}
-    def wgs_filtered = VQSR(wgs)
-    def wes_filtered = hardFiltering(wes, hardFilters)
+def tagArtifacts(ch_artifact_input, hardFilters, pathFasta, pathFai, pathDict) {
+    def ch_vqsr_input = ch_artifact_input.filter{it[0].sequencingType == "WGS"}.map{ meta, vcf, tbi -> [meta, [vcf,tbi]]}
+    def ch_variantfiltration_input = ch_artifact_input.filter{it[0].sequencingType == "WES"}
 
-    return wgs_filtered.concat(wes_filtered)
+    def ch_vqsr_output = VQSR(ch_vqsr_input)
+
+    def ch_gatk4_variantfiltration_output = GATK4_VARIANTFILTRATION(
+        ch_variantfiltration_input,
+        [[:], pathFasta],
+        [[:], pathFai],
+        [[:], pathDict])
+        
+    def ch_variantfiltration_output =  ch_gatk4_variantfiltration_output.vcf.join(ch_gatk4_variantfiltration_output.tbi)
+       .map{ meta, vcf, tbi -> [meta, [vcf,tbi]]}
+
+    return ch_vqsr_output.concat(ch_variantfiltration_output)
 }
 
 def exomiser(inputChannel, 
@@ -151,10 +159,9 @@ workflow POSTPROCESSING {
     [[:], []]  //leaving empty as we don't use dbsnp
     ).vcf
     .join(GATK4_GENOTYPEGVCFS.out.tbi)
-    .map{ meta, vcf, tbi -> [meta, [vcf,tbi]]}
 
     //tag variants that are probable artifacts
-    def ch_output_from_tagArtifacts = tagArtifacts(ch_output_from_genotypegvcf, params.hardFilters)
+    def ch_output_from_tagArtifacts = tagArtifacts(ch_output_from_genotypegvcf, params.hardFilters,pathReferenceGenomeFasta,pathReferenceGenomeFai,pathReferenceDict)
     //tag frequent mutations in the population
     def ch_output_from_splitMultiAllelics = splitMultiAllelics(ch_output_from_tagArtifacts, referenceGenome)
 

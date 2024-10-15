@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Fixed`
 - [#35](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/35) Fix incorrect assumption about assets folder location in github ci workflow
-
+- [#36](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/36) Fix variable input in process BCFTOOLS_NORM causing resume problems
 
 ## v2.0.0dev
 

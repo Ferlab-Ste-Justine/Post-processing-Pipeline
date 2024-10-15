@@ -17,8 +17,7 @@ workflow EXCLUDE_MNPS {
 
     def ch_bcftoolsfilter_for_bcftoolsnorm = BCFTOOLS_FILTER.out.vcf.join(BCFTOOLS_FILTER.out.tbi)
 
-    ch_reference = input.map{meta,file -> [meta,reference_path]}
-    BCFTOOLS_NORM(ch_bcftoolsfilter_for_bcftoolsnorm,ch_reference)
+    BCFTOOLS_NORM(ch_bcftoolsfilter_for_bcftoolsnorm, [[:], reference_path])
     ch_output_excludemnps = BCFTOOLS_NORM.out.vcf.join(BCFTOOLS_NORM.out.tbi)
         .map{meta, vcf, tbi ->[meta,[vcf,tbi]]}
 

@@ -192,6 +192,9 @@ def getPipelineInfoFolder(outdir) {
 // Check and validate pipeline parameters
 //
 def validateInputParameters() {
+    if (params.allow_old_gatk_data) {
+        log.warn "The 'allow_old_gatk_data' parameter is set to true, allowing the pipeline to run with older GATK data in GATK4_GENOTYPEGVCFS. Not recommended for production."
+    }
     genomeExistsError()
 }
 

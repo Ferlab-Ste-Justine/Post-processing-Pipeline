@@ -104,6 +104,11 @@ process writemeta{
     Revision : ${workflow.revision}
     CommitId : ${workflow.commitId}
     """
+
+    stub:
+    """
+    touch metadata.txt
+    """
 }
 
 

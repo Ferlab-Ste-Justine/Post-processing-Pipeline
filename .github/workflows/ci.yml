@@ -42,4 +42,8 @@ jobs:
 
         # Using the stub mode until our test data setup is ready
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -stub -profile test,docker --input assets/TestSampleSheet.csv
+          nextflow run ${GITHUB_WORKSPACE} -stub-run -profile test,docker --input "${GITHUB_WORKSPACE}/assets/TestSampleSheet.csv"
+
+      - name: Display nextflow.log on error
+        if: failure()
+        run: cat .nextflow.log

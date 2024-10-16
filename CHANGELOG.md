@@ -5,6 +5,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## v2.1.0dev - [date]
 
+### `Added`
+- [#35](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/35) Added allow_old_gatk_data parameter (set to false by default).
+- [#35](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/35) Added missing stub block in process writemeta for compatibility with latest nextflow version.
+- [#35](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/35) Improve github ci workflow to display nextflow log file content on error
+
+### `Fixed`
+- [#35](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/35) Fix incorrect assumption about assets folder location in github ci workflow
+
 
 ## v2.0.0dev
 

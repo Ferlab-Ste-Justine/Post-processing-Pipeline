@@ -251,6 +251,11 @@
           "description": "Parameters for Hard-Filtering",
           "help_text": "Parameters for Hard-Filtering. Must be an array containing each desired filter. Each filter must be formatted with the desired name and expression, for example\\n[[name: 'QD1', expression: 'QD < 1.0'],[name: 'QD2', expression: 'QD < 2.0]]"
         },
+        "allow_old_gatk_data": {
+          "type": "boolean",
+          "description": "Allow the use of old GATK data in GATK_GENOTYPEGVCFS process by adding --allow-old-rms-mapping-quality-annotation-data to ext.args. Note: this won't work if ext.args is overridden.",
+          "help_text": "Allow the use of old GATK data in GATK_GENOTYPEGVCFS process by adding --allow-old-rms-mapping-quality-annotation-data to ext.args. Note that this won't work if ext.args is overridden. This parameter is not recommended for production use."
+        },
         "tools": {
           "type": "string",
           "pattern": "^(vep|exomiser)?(,(vep|exomiser))*$",
@@ -374,7 +379,10 @@
             "required": ["exomiser_cadd_version", "tools"]
           },
           "then": {
-            "required": ["exomiser_cadd_indel_filename", "exomiser_cadd_snv_filename"]
+            "required": [
+              "exomiser_cadd_indel_filename",
+              "exomiser_cadd_snv_filename"
+            ]
           }
         },
         {

@@ -1,3 +1,5 @@
+// This module does not follow nf-core standards. We plan to fix or replace it with nf-core modules in the future.
+
 
 /**
 Build a recalibration model to score SNP variant quality for filtering purposes

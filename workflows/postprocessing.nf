@@ -11,9 +11,9 @@ include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pi
 include { EXCLUDE_MNPS           } from "../subworkflows/local/exclude_mnps"
 include { VQSR                   } from "../subworkflows/local/vqsr"
 include { EXOMISER               } from '../modules/local/exomiser'
-include { splitMultiAllelics     } from '../modules/local/vep'
-include { vep                    } from '../modules/local/vep'
-include { tabix                  } from '../modules/local/vep'
+include { splitMultiAllelics     } from '../modules/local/split_multi_allelics'
+include { ENSEMBLVEP_VEP         } from '../modules/nf-core/ensemblvep/vep/main'  
+include { tabix                  } from '../modules/local/tabix'
 include { COMBINEGVCFS           } from '../modules/local/combine_gvcfs'
 include { GATK4_GENOTYPEGVCFS    } from '../modules/nf-core/gatk4/genotypegvcfs'
 include { GATK4_VARIANTFILTRATION} from '../modules/nf-core/gatk4/variantfiltration'
@@ -21,6 +21,8 @@ include { GATK4_VARIANTFILTRATION} from '../modules/nf-core/gatk4/variantfiltrat
 //functions
 include { isExomiserToolIncluded } from '../subworkflows/local/utils_nfcore_postprocessing_pipeline/utils'
 include { isVepToolIncluded } from '../subworkflows/local/utils_nfcore_postprocessing_pipeline/utils'
+
+def HOMO_SAPIENS_SPECIES = "homo_sapiens"
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -77,13 +79,32 @@ def exomiser(inputChannel,
     if (cadd_version) {
         cadd_input = [cadd_version, cadd_snv_filename, cadd_indel_filename]
     }
-    EXOMISER(ch_input_for_exomiser,
+    return EXOMISER(ch_input_for_exomiser,
         file(exomiser_data_dir),
         exomiser_genome,
         exomiser_data_version,
         remm_input,
         cadd_input
     )  
+}
+
+def vep(input_channel, vep_genome, vep_species, path_fasta, vep_cache, vep_cache_version) {
+    
+    def ch_input_for_vep  = input_channel.map{meta, files ->
+        def vcf_file = files.find { it.name.endsWith("vcf.gz") }
+        def custom_extra_files = [] 
+        [meta, vcf_file, custom_extra_files]
+    }
+  
+    return ENSEMBLVEP_VEP(
+        ch_input_for_vep, 
+        vep_genome,
+        vep_species,
+        vep_cache_version,
+        vep_cache,
+        [[:], path_fasta],  // meta2, fasta
+        [] //extra files
+    )
 }
 
 process writemeta{
@@ -172,10 +193,17 @@ workflow POSTPROCESSING {
 
     //Annotating mutations
     if (isVepToolIncluded()) {
-        def vepCache = file(params.vepCache)
+        def vep_cache = file(params.vep_cache)
 
-        vep(ch_output_from_splitMultiAllelics, referenceGenome, vepCache)
-        tabix(vep.out)
+        def ch_output_from_vep = vep(
+            ch_output_from_splitMultiAllelics, 
+            params.vep_genome,
+            HOMO_SAPIENS_SPECIES,
+            pathReferenceGenomeFasta, 
+            vep_cache,
+            params.vep_cache_version
+        )
+        tabix(ch_output_from_vep.vcf)
     }
 
     if (isExomiserToolIncluded()) {

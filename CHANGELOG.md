@@ -6,6 +6,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## v2.2.0-dev - [date]
 
+### `Added`
+- [#41](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/41) Allow to customize the vep command
+- [#41](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/41) Improve parameter schema for params max_disk, max_memory, max_time
+- [#41](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/41) Consider only stable nextflow versions for ci test
+
+### `Known issues`
+- The nf-core modules that we are using have a potential performance flaw. Typically, the regex used to describe the output files also match the input files (ex: "*.vcf"), which can cause unnecessary file transfers.  This has already proven to cause issues on fusion. One fix could be to transfer the whole modules to local to perform the small change necessary to fix this.
+- The VEP cache version used in the CQDG environment (112) does not match the default configured VEP version (111). This issue can be avoided by overriding the Docker container of the ensemblevep process. If no project is using VEP version 111, it should not be used as the default value.
+
+
+### `Fixed`
+- [#51](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/41) Fix vep url pointing to the wrong vep version in the reference data documentation.
 
 ## v2.1.0dev
 
@@ -17,6 +29,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `Fixed`
 - [#35](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/35) Fix incorrect assumption about assets folder location in github ci workflow
 - [#36](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/36) Fix variable input in process BCFTOOLS_NORM causing resume problems
+
+### `Known issues`
+- The nf-core modules genotypeGVCFs and VARIANTFILTRATION have a potential performance flaw. The output glob specifies for vcf and tbi *.vcf and *.vcf.tbi respectively. This regex will also include the inputs, which can cause unnecessary file transfers. This has already proven to cause issues on fusion. One fix could be to transfer the whole modules to local to perform the small change necessary to fix this (change the globs to *${prefix}.vcf)
+
 
 ## v2.0.0dev
 

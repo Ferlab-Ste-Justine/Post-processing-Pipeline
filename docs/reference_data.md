@@ -12,6 +12,7 @@ This directory should contain the following files:
 - The reference genome FASTA file index (e.g., `Homo_sapiens_assembly38.fasta.fai`). Its location will be automatically derived by appending `.fai` to the `referenceGenomeFasta` parameter.
 - The reference genome dictionary file (e.g., `Homo_sapiens_assembly38.dict`). Its location will be automatically derived by replacing the `.fasta` file extension of the `referenceGenomeFasta` parameter with `.dict`.
 
+
 ## Broad reference data (VQSR)
 The `broad` parameter specifies the directory containing the reference data files for VQSR. We chose the name `broad` because
 this data is from the [Broad Institute](https://www.broadinstitute.org/), a collaborative research institution known for its contributions to genomics and biomedical research.
@@ -34,7 +35,8 @@ The `vepCache` parameter specifies the directory for the vep cache. It is only r
 `tools` parameter.
 
 The vep cache is not automatically populated by the pipeline. It must be pre-downloaded. You can obtain a copy of the 
-data by following the [vep installation procedure](https://github.com/Ensembl/ensembl-vep). Generally, we only need the human files obtainable from [Ensembl](https://ftp.ensembl.org/pub/release-112/variation/vep/homo_sapiens_vep_112_GRCh38.tar.gz).
+data by following the [vep installation procedure](https://github.com/Ensembl/ensembl-vep). Generally, we only need the human files obtainable from [Ensembl](https://ftp.ensembl.org/pub/release-111/variation/vep/homo_sapiens_vep_111_GRCh38.tar.gz).
+Make sure to use the data release matching the vep version used (i.e. configured docker container for the vep process).
 
 ## Exomiser reference data
 The exomiser reference data is only required if `exomiser` is specified via the `tools` parameter.

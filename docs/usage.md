@@ -91,6 +91,11 @@ Exomiser, on the other hand, is a tool specifically designed for the analysis of
 integrates phenotype data with variant information to prioritize variants that are likely to be disease-causing. 
 This can greatly assist in the identification of potential disease-causing variants in exome sequencing data.
 
+### Customize versions and commands
+
+If needed, it is possible to customize the options passed to the vep command by overriding the ext.args directive for the
+ENSEMBLVEP_VEP process. See [conf/modules.config](../conf/modules.config).
+
 
 ### Stub mode and quick tests
 

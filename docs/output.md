@@ -20,7 +20,7 @@ The directories listed below will be created in the output directory after the p
   - Copies of the configuration files used: `config/*.config`. This includes the default `nextflow.config` file as well as any additional configuration files passed as parameters.
   - Other metadata relevant for reproducibility: `metadata.txt` . It contains information such as the original command line, the name of the branch and revision used, the username of the person who submitted the job, a list of configuration files passed, the nextflow work directory, etc.
 - `splitmultiallelics/`: pipeline output before running the tools specified via the `tools` parameter.
-- `vep/`: vep output
+- `ensemblvep/`: vep output
 - `exomiser/results`: exomiser output
 
 You might see other folders named after different pipeline processes. These are considered intermediate pipeline outputs.

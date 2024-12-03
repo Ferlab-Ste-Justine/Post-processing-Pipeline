@@ -137,7 +137,7 @@
         "max_memory": {
           "type": "string",
           "description": "Maximum amount of memory that can be requested for any single job.",
-          "default": "120 GB",
+          "default": "120.GB",
           "fa_icon": "fas fa-memory",
           "pattern": "^\\d+(\\.\\d+)?\\.?\\s*(K|M|G|T)?B$",
           "hidden": true,
@@ -146,7 +146,7 @@
         "max_time": {
           "type": "string",
           "description": "Maximum amount of time that can be requested for any single job.",
-          "default": "12h",
+          "default": "12.h",
           "fa_icon": "far fa-clock",
           "pattern": "^(\\d+\\.?\\s*(s|m|h|d|day)\\s*)+$",
           "hidden": true,
@@ -154,7 +154,10 @@
         },
         "max_disk": {
           "type": "string",
-          "default": "80 GB"
+          "default": "80.GB",
+          "description": "Maximum amount of disk space that can be requested for any single job.",
+          "pattern": "^\\d+(\\.\\d+)?\\.?\\s*(K|M|G|T)?B$",
+          "help_text": "Use to set an upper-limit for the disk space requirement for each process. Should be a string in the format integer-unit e.g. `--max_disk '8.GB'`"
         }
       }
     },
@@ -269,15 +272,21 @@
       "description": "vep parameters",
       "default": "",
       "properties": {
-        "vepCpu": {
-          "type": "integer",
-          "default": 4
-        },
-        "vepCache": {
+        "vep_cache": {
           "type": "string",
-          "help_text": "Path to the vepCache directory, which is usually installed by vep by default. It should contain at least the homo_sapien/111_GRCh38/ directory. ",
           "description": "Directory of the Vep Cache",
-          "format": "directory-path"
+          "format": "directory-path",
+          "help_text": "Path to the vepCache directory, which is usually installed by vep by default. It should contain at least the homo_sapien/111_GRCh38/ directory."
+        },
+        "vep_cache_version": {
+          "type": "string",
+          "description": "Which version of the vep cache to annotate with",
+          "help text": "We recommend using the same version as vep, i.e. the vep version that matches the container."
+        },
+        "vep_genome": {
+          "type": "string",
+          "description": "Will be used by vep to find the assembly version in the cache",
+          "help text": "Ex: GRCh38"
         }
       },
       "if": {
@@ -289,7 +298,7 @@
         "required": ["tools"]
       },
       "then": {
-        "required": ["vepCache"]
+        "required": ["vep_cache", "vep_cache_version", "vep_genome"]
       }
     },
     "exomiser_option": {

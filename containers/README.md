@@ -6,7 +6,14 @@ utilities such as the AWS CLI and Rclone. Additionally, it provides more basic l
 not included in the base nextflow image.
 
 ### Exomiser
-This Docker image is based on the official Exomiser Docker image. It includes Exomiser tools but modifies the entrypoint to work with Nextflow on Kubernetes.
+
+This Docker image is based on the official exomiser Docker image exomiser exomiser-cli:14.0.0-bash. 
+It is modified for compatibility with nextflow.
+
+### Exomiser-13
+
+This is a docker image allowing to run exomiser 13.1.0. One can substitute the resulting image with our default
+exomiser image to run the pipeline with exomser 13.1.0.
 
 ## Local Testing Commands
 Here is an example for the Nextflow image. You can adapt these commands for other images as needed.

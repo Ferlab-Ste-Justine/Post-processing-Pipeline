@@ -21,16 +21,30 @@ jobs:
           dockerfile: containers/nextflow/Dockerfile
           tag_format: "latest"
   push-exomiser:
-      name: Publish Exomiser Image using latest tags
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v3
-        - name: Push the image on the registry
-          uses: Ferlab-Ste-Justine/action-push-image@v2
-          with:
-            username: ${{ secrets.FERLAB_DOCKER_HUB_USER }}
-            password: ${{ secrets.FERLAB_DOCKER_HUB_TOKEN }}
-            image: ferlabcrsj/exomiser
-            location: containers/exomiser
-            dockerfile: containers/exomiser/Dockerfile
-            tag_format: "latest"
+    name: Publish Exomiser Image using latest tags
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Push the image on the registry
+        uses: Ferlab-Ste-Justine/action-push-image@v2
+        with:
+          username: ${{ secrets.FERLAB_DOCKER_HUB_USER }}
+          password: ${{ secrets.FERLAB_DOCKER_HUB_TOKEN }}
+          image: ferlabcrsj/exomiser
+          location: containers/exomiser
+          dockerfile: containers/exomiser/Dockerfile
+          tag_format: "latest"
+  push-exomiser-13:
+    name: Publish Exomiser 13.1.0 Image using latest tags
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Push the image on the registry
+        uses: Ferlab-Ste-Justine/action-push-image@v2
+        with:
+          username: ${{ secrets.FERLAB_DOCKER_HUB_USER }}
+          password: ${{ secrets.FERLAB_DOCKER_HUB_TOKEN }}
+          image: ferlabcrsj/exomiser
+          location: containers/exomiser-13
+          dockerfile: containers/exomiser-13/Dockerfile
+          tag_format: "13.1.0-latest"

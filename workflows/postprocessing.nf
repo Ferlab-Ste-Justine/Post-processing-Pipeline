@@ -138,8 +138,7 @@ workflow POSTPROCESSING {
     def referenceGenome = file(params.referenceGenome)
     def pathReferenceGenomeFasta = file(params.referenceGenome + "/" + params.referenceGenomeFasta)
     def pathReferenceGenomeFai = file(pathReferenceGenomeFasta + ".fai")
-    def broad = file(params.broad)
-    def pathIntervalFile = file(params.broad + "/" + params.intervalsFile)
+    def pathIntervalFile =  params.intervalsFile? file(params.intervalsFile) : [] //The empty list is used if we don't want to use an interval file
     def pathReferenceDict = file(params.referenceGenome + "/" + params.referenceGenomeFasta.substring(0,params.referenceGenomeFasta.indexOf(".")) + ".dict")
     file(params.outdir).mkdirs()
 

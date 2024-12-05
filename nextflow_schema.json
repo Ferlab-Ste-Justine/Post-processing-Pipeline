@@ -53,14 +53,14 @@
         },
         "broad": {
           "type": "string",
-          "description": "Directory containing the references for vqsr and the intervalsFile",
-          "help_text": "Path to the directory containing 5 important files: \\n1. The intervalsFile whose name is defined in the intervalsFile parameter\\n2. The Hapmap file for vqsr training\\n3. The omni2.5 file for vqsr training\\n4. The 1000G SNP reference file for vqsr training\\n5. The dbsnp database for vqsr training",
+          "description": "Directory containing the references for vqsr",
+          "help_text": "Path to the directory containing 4 important files: \\n1. The Hapmap file for vqsr training\\n2. The omni2.5 file for vqsr training\\n3. The 1000G SNP reference file for vqsr training\\n4. The dbsnp database for vqsr training",
           "format": "directory-path"
         },
         "intervalsFile": {
           "type": "string",
-          "description": "Namefile of the genome interval we want to use",
-          "help_text": "Namefile of the genome interval. Used during the CombineGVCFs step to indicate the regions of interest",
+          "description": "Path to interval file",
+          "help_text": "Path to an interval file. If specified, will be used during the CombineGVCFs step to indicate the regions of interest.",
           "format": "file-path"
         },
         "referenceGenome": {
@@ -77,8 +77,6 @@
         }
       },
       "required": [
-        "broad",
-        "intervalsFile",
         "referenceGenome",
         "referenceGenomeFasta"
       ]

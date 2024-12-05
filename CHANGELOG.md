@@ -5,6 +5,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## v2.3.0-dev - [date]
 
+### `Added`
+- [#44](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/44) Make interval file optional in GenotypeGVCFs process
+- [#44](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/44) Decouple the interval file parameter from the broad
 
 ## v2.2.0-dev
 

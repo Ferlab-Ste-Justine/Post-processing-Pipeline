@@ -26,6 +26,7 @@ process COMBINEGVCFS {
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     def input_list = vcf.collect{"--variant $it"}.join(' ')
+    def interval_options = interval ? "--intervals $interval" : ""
 
     def avail_mem = 3072
     if (!task.memory) {
@@ -40,7 +41,7 @@ process COMBINEGVCFS {
         --output ${prefix}.combined.g.vcf.gz \\
         --reference ${fasta} \\
         --tmp-dir . \\
-        --intervals $interval \\
+        $interval_options \\
         $args
 
     cat <<-END_VERSIONS > versions.yml

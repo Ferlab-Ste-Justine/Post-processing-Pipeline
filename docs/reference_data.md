@@ -12,23 +12,32 @@ This directory should contain the following files:
 - The reference genome FASTA file index (e.g., `Homo_sapiens_assembly38.fasta.fai`). Its location will be automatically derived by appending `.fai` to the `referenceGenomeFasta` parameter.
 - The reference genome dictionary file (e.g., `Homo_sapiens_assembly38.dict`). Its location will be automatically derived by replacing the `.fasta` file extension of the `referenceGenomeFasta` parameter with `.dict`.
 
-
 ## Broad reference data (VQSR)
-The `broad` parameter specifies the directory containing the reference data files for VQSR. We chose the name `broad` because
-this data is from the [Broad Institute](https://www.broadinstitute.org/), a collaborative research institution known for its contributions to genomics and biomedical research.
+The `broad` parameter specifies the directory containing the reference data files for VQSR. 
+Note that the VQSR step applies only to whole genome data, so you need to specify the broad parameter only if you have whole genome data.
 
-Files can be downloaded using this link: [GATK Ressource Bundle](https://console.cloud.google.com/storage/browser/genomics-public-data/resources/broad/hg38/v0?pageState=(%22StorageObjectListTable%22:(%22f%22:%22%255B%255D%22))&prefix=&forceOnObjectsSortingFiltering=true)
+We chose the name `broad` because this data is from the [Broad Institute](https://www.broadinstitute.org/), a collaborative research institution known 
+for its contributions to genomics and biomedical research.
+
+Files can be downloaded using this link: [GATK Ressource Bundle](https://console.cloud.google.com/storage/browser/genomics-public-data/resources/broad/hg38/v0/)
 
 The broad directory must contain the following files:
--  *Intervals Files*: The genomic interval(s) over which we operate (WES, WGS or targeted sequencing). The filename of this list must be defined with the intervalsFile parameter (e.g., `wgs_calling_regions.hg38.interval_list`). For more details, see [Gatk documentation](https://gatk.broadinstitute.org/hc/en-us/articles/360035531852-Intervals-and-interval-lists).
-- Highly validated variance ressources currently required by VQSR. ***These are currently hard coded in the pipeline***:
   - HapMap file : hapmap_3.3.hg38.vcf.gz
   - 1000G omni2.5 file : 1000G_omni2.5.hg38.vcf.gz
   - 1000G reference file : 1000G_phase1.snps.high_confidence.hg38.vcf.gz
   - SNP database : Homo_sapiens_assembly38.dbsnp138.vcf.gz
 
+These are all highly validated variance ressources currently required by VQSR. 
+***The file names are not configurable and are currently hard coded in the pipeline***.
 
-Extra settings (ex: resource prior probabilities, tranches, etc.) required to run the different VQSR steps are injected through pipeline parameters or hard coded in the vqsr modules. The values chosen for these settings are based on NIH [Biowulf](https://hpc.nih.gov/training/gatk_tutorial/vqsr.html)  
+Extra settings (ex: resource prior probabilities, tranches, etc.) required to run the different VQSR steps are injected through pipeline parameters or hard coded in the vqsr modules. The values chosen for these settings are based on NIH [Biowulf](https://hpc.nih.gov/training/gatk_tutorial/vqsr.html) 
+
+## Interval file 
+The `intervalFile` parameter specifies the path to an interval file (ex: `broad/wgs_calling_regions.hg38.interval_list`).
+
+If specified, the given interval file will be used to defines the genomic interval(s) over which we operate (WES, WGS or targeted sequencing).
+For more details, see [Gatk documentation](https://gatk.broadinstitute.org/hc/en-us/articles/360035531852-Intervals-and-interval-lists).
+
 
 ## VEP Cache Directory
 The `vepCache` parameter specifies the directory for the vep cache. It is only required if `vep` is specified via the
@@ -96,8 +105,8 @@ analysis file should contain only the `analysis` section.
 | --- | --- | --- |
 | `referenceGenome` |  _Required_ | Path to the directory containing the reference genome data |
 | `referenceGenomeFasta` | _Required_ | Filename of the reference genome .fasta file, within the specified `referenceGenome` directory |
-| `broad` | _Required_ | Path to the directory containing Broad reference data |
-| `intervalsFile` | _Required_ | Filename of the genome intervals list, within the specified `broad` directory |
+| `broad` | _Optional_ | Path to the directory containing Broad reference data (for VQSR) |
+| `intervalsFile` | _Optional_ | Path to the file containg the genome intervals list on which to operate |
 | `vepCache` | _Optional_ | Path to the vep cache data directory |
 | `exomiser_data_dir` | _Optional_ | Path to the exomiser reference data directory |
 | `exomiser_genome` | _Optional_ | Genome assembly version to be used by exomiser(`hg19` or `hg38`) |

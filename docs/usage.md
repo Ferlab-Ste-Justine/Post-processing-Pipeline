@@ -164,8 +164,8 @@ Parameters summary
 | `outdir` | _Required_ | Path to the output directoy |
 | `referenceGenome` |  _Required_ | Path to the directory containing the reference genome data |
 | `referenceGenomeFasta` | _Required_ | Filename of the reference genome .fasta file, within the specified `referenceGenome` directory |
-| `broad` | _Required_ | Path to the directory containing Broad reference data |
-| `intervalsFile` | _Required_ | Filename of the genome intervals list, within the specified `broad` directory |
+| `broad` | _Optional_ | Path to the directory containing Broad reference data (for VQSR) |
+| `intervalsFile` | _Optional_ | Path to the file containg the genome intervals list on which to operate |
 | `tools` | _Optional_ | Additional tools to run separated by commas. Supported tools are `vep` and `exomiser` |
 | `vepCache` | _Optional_ | Path to the vep cache data directory |
 | `exomiser_data_dir` | _Optional_ | Path to the exomiser reference data directory |

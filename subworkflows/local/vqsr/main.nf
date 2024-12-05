@@ -13,8 +13,10 @@ workflow VQSR {
         input // channel: (val(meta),  [.vcf.gz, .vcf.gz.tbi])
     main:
         referenceGenome = file(params.referenceGenome)
-        broad = file(params.broad)
 
+        //If VQSR is not used (i.e. only whole exome data), we allow to avoid passing the broad paramater.
+        //This code, however, will be executed anyway, so we need to handle this scenario.
+        broad = params.broad? file(params.broad): ""
 
         outputSNP = variantRecalibratorSNP(input, referenceGenome, broad)
             | join(input)

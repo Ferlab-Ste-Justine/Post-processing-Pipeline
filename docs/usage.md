@@ -164,6 +164,8 @@ Parameters summary
 | `outdir` | _Required_ | Path to the output directoy |
 | `referenceGenome` |  _Required_ | Path to the directory containing the reference genome data |
 | `referenceGenomeFasta` | _Required_ | Filename of the reference genome .fasta file, within the specified `referenceGenome` directory |
+| `dbsnpFile` | _Optional_ | Path to dbsnp file. If specified, will be used to add ids in the ID column of output vcf files. |
+| `dbsnpFileIndex` | _Optional_ | Path to dbsnp file index. Must be specified if the dbsnpFile parameter is specified. |
 | `broad` | _Optional_ | Path to the directory containing Broad reference data (for VQSR) |
 | `intervalsFile` | _Optional_ | Path to the file containg the genome intervals list on which to operate |
 | `tools` | _Optional_ | Additional tools to run separated by commas. Supported tools are `vep` and `exomiser` |

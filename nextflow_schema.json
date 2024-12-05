@@ -74,12 +74,30 @@
           "description": "Name of the fasta file for the genome",
           "help_text": "Name of the fasta file for the genome we usually apply \"Homo_sapiens_assembly38.fasta\"",
           "format": "file-path"
+        },
+        "dbsnpFile": {
+          "type": "string",
+          "description": "Path to dbsnp file.",
+          "help_text": "Path to dbsnp file. Will be used to add dbsnp ids in the output vcf ID column if provided.",
+          "format": "file-path"
+        },
+        "dbsnpFileIndex": {
+          "type": "string",
+          "description": "Path to dbsnp file index.",
+          "help_text": "Path to dbsnp file index. Required if specifying the dbsnpFile parameter.",
+          "format": "file-path"
         }
       },
       "required": [
         "referenceGenome",
         "referenceGenomeFasta"
-      ]
+      ],
+      "if": {
+        "required": ["dbsnpFile"]
+      },
+      "then": {
+        "required": ["dbsnpFileIndex"]
+      }
     },
     "institutional_config_options": {
       "title": "Institutional config options",

@@ -12,6 +12,12 @@ This directory should contain the following files:
 - The reference genome FASTA file index (e.g., `Homo_sapiens_assembly38.fasta.fai`). Its location will be automatically derived by appending `.fai` to the `referenceGenomeFasta` parameter.
 - The reference genome dictionary file (e.g., `Homo_sapiens_assembly38.dict`). Its location will be automatically derived by replacing the `.fasta` file extension of the `referenceGenomeFasta` parameter with `.dict`.
 
+## DBSNP reference data
+The `dbsnpFile` and `dbsnpFileIndex` parameters specify the path to a dbsnp file and it's index, respectively.
+If specified, dbsnp ids will be added in the ID column of the output vcf files in the GenotypeGVCFs step.
+
+Both parameters are null by default. Note that, if specifying `dbsnpFile`, it is mandatory to specify `dbsnpFileIndex`.
+
 ## Broad reference data (VQSR)
 The `broad` parameter specifies the directory containing the reference data files for VQSR. 
 Note that the VQSR step applies only to whole genome data, so you need to specify the broad parameter only if you have whole genome data.
@@ -105,6 +111,8 @@ analysis file should contain only the `analysis` section.
 | --- | --- | --- |
 | `referenceGenome` |  _Required_ | Path to the directory containing the reference genome data |
 | `referenceGenomeFasta` | _Required_ | Filename of the reference genome .fasta file, within the specified `referenceGenome` directory |
+| `dbsnpFile` | _Optional_ | Path to dbsnp file. If specified, will be used to add ids in the ID column of output vcf files. |
+| `dbsnpFileIndex` | _Optional_ | Path to dbsnp file index. Must be specified if the dbsnpFile parameter is specified. |
 | `broad` | _Optional_ | Path to the directory containing Broad reference data (for VQSR) |
 | `intervalsFile` | _Optional_ | Path to the file containg the genome intervals list on which to operate |
 | `vepCache` | _Optional_ | Path to the vep cache data directory |

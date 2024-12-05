@@ -13,7 +13,8 @@ include { VQSR                   } from "../subworkflows/local/vqsr"
 include { EXOMISER               } from '../modules/local/exomiser'
 include { splitMultiAllelics     } from '../modules/local/split_multi_allelics'
 include { ENSEMBLVEP_VEP         } from '../modules/nf-core/ensemblvep/vep/main'  
-include { tabix                  } from '../modules/local/tabix'
+include { tabix  as vep_tabix    } from '../modules/local/tabix'
+include { tabix as initial_tabix } from '../modules/local/tabix' 
 include { COMBINEGVCFS           } from '../modules/local/combine_gvcfs'
 include { GATK4_GENOTYPEGVCFS    } from '../modules/nf-core/gatk4/genotypegvcfs'
 include { GATK4_VARIANTFILTRATION} from '../modules/nf-core/gatk4/variantfiltration'
@@ -132,6 +133,17 @@ process writemeta{
     """
 }
 
+// We assume that the input gvcf files are indexed
+def replicate_excludemnps_output_format(input_channel) {
+    def with_tbi = input_channel.filter{meta, vcf -> file(vcf + ".tbi").exists()}
+        .map{meta, vcf -> [meta, [file(vcf), file(vcf + ".tbi")]]}
+
+    def tbi_input = input_channel.filter{meta, vcf -> !file(vcf + ".tbi").exists()}
+    def tbi_output = initial_tabix(tbi_input)
+    def with_generated_tbi = tbi_input.join(tbi_output).map{meta, vcf, tbi -> [meta, [vcf, tbi]]}
+
+    return with_tbi.concat(with_generated_tbi)
+}
 
 workflow POSTPROCESSING {
     //Local Temp Params
@@ -156,8 +168,13 @@ workflow POSTPROCESSING {
     .collectFile(storeDir: "${params.outdir}/pipeline_info/configs",cache: false)
 
     writemeta()
-    def ch_output_from_excludemnps = EXCLUDE_MNPS(ch_samplesheet).ch_output_excludemnps
-    //Create groupkey for the grouptuple and separate the vcf (file[0]) and the index (files[1])
+
+    def ch_output_from_excludemnps = params.exclude_mnps ? 
+        EXCLUDE_MNPS(ch_samplesheet).ch_output_excludemnps : 
+        replicate_excludemnps_output_format(ch_samplesheet)
+        
+    def grouped_by_family = ch_output_from_excludemnps
+         //Create groupkey for the grouptuple and separate the vcf (file[0]) and the index (files[1])
         .map{meta, files -> tuple(groupKey(meta.familyId, meta.sampleSize),meta,files[0],files[1])}
         .groupTuple()
         .map{ familyId, meta, vcf, tbi -> 
@@ -165,12 +182,10 @@ workflow POSTPROCESSING {
             def updated_meta = meta[0].findAll{!["sample", "id"].contains(it.key) }
             updated_meta["id"] = updated_meta.familyId
             [updated_meta, vcf.flatten(), tbi.flatten()]}
-    
-
 
     //Combine per-sample gVCF files into a multi-sample gVCF file
-    def filtered_one = ch_output_from_excludemnps.filter{it[0].sampleSize == 1}
-    def ch_input_for_combinegvcf = ch_output_from_excludemnps.filter{it[0].sampleSize > 1}    
+    def filtered_one = grouped_by_family.filter{it[0].sampleSize == 1}
+    def ch_input_for_combinegvcf = grouped_by_family.filter{it[0].sampleSize > 1}    
     def ch_output_from_combinegvcf = COMBINEGVCFS(ch_input_for_combinegvcf , pathReferenceGenomeFasta,pathReferenceGenomeFai,pathReferenceDict,pathIntervalFile).combined_gvcf
     .join(COMBINEGVCFS.out.tbi)
     .concat(filtered_one)
@@ -204,7 +219,7 @@ workflow POSTPROCESSING {
             vep_cache,
             params.vep_cache_version
         )
-        tabix(ch_output_from_vep.vcf)
+        vep_tabix(ch_output_from_vep.vcf)
     }
 
     if (isExomiserToolIncluded()) {

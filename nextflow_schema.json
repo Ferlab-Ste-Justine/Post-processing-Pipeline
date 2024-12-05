@@ -279,6 +279,12 @@
           "type": "string",
           "pattern": "^(vep|exomiser)?(,(vep|exomiser))*$",
           "description": "List of tools to use separate with comma.  Available tools: [vep, exomiser]"
+        },
+        "exclude_mnps": {
+          "type": "boolean",
+          "description": "If true, exclude MNPs from the VEP annotation",
+          "help_text": "If true (default), exclude MNPs from the VEP annotation. Must be true on whole genome data.",
+          "default": true 
         }
       }
     },

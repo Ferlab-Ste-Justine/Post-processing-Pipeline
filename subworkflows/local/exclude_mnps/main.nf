@@ -3,13 +3,12 @@ include { BCFTOOLS_NORM } from '../../../modules/nf-core/bcftools/norm/main'
 /**
 Separates MNPs into several SNP that will be analyzed separately
 
-The input and output formats are the same:
-    Input: ([meta]  [some.file.vcf.gz, some.file.vcf.gz.tbi])
-
+    Input: [meta, input.vcf.gz]
+    Output: [meta, [output.vcf.gz, output.vcf.gz.tbi]]
 */
 workflow EXCLUDE_MNPS {
     take:
-        input // channel: (val(metas),  [.gvcf.gz])
+        input // channel: [meta,  .gvcf.gz]
     main:
     versions = Channel.empty()
     def reference_path = file("${params.referenceGenome}/${params.referenceGenomeFasta}")
@@ -24,6 +23,6 @@ workflow EXCLUDE_MNPS {
     versions = versions.mix(BCFTOOLS_FILTER.out.versions)
     versions = versions.mix(BCFTOOLS_NORM.out.versions)
     emit:
-        ch_output_excludemnps // channel: (val(meta),  [.vcf.gz, .vcf.gz.tbi])
+        ch_output_excludemnps // channel: [meta,  [.vcf.gz, .vcf.gz.tbi]]
         versions
 }

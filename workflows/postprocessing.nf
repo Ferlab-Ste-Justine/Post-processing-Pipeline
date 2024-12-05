@@ -140,6 +140,8 @@ workflow POSTPROCESSING {
     def pathReferenceGenomeFai = file(pathReferenceGenomeFasta + ".fai")
     def pathIntervalFile =  params.intervalsFile? file(params.intervalsFile) : [] //The empty list is used if we don't want to use an interval file
     def pathReferenceDict = file(params.referenceGenome + "/" + params.referenceGenomeFasta.substring(0,params.referenceGenomeFasta.indexOf(".")) + ".dict")
+    def dbsnpFile = params.dbsnpFile? file(params.dbsnpFile) : []
+    def dbsnpFileIndex = params.dbsnpFileIndex? file(params.dbsnpFileIndex) : []
     file(params.outdir).mkdirs()
 
     take:
@@ -180,8 +182,8 @@ workflow POSTPROCESSING {
     [[:], pathReferenceGenomeFasta],
     [[:], pathReferenceGenomeFai],
     [[:], pathReferenceDict],
-    [[:], []], //leaving empty as we don't use dbsnp
-    [[:], []]  //leaving empty as we don't use dbsnp
+    [[:], dbsnpFile],
+    [[:], dbsnpFileIndex]
     ).vcf
     .join(GATK4_GENOTYPEGVCFS.out.tbi)
 

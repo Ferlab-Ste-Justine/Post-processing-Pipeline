@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#41](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/41) Allow to customize the vep command
 - [#41](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/41) Improve parameter schema for params max_disk, max_memory, max_time
 - [#41](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/41) Consider only stable nextflow versions for ci test
+- [#42](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/42) Add docker image for exomiser 13.1.0
 
 ### `Known issues`
 - The nf-core modules that we are using have a potential performance flaw. Typically, the regex used to describe the output files also match the input files (ex: "*.vcf"), which can cause unnecessary file transfers.  This has already proven to cause issues on fusion. One fix could be to transfer the whole modules to local to perform the small change necessary to fix this.
@@ -17,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ### `Fixed`
-- [#51](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/41) Fix vep url pointing to the wrong vep version in the reference data documentation.
+- [#41](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/41) Fix vep url pointing to the wrong vep version in the reference data documentation.
 
 ## v2.1.0dev
 

@@ -18,7 +18,7 @@ The samplesheet must contains the following columns at the minimum:
 - *familyId*: The identifier used for the sample family
 - *sample*: The identifier used for the sample
 - *sequencingType*: Must be either WES (Whole Exome Sequencing) or WGS (Whole Genome Sequencing)
-- *gvcf*: Path to the sample .gvcf file
+- *gvcf*: Path to the sample .gvcf.gz file
 
 Additionnally, there is an optional *phenoFamily* column that can contain a .yml/.json file providing phenotype 
 information on the family in phenopacket format. This column is only necessary if using the exomiser tool.
@@ -76,6 +76,17 @@ If you wish to repeatedly use the same parameters for multiple runs, rather than
 :::warning
 Do not use `-c <file>` to specify parameters as this will result in errors. Custom config files specified with `-c` must only be used for [tuning process resource specifications](https://nf-co.re/docs/usage/configuration#tuning-workflow-resources), other infrastructural tweaks (such as output directories), or module arguments (args).
 :::
+
+### Skip exclude MNPs
+
+At the beginning of our workflow, we separate MNPs into individual SNPs.  
+
+You can optionally skip this step by setting the `exclude_mnps` parameter to `false` (default is `true`).
+
+Note that MNPs are not supported by the VQSR procedure, so you cannot skip this step if you have whole genome data.
+
+Additionally, if you skip the exclusion of MNPs, ensure that your input GVCF files are indexed or that they are compressed with bgzip. 
+If the index file is missing, the workflow will attempt to generate it, but the input GVCF file must be compressed with bgzip for this to work.
 
 
 ### Tools
@@ -170,6 +181,7 @@ Parameters summary
 | `intervalsFile` | _Optional_ | Path to the file containg the genome intervals list on which to operate |
 | `tools` | _Optional_ | Additional tools to run separated by commas. Supported tools are `vep` and `exomiser` |
 | `vepCache` | _Optional_ | Path to the vep cache data directory |
+| `exclude_mnps` | _Optional_ | Replace MNPs by individual SNPs (default: true). Must be true on whole genome data. |
 | `exomiser_data_dir` | _Optional_ | Path to the exomiser reference data directory |
 | `exomiser_genome` | _Optional_ | Genome assembly version to be used by exomiser(`hg19` or `hg38`) |
 | `exomiser_data_version` | _Optional_ | Exomiser data version (e.g., `2402`)|

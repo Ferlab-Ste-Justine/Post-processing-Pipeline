@@ -6,7 +6,7 @@ process tabix {
     tuple val(meta), path(vcfFile)
 
     output:
-    path "*.tbi"
+    tuple val(meta), path("*.tbi")
 
     script:
     def args = task.ext.args ?: ''

@@ -196,6 +196,11 @@
           "fa_icon": "fas fa-question-circle",
           "hidden": true
         },
+        "publish_all": {
+          "type": "boolean",
+          "description": "Publish results from all processes to the output directory.",
+          "help_text": "If true (default false), publish results from all processes to the output directory. This is useful for debugging and testing, but can create a lot of output files."
+        },
         "publish_dir_mode": {
           "type": "string",
           "default": "copy",
@@ -222,7 +227,7 @@
           "type": "boolean",
           "description": "Boolean whether to validate parameters against the schema at runtime",
           "default": true,
-          "fa_icon": "fas fa-check-square",
+
           "hidden": true
         },
         "validationShowHiddenParams": {

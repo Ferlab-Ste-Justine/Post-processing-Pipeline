@@ -132,4 +132,7 @@ For more details about the content of each of these files, you can have a look a
 
 ## Others Steps
 
-You might see other folders named after different pipeline processes. These are considered intermediate pipeline outputs.
+If needed, you can set the parameter `publish_all` to `true`, and the output from all pipeline steps will be published. 
+The names of the subdirectories will match the nextflow process names.
+
+We don't recommend using this in production. This is primarily useful for testing, debugging or troubleshooting.

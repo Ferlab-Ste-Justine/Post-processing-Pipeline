@@ -389,6 +389,18 @@
           "description": "The filename of the exomiser REMM data file (e.g., ReMM.v0.3.1.post1.hg38.tsv.gz)",
           "format": "file-path",
           "pattern": "^\\S+\\.tsv.gz$"
+        },
+        "exomiser_local_frequency_path": {
+          "type": "string",
+          "description": "Path to the local frequency data file",
+          "format": "file-path",
+          "pattern": "^\\S+\\.tsv.gz$"
+        },
+        "exomiser_local_frequency_index_path": {
+          "type": "string",
+          "description": "Path to the index of the local frequency data file",
+          "format": "file-path",
+          "pattern": "^\\S+\\.tbi$"
         }
       },
       "allOf": [
@@ -436,6 +448,14 @@
               "exomiser_data_dir",
               "exomiser_data_version"
             ]
+          }
+        },
+        {
+          "if": {
+            "required": ["exomiser_local_frequency_path"]
+          },
+          "then": {
+            "required": ["exomiser_local_frequency_index_path"]
           }
         }
       ]

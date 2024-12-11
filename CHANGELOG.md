@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#45](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/45) Allow to add dbsnp ids to output vcf files
 - [#46](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/46) Allow to skip the exclude mnp step
 - [#47](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/47) Improve pipeline output documentation
+- [#48](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/48) Publish only main outputs by default
 
 ### `Known issues`
 - The nf-core modules that we are using have a potential performance flaw. Typically, the regex used to describe the output files also match the input files (ex: "*.vcf"), which can cause unnecessary file transfers.  This has already proven to cause issues on fusion. One fix could be to transfer the whole modules to local to perform the small change necessary to fix this.

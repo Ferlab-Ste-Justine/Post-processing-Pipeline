@@ -12,6 +12,7 @@ inheritanceModes: {
   MITOCHONDRIAL: 0.2
 }
 frequencySources: [
+    LOCAL,
     UK10K
 ]
 pathogenicitySources: [ REVEL, REMM, CADD]

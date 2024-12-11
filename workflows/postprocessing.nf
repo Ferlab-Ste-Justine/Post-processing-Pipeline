@@ -60,6 +60,8 @@ def exomiser(inputChannel,
     exomiser_data_dir, 
     analysis_wes_path, 
     analysis_wgs_path,
+    local_frequency_file,
+    local_frequency_index_file,
     remm_version,
     remm_filename,
     cadd_version,
@@ -80,10 +82,12 @@ def exomiser(inputChannel,
     if (cadd_version) {
         cadd_input = [cadd_version, cadd_snv_filename, cadd_indel_filename]
     }
+
     return EXOMISER(ch_input_for_exomiser,
         file(exomiser_data_dir),
         exomiser_genome,
         exomiser_data_version,
+        [local_frequency_file, local_frequency_index_file],
         remm_input,
         cadd_input
     )  
@@ -154,6 +158,9 @@ workflow POSTPROCESSING {
     def pathReferenceDict = file(params.referenceGenome + "/" + params.referenceGenomeFasta.substring(0,params.referenceGenomeFasta.indexOf(".")) + ".dict")
     def dbsnpFile = params.dbsnpFile? file(params.dbsnpFile) : []
     def dbsnpFileIndex = params.dbsnpFileIndex? file(params.dbsnpFileIndex) : []
+    def exomiserLocalFrequencyFile = params.exomiser_local_frequency_path? file(params.exomiser_local_frequency_path) : []
+    def exomiserLocalFrequencyIndexFile = params.exomiser_local_frequency_index_path? file(params.exomiser_local_frequency_index_path) : []
+   
     file(params.outdir).mkdirs()
 
     take:
@@ -229,6 +236,8 @@ workflow POSTPROCESSING {
             params.exomiser_data_dir,
             params.exomiser_analysis_wes,
             params.exomiser_analysis_wgs,
+            exomiserLocalFrequencyFile,
+            exomiserLocalFrequencyIndexFile,
             params.exomiser_remm_version,
             params.exomiser_remm_filename,
             params.exomiser_cadd_version,

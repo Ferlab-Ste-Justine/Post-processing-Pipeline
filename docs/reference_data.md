@@ -80,6 +80,8 @@ cadd/1.7/
 
 To prepare the exomiser data directory, follow the instructions in the [exomiser installation documentation](https://exomiser.readthedocs.io/en/latest/installation.html#linux-install)
 
+Exomiser allows the use of a custom file for frequency data sources, typically to reduce the priority of high-frequency variants caused by artifacts. To use this feature, specify the `LOCAL` frequency source in the exomiser analysis file. Then, provide the paths to your custom frequency file and its index using the parameters `exomiser_local_frequency_path` and `exomiser_local_frequency_index_path`. Note that the index file is required if using this feature.
+
 Together with the `exomiser_data_dir` parameter, these parameters must be provided to exomiser and should match the reference data available
 - `exomiser_genome`: The genome assembly version to be used by exomiser. Accepted values are `hg38` or `hg19`.
 - `exomiser_data_version`: The exomiser data version. Example: `2402`.
@@ -88,6 +90,8 @@ Together with the `exomiser_data_dir` parameter, these parameters must be provid
 - `exomiser_cadd_snv_filename`: The filename of the exomiser CADD snv data file (optional). Example: `whole_genome_SNVs.tsv.gz`
 - `exomiser_remm_version`: The version of the REMM data to be used by exomiser (optional). Example:`0.3.1.post1`
 - `exomiser_remm_filename`: The filename of the exomiser REMM data file (optional). Example: `ReMM.v0.3.1.post1.hg38.tsv.gz`
+- `exomiser_local_frequency_path`: Path to a custom frequency source file (optional).
+- `exomiser_local_frequency_index_path`: Path to the index file (.tbi) of the custom frequency source file (optional).
 
 ## Exomiser analysis files
 In addition to the reference data, exomiser requires an analysis file (.yml/.json) that contains, among others 
@@ -124,6 +128,8 @@ analysis file should contain only the `analysis` section.
 | `exomiser_cadd_snv_filename`|	_Optional_ | Filename of the exomiser CADD snv data file (e.g., `whole_genome_SNVs.tsv.gz`) |
 | `exomiser_remm_version` | _Optional_ | Version of the REMM data to be used by exomiser (e.g., `0.3.1.post1`)|
 | `exomiser_remm_filename` | _Optional_	| Filename of the exomiser REMM data file (e.g., `ReMM.v0.3.1.post1.hg38.tsv.gz`) |
+| `exomiser_local_frequency_path`| _Optional_ | Path to a custom frequency source file |
+| `exomiser_local_frequency_index_path`| _Optional_ | Path to the index file (.tbi) of the custom frequency source file. Required if specifying `exomiser_local_frequency_path`. |
 | `exomiser_analysis_wes` | _Optional_ | Path to the exomiser analysis file for WES data, if different from the default |
 | `exomiser_analysis_wgs` | _Optional_ | Path to the exomiser analysis file for WGS data, if different from the default |
 

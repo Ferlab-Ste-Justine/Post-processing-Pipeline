@@ -7,12 +7,17 @@ process EXOMISER {
     path datadir
     val exomiserGenome
     val exomiserDataVersion
-    
+
+    // If specified, the local frequency file path will be inferred from the given path and passed to the exomiser cli.
+    // It is expected that the file has a corresponding .tbi index file.
+    tuple path(localFrequencyPath), path(localFrequencyIndexPath)
+
     // If remm/cadd version is specified, remm/cadd reference file(s) path(s) will be inferred from the given filename(s)
     // and passed to the exomiser cli. Each remm/cadd reference file should have a corresponding .tbi index file.
     // Note that, if nextflow adds support for optional paths, one might prefer to pass the full paths explicitly.
     tuple val(remmVersion), val(remmFileName) 
     tuple val(caddVersion), val(caddSnvFileName),val(caddIndelFileName)
+
 
     output:
     tuple val(meta), path("results/*vcf.gz")         , optional:true, emit: vcf
@@ -30,6 +35,12 @@ process EXOMISER {
     def args = task.ext.args ?: ''
     def exactVcfFile = vcfFile.find { it.name.endsWith("vcf.gz") }
 
+    def localFrequencyFileArgs = "" 
+    if (localFrequencyPath) {
+        log.info("Using LOCAL frequency file {}", localFrequencyPath)
+        localFrequencyFileArgs = "--exomiser.${exomiserGenome}.local-frequency-path=/`pwd`/${localFrequencyPath}"
+    }
+
     def remmArgs = ""
     if (remmVersion) {
         log.info("Using REMM version {}", remmVersion)
@@ -44,16 +55,25 @@ process EXOMISER {
         caddArgs += " --exomiser.${exomiserGenome}.cadd-snv-path=/`pwd`/${datadir}/cadd/${caddVersion}/${caddSnvFileName}"
         caddArgs += " --exomiser.${exomiserGenome}.cadd-indel-path=/`pwd`/${datadir}/cadd/${caddVersion}/${caddIndelFileName}"
     }
+
+    def avail_mem = 3072
+    if (!task.memory) {
+        log.info '[EXOMISER] Available memory not known - defaulting to 3GB. Specify process memory requirements to change this.'
+    } else {
+        avail_mem = (task.memory.mega*0.8).intValue()
+    }
+
     """
     #!/bin/bash -eo pipefail
 
-    java -cp \$( cat /app/jib-classpath-file ) \$( cat /app/jib-main-class-file ) \\
+    java -Xmx${avail_mem}M -cp \$( cat /app/jib-classpath-file ) \$( cat /app/jib-main-class-file ) \\
         --vcf ${exactVcfFile} \\
         --assembly "${params.exomiser_genome}" \\
         --analysis "${analysisFile}" \\
         --sample ${phenoFile} \\
         --output-format=HTML,JSON,TSV_GENE,TSV_VARIANT,VCF \\
         --exomiser.data-directory=/`pwd`/${datadir} \\
+        ${localFrequencyFileArgs} \\
         ${remmArgs} \\
         ${caddArgs} \\
         --exomiser.${exomiserGenome}.data-version="${exomiserDataVersion}" \\

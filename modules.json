@@ -15,6 +15,11 @@
             "git_sha": "33ef773a7ea36e88323902f63662aa53c9b88988",
             "installed_by": ["modules"]
           },
+          "bcftools/view": {
+            "branch": "master",
+            "git_sha": "666652151335353eef2fcd58880bcef5bc2928e1",
+            "installed_by": ["modules"]
+          },
           "ensemblvep/vep": {
             "branch": "master",
             "git_sha": "6e3585d9ad20b41adc7d271009f8cb5e191ecab4",

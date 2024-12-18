@@ -10,11 +10,11 @@ include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pi
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { EXCLUDE_MNPS           } from "../subworkflows/local/exclude_mnps"
 include { VQSR                   } from "../subworkflows/local/vqsr"
+include { BCFTOOLS_VIEW          } from '../modules/nf-core/bcftools/view/main' 
 include { EXOMISER               } from '../modules/local/exomiser'
 include { splitMultiAllelics     } from '../modules/local/split_multi_allelics'
 include { ENSEMBLVEP_VEP         } from '../modules/nf-core/ensemblvep/vep/main'  
 include { tabix  as vep_tabix    } from '../modules/local/tabix'
-include { tabix as initial_tabix } from '../modules/local/tabix' 
 include { COMBINEGVCFS           } from '../modules/local/combine_gvcfs'
 include { GATK4_GENOTYPEGVCFS    } from '../modules/nf-core/gatk4/genotypegvcfs'
 include { GATK4_VARIANTFILTRATION} from '../modules/nf-core/gatk4/variantfiltration'
@@ -137,16 +137,28 @@ process writemeta{
     """
 }
 
-// We assume that the input gvcf files are indexed
-def replicate_excludemnps_output_format(input_channel) {
-    def with_tbi = input_channel.filter{meta, vcf -> file(vcf + ".tbi").exists()}
-        .map{meta, vcf -> [meta, [file(vcf), file(vcf + ".tbi")]]}
 
-    def tbi_input = input_channel.filter{meta, vcf -> !file(vcf + ".tbi").exists()}
-    def tbi_output = initial_tabix(tbi_input)
-    def with_generated_tbi = tbi_input.join(tbi_output).map{meta, vcf, tbi -> [meta, [vcf, tbi]]}
+def handle_mnps(input_channel, do_exclude_mnps) {
+    if(!do_exclude_mnps) {
+        return input_channel.map{meta, vcf, tbi -> [meta, [vcf, tbi]]}
+    }
+    def ch_input_excludemnps = input_channel.map{meta, vcf, tbi -> [meta, vcf]}
+    return EXCLUDE_MNPS(ch_input_excludemnps).ch_output_excludemnps
+}
 
-    return with_tbi.concat(with_generated_tbi)
+
+/* 
+  Deal with variations in input file formats, extensions, and the presence or absence of index files.
+  input: [meta, vcf]
+  output: [meta, vcf, tbi]
+*/
+def standardize_input_vcf_files(input_channel) {
+    def view_input = input_channel.map{meta,  vcf -> 
+        def tbi = file(vcf + ".tbi")
+        [meta, vcf, tbi.exists() ? tbi: []]
+    }
+    def view_output = BCFTOOLS_VIEW(view_input, [], [], [])
+    return view_output.vcf.join(view_output.tbi)
 }
 
 workflow POSTPROCESSING {
@@ -176,11 +188,12 @@ workflow POSTPROCESSING {
 
     writemeta()
 
-    def ch_output_from_excludemnps = params.exclude_mnps ? 
-        EXCLUDE_MNPS(ch_samplesheet).ch_output_excludemnps : 
-        replicate_excludemnps_output_format(ch_samplesheet)
+
+    def ch_samplesheet_standard = standardize_input_vcf_files(ch_samplesheet)
+    
+    def ch_output_from_handle_mnps = handle_mnps(ch_samplesheet_standard, params.exclude_mnps)
         
-    def grouped_by_family = ch_output_from_excludemnps
+    def grouped_by_family = ch_output_from_handle_mnps
          //Create groupkey for the grouptuple and separate the vcf (file[0]) and the index (files[1])
         .map{meta, files -> tuple(groupKey(meta.familyId, meta.sampleSize),meta,files[0],files[1])}
         .groupTuple()

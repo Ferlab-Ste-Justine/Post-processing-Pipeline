@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Fixed`
 - [#50](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/50) Use container tag 1.20 for splitMultiAllelics process
+- [#51](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/51) Add missing ressources for exomiser process in configuration
 
 ### `Known issues`
 - The nf-core modules that we are using have a potential performance flaw. Typically, the regex used to describe the output files also match the input files (ex: "*.vcf"), which can cause unnecessary file transfers.  This has already proven to cause issues on fusion. One fix could be to transfer the whole modules to local to perform the small change necessary to fix this.

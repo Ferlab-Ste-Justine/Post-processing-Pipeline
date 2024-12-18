@@ -1,6 +1,6 @@
 process EXOMISER {
 
-    label 'process_low'
+    label 'process_medium'
  
     input:
     tuple val(meta), path(vcfFile), path(phenoFile), path(analysisFile)

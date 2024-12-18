@@ -1,9 +1,7 @@
 // This module does not follow nf-core standards. We plan to fix or replace it with an nf-core module in the future.
 process splitMultiAllelics{
-    label 'medium'
+    label 'process_medium'
 
-    container 'staphb/bcftools'
-    
     input:
     tuple val(meta), path(vcfFile)
     path referenceGenome

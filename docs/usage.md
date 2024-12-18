@@ -85,10 +85,6 @@ You can optionally skip this step by setting the `exclude_mnps` parameter to `fa
 
 Note that MNPs are not supported by the VQSR procedure, so you cannot skip this step if you have whole genome data.
 
-Additionally, if you skip the exclusion of MNPs, ensure that your input GVCF files are indexed or that they are compressed with bgzip. 
-If the index file is missing, the workflow will attempt to generate it, but the input GVCF file must be compressed with bgzip for this to work.
-
-
 ### Tools
 
 You can include additional analysis in your pipeline  via the `tools` parameter. Currently, the pipeline supports 

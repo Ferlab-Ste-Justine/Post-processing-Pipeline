@@ -170,7 +170,7 @@
         },
         "max_disk": {
           "type": "string",
-          "default": "80.GB",
+          "default": "200.GB",
           "description": "Maximum amount of disk space that can be requested for any single job.",
           "pattern": "^\\d+(\\.\\d+)?\\.?\\s*(K|M|G|T)?B$",
           "help_text": "Use to set an upper-limit for the disk space requirement for each process. Should be a string in the format integer-unit e.g. `--max_disk '8.GB'`"

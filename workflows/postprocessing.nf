@@ -67,9 +67,10 @@ def exomiser(inputChannel,
     cadd_snv_filename,
     cadd_indel_filename
     ) {
-    def ch_input_for_exomiser = inputChannel.map{meta, files -> [
+    def ch_input_for_exomiser = inputChannel.map{meta, vcf, tbi -> [
         meta,
-        files,
+        vcf,
+        tbi,
         meta.familypheno, 
         meta.sequencingType == "WES"? file(analysis_wes_path) : file(analysis_wgs_path)
     ]}
@@ -94,11 +95,7 @@ def exomiser(inputChannel,
 
 def vep(input_channel, vep_genome, vep_species, path_fasta, vep_cache, vep_cache_version) {
 
-    def ch_input_for_vep  = input_channel.map{meta, files ->
-        def vcf_file = files.find { it.name.endsWith("vcf.gz") }
-        def custom_extra_files = [] 
-        [meta, vcf_file, custom_extra_files]
-    }
+    def ch_input_for_vep  = input_channel.map{meta, vcf, tbi -> [meta, vcf, []]}
 
     return VCF_ANNOTATE_ENSEMBLVEP(
         ch_input_for_vep,  //  meta, vcf, optional_custom_files
@@ -226,11 +223,13 @@ workflow POSTPROCESSING {
     //normalize variants
     def ch_output_from_splitMultiAllelics = splitMultiAllelics(ch_output_from_tagArtifacts, referenceGenome)
 
+
+    def ch_output_from_vep //declaring vep output channel early so that it can be accessed outside the if block
     //Annotating variants with VEP
     if (isVepToolIncluded()) {
         def vep_cache = file(params.vep_cache)
 
-        def ch_output_from_vep = vep(
+        ch_output_from_vep = vep(
             ch_output_from_splitMultiAllelics, 
             params.vep_genome,
             HOMO_SAPIENS_SPECIES,
@@ -241,7 +240,13 @@ workflow POSTPROCESSING {
     }
 
     if (isExomiserToolIncluded()) {
-        exomiser(ch_output_from_splitMultiAllelics, 
+        def ch_exomiser_input = ch_output_from_splitMultiAllelics
+        if (isVepToolIncluded() && params.exomiser_start_from_vep){
+            log.info("Running the exomiser analysis using the vep annotated vcf file as input")
+            ch_exomiser_input = ch_output_from_vep
+        }
+        exomiser(
+            ch_exomiser_input,
             params.exomiser_genome,
             params.exomiser_data_version,
             params.exomiser_data_dir,

@@ -401,6 +401,11 @@
           "description": "Path to the index of the local frequency data file",
           "format": "file-path",
           "pattern": "^\\S+\\.tbi$"
+        },
+        "exomiser_start_from_vep": {
+          "type": "boolean",
+          "description": "If true, run the exomiser analysis on the VEP annotated VCF file",
+          "default": false
         }
       },
       "allOf": [

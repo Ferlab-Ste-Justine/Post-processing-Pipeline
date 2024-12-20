@@ -3,7 +3,7 @@ process EXOMISER {
     label 'process_medium'
  
     input:
-    tuple val(meta), path(vcfFile), path(phenoFile), path(analysisFile)
+    tuple val(meta), path(vcfFile), path(indexFile), path(phenoFile), path(analysisFile)
     path datadir
     val exomiserGenome
     val exomiserDataVersion
@@ -33,7 +33,6 @@ process EXOMISER {
 
     script:
     def args = task.ext.args ?: ''
-    def exactVcfFile = vcfFile.find { it.name.endsWith("vcf.gz") }
 
     def localFrequencyFileArgs = "" 
     if (localFrequencyPath) {
@@ -63,11 +62,13 @@ process EXOMISER {
         avail_mem = (task.memory.mega*0.8).intValue()
     }
 
+    // Note: specifying the extra options (args) at the beginning because output options are ignored when they are passed at the end.
     """
     #!/bin/bash -eo pipefail
 
     java -Xmx${avail_mem}M -cp \$( cat /app/jib-classpath-file ) \$( cat /app/jib-main-class-file ) \\
-        --vcf ${exactVcfFile} \\
+        ${args} \\
+        --vcf ${vcfFile} \\
         --assembly "${params.exomiser_genome}" \\
         --analysis "${analysisFile}" \\
         --sample ${phenoFile} \\
@@ -77,8 +78,7 @@ process EXOMISER {
         ${remmArgs} \\
         ${caddArgs} \\
         --exomiser.${exomiserGenome}.data-version="${exomiserDataVersion}" \\
-        --exomiser.phenotype.data-version="${exomiserDataVersion}" \\
-        ${args}
+        --exomiser.phenotype.data-version="${exomiserDataVersion}"
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -91,12 +91,12 @@ process EXOMISER {
     """
     #!/bin/bash -eo pipefail
     mkdir results
-    touch results/${familyId}.splitted-exomiser.genes.tsv
-    touch results/${familyId}.splitted-exomiser.html
-    touch results/${familyId}.splitted-exomiser.json
-    touch results/${familyId}.splitted-exomiser.variants.tsv
-    touch results/${familyId}.splitted-exomiser.vcf.gz
-    touch results/${familyId}.splitted-exomiser.vcf.gz.tbi
+    touch results/${familyId}.exomiser.genes.tsv
+    touch results/${familyId}.exomiser.html
+    touch results/${familyId}.exomiser.json
+    touch results/${familyId}.exomiser.variants.tsv
+    touch results/${familyId}.exomiser.vcf.gz
+    touch results/${familyId}.exomiser.vcf.gz.tbi
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

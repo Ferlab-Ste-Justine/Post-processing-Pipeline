@@ -109,22 +109,22 @@ The `exomiser/results` subdirectory contains the output fo the pipeline after th
 
 ```
 |_ exomiser/results
-   |_ family1.splitted-exomiser.genes.tsv
-   |_ family1.splitted-exomiser.html
-   |_ family1.splitted-exomiser.json
-   |_ family1.splitted-exomiser.variants.tsv
-   |_ family1.splitted-exomiser.vcf.gz
-   |_ family1.splitted-exomiser.vcf.gz.tbi
+   |_ family1.exomiser.genes.tsv
+   |_ family1.exomiser.html
+   |_ family1.exomiser.json
+   |_ family1.exomiser.variants.tsv
+   |_ family1.exomiser.vcf.gz
+   |_ family1.exomiser.vcf.gz.tbi
   ...   
 ```
 
 It should contains a set of 6 files per family.  Specifically, we use the following naming scheme:
-- `<FAMILY_ID>.splitted-exomiser.genes.tsv`
-- `<FAMILY_ID>.splitted-exomiser.html`
-- `<FAMILY_ID>.splitted-exomiser.json`
-- `<FAMILY_ID>.splitted-exomiser.variants.tsv`
-- `<FAMILY_ID>.splitted-exomiser.vcf.gz`
-- `<FAMILY_ID>.splitted-exomiser.vcf.gz.tbi`
+- `<FAMILY_ID>.exomiser.genes.tsv`
+- `<FAMILY_ID>.exomiser.html`
+- `<FAMILY_ID>.exomiser.json`
+- `<FAMILY_ID>.exomiser.variants.tsv`
+- `<FAMILY_ID>.exomiser.vcf.gz`
+- `<FAMILY_ID>.exomiser.vcf.gz.tbi`
 
 The family ID should match the family ID in the input sample sheet.
 

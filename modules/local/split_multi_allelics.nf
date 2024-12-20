@@ -7,7 +7,7 @@ process splitMultiAllelics{
     path referenceGenome
 
     output:
-    tuple val(meta), path("*splitted.vcf*")
+    tuple val(meta), path("*splitted.vcf.gz"), path("*splitted.vcf.gz.tbi")
 
     script:
     def familyId = meta.familyId

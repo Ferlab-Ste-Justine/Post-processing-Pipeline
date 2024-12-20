@@ -98,6 +98,14 @@ Exomiser, on the other hand, is a tool specifically designed for the analysis of
 integrates phenotype data with variant information to prioritize variants that are likely to be disease-causing. 
 This can greatly assist in the identification of potential disease-causing variants in exome sequencing data.
 
+### Exomiser input data
+
+By default, both vep and exomiser steps, if applicable, run in parallel and consume the output of the normalization step.
+
+To have the Exomiser step start from the VEP output instead, set the parameter `exomiser_start_from_vep` to `true`. In this case, the vep and exomiser steps will run sequentially.
+
+Note that the parameter `exomiser_start_from_vep` will be ignored if vep is not specified via the `tools` parameter.
+
 ### Customize versions and commands
 
 If needed, it is possible to customize the options passed to the vep command by overriding the ext.args directive for the
@@ -188,3 +196,4 @@ Parameters summary
 | `exomiser_remm_filename` | _Optional_	| Filename of the exomiser REMM data file (e.g., `ReMM.v0.3.1.post1.hg38.tsv.gz`) |
 | `exomiser_analysis_wes` | _Optional_ | Path to the exomiser analysis file for WES data, if different from the default |
 | `exomiser_analysis_wgs` | _Optional_ | Path to the exomiser analysis file for WGS data, if different from the default |
+| `exomiser_start_from_vep` | _Optional_ | If `true` (default `false`), run the exomiser analysis on the VEP annotated VCF file. Ignored if vep is not activated via `tools` parameter. |

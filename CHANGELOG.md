@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#48](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/48) Publish only main outputs by default
 - [#49](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/49) Add support for local frequency source
 - [#49](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/49) Pass java -Xmx option at the command line for exomiser
+- [#53](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/53) Replace vep and tabix logic by a standard nf-core subworkflow
 
 ### `Fixed`
 - [#50](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/50) Use container tag 1.20 for splitMultiAllelics process

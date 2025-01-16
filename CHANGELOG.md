@@ -5,6 +5,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## v2.4.0-dev - [date]
 
+### `Fixed`
+- [#57](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/57) Allow to pass exomiser application properties
+
 ## v2.3.0-dev
 
 ### `Added`

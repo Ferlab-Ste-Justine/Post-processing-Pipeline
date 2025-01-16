@@ -33,6 +33,7 @@ process EXOMISER {
 
     script:
     def args = task.ext.args ?: ''
+    def applicationPropertiesArgs = task.ext.application_properties_args ?: ''
 
     def localFrequencyFileArgs = "" 
     if (localFrequencyPath) {
@@ -67,18 +68,19 @@ process EXOMISER {
     #!/bin/bash -eo pipefail
 
     java -Xmx${avail_mem}M -cp \$( cat /app/jib-classpath-file ) \$( cat /app/jib-main-class-file ) \\
-        ${args} \\
         --vcf ${vcfFile} \\
         --assembly "${params.exomiser_genome}" \\
         --analysis "${analysisFile}" \\
         --sample ${phenoFile} \\
         --output-format=HTML,JSON,TSV_GENE,TSV_VARIANT,VCF \\
+        ${args} \\
         --exomiser.data-directory=/`pwd`/${datadir} \\
         ${localFrequencyFileArgs} \\
         ${remmArgs} \\
         ${caddArgs} \\
         --exomiser.${exomiserGenome}.data-version="${exomiserDataVersion}" \\
-        --exomiser.phenotype.data-version="${exomiserDataVersion}"
+        --exomiser.phenotype.data-version="${exomiserDataVersion}" \\
+        ${applicationPropertiesArgs}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

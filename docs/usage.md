@@ -106,6 +106,16 @@ To have the Exomiser step start from the VEP output instead, set the parameter `
 
 Note that the parameter `exomiser_start_from_vep` will be ignored if vep is not specified via the `tools` parameter.
 
+### Exomiser CLI options
+
+We typically allow passing extra arguments in our process scripts via the process `task.ext` directive (`task.ext.args` key).
+
+When using the exomiser process, it's important to distinguish between regular CLI options and options that correspond to properties normally specified in the application.properties file.
+
+Regular CLI options should be added to `task.ext.args`.
+
+Options that correspond to application properties (e.g., typically `--exomiser.some-property=value`) must be added to `task.ext.application_properties_args`. These options need to be grouped at the end of the exomiser command to ensure that regular exomiser cli options are parsed correctly.
+
 ### Customize versions and commands
 
 If needed, it is possible to customize the options passed to the vep command by overriding the ext.args directive for the

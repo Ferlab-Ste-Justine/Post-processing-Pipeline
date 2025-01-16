@@ -39,7 +39,7 @@ This schema was done using [inkscape](https://inkscape.org/) with the good prati
 Here is an example nextflow command to run the pipeline:
 
 ```bash
-nextflow run -c cluster.config Ferlab-Ste-Justine/Post-processing-Pipeline -r "v2.4.0" \
+nextflow run -c cluster.config Ferlab-Ste-Justine/Post-processing-Pipeline -r "v2.4.1" \
     -params-file params.json  \
    --input samplesheet.csv \
    --outdir results/dir \

@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Changed`
 - [#54](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/54) Standardize exomiser output filenames
+- [#59](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/59) Add ".snv" to VEP output filename prefix
 
 ### `Fixed`
 - [#50](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/50) Use container tag 1.20 for splitMultiAllelics process

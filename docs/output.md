@@ -92,14 +92,14 @@ The `ensemblvep` subdirectory contains the output of the pipeline after the vep 
 
 ```
 |_ ensemblvep/
-  |_ variants.family1.vep.vcf.gz
-  |_ variants.family1.vep.vcf.gz.tbi
+  |_ variants.family1.snv.vep.vcf.gz
+  |_ variants.family1.snv.vep.vcf.gz.tbi
   ...
 ```
 
 It contains one pair of `vcf.gz`, `vcf.gz.tbi` files per family. Specifically, we use the following naming scheme:
-- `variants.<FAMILY_ID>.vep.vcf.gz`
-- `variants.<FAMILY_ID>.vep.vcf.gz.tbi`
+- `variants.<FAMILY_ID>.snv.vep.vcf.gz`
+- `variants.<FAMILY_ID>.snv.vep.vcf.gz.tbi`
 
 The family ID should match the family ID in the input sample sheet.
 

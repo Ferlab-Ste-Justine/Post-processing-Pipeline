@@ -88,10 +88,7 @@
           "format": "file-path"
         }
       },
-      "required": [
-        "referenceGenome",
-        "referenceGenomeFasta"
-      ],
+      "required": ["referenceGenome", "referenceGenomeFasta"],
       "if": {
         "required": ["dbsnpFile"]
       },
@@ -227,7 +224,6 @@
           "type": "boolean",
           "description": "Boolean whether to validate parameters against the schema at runtime",
           "default": true,
-
           "hidden": true
         },
         "validationShowHiddenParams": {
@@ -272,6 +268,18 @@
         },
         "hardFilters": {
           "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "expression": {
+                "type": "string"
+              }
+            },
+            "required": ["name", "expression"]
+          },
           "description": "Parameters for Hard-Filtering",
           "help_text": "Parameters for Hard-Filtering. Must be an array containing each desired filter. Each filter must be formatted with the desired name and expression, for example\\n[[name: 'QD1', expression: 'QD < 1.0'],[name: 'QD2', expression: 'QD < 2.0]]"
         },
@@ -289,7 +297,7 @@
           "type": "boolean",
           "description": "If true, exclude MNPs from the VEP annotation",
           "help_text": "If true (default), exclude MNPs from the VEP annotation. Must be true on whole genome data.",
-          "default": true 
+          "default": true
         }
       }
     },
@@ -314,6 +322,16 @@
           "type": "string",
           "description": "Will be used by vep to find the assembly version in the cache",
           "help text": "Ex: GRCh38"
+        },
+        "download_cache": {
+            "type": "boolean",
+            "description": "Whether to download the vep cache or not"
+        },
+        "outdir_cache": {
+            "type": "string",
+            "description": "Path where vep cache will be downloaded",
+            "default": "${outdir}/cache",
+            "format": "directory-path"
         }
       },
       "if": {
@@ -404,8 +422,7 @@
         },
         "exomiser_start_from_vep": {
           "type": "boolean",
-          "description": "If true, run the exomiser analysis on the VEP annotated VCF file",
-          "default": false
+          "description": "If true, run the exomiser analysis on the VEP annotated VCF file"
         }
       },
       "allOf": [

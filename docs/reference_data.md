@@ -46,7 +46,7 @@ For more details, see [Gatk documentation](https://gatk.broadinstitute.org/hc/en
 
 
 ## VEP Cache Directory
-The `vepCache` parameter specifies the directory for the vep cache. It is only required if `vep` is specified via the
+The `vep_cache` parameter specifies the directory for the vep cache. It is only required if `vep` is specified via the
 `tools` parameter.
 
 The vep cache is not automatically populated by the pipeline. It must be pre-downloaded. You can obtain a copy of the 

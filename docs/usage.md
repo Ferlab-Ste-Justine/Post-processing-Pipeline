@@ -194,7 +194,11 @@ Parameters summary
 | `broad` | _Optional_ | Path to the directory containing Broad reference data (for VQSR) |
 | `intervalsFile` | _Optional_ | Path to the file containg the genome intervals list on which to operate |
 | `tools` | _Optional_ | Additional tools to run separated by commas. Supported tools are `vep` and `exomiser` |
-| `vepCache` | _Optional_ | Path to the vep cache data directory |
+| `vep_cache` | _Optional_ | Path to the vep cache data directory |
+| `vep_cache_version` | _Optional_ | Version of the vep cache. e.g. `111` |
+| `vep_genome` | _Optional_ | Genome assembly version of the vep cache  |
+| `download_cache` | _Optional_ | Download vep cache (default: false) |
+| `outdir_cache` | _Optional_ |  Path to write the cache to. If not declared, cache will be written to `<outputdir>/cache/` |
 | `exclude_mnps` | _Optional_ | Replace MNPs by individual SNPs (default: true). Must be true on whole genome data. |
 | `exomiser_data_dir` | _Optional_ | Path to the exomiser reference data directory |
 | `exomiser_genome` | _Optional_ | Genome assembly version to be used by exomiser(`hg19` or `hg38`) |

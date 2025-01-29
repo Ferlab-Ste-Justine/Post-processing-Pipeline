@@ -17,18 +17,18 @@ include { VCF_ANNOTATE_ENSEMBLVEP } from '../subworkflows/nf-core/vcf_annotate_e
 include { COMBINEGVCFS            } from '../modules/local/combine_gvcfs'
 include { GATK4_GENOTYPEGVCFS     } from '../modules/nf-core/gatk4/genotypegvcfs'
 include { GATK4_VARIANTFILTRATION } from '../modules/nf-core/gatk4/variantfiltration'
+include { ENSEMBLVEP_DOWNLOAD     } from '../modules/nf-core/ensemblvep/download/main'
 
 //functions
 include { isExomiserToolIncluded  } from '../subworkflows/local/utils_nfcore_postprocessing_pipeline/utils'
 include { isVepToolIncluded       } from '../subworkflows/local/utils_nfcore_postprocessing_pipeline/utils'
-
-def HOMO_SAPIENS_SPECIES = "homo_sapiens"
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
+
 /**
 Tag variants that are probable artifacts
 In the case of whole genome sequencing data, we use the vqsr procedure.
@@ -48,7 +48,7 @@ def tagArtifacts(ch_artifact_input, hardFilters, pathFasta, pathFai, pathDict) {
         [[:], pathDict])
         
     def ch_variantfiltration_output =  ch_gatk4_variantfiltration_output.vcf.join(ch_gatk4_variantfiltration_output.tbi)
-       .map{ meta, vcf, tbi -> [meta, [vcf,tbi]]}
+        .map{ meta, vcf, tbi -> [meta, [vcf,tbi]]}
 
     return ch_vqsr_output.concat(ch_variantfiltration_output)
 }
@@ -144,9 +144,9 @@ def handle_mnps(input_channel, do_exclude_mnps) {
 
 
 /* 
-  Deal with variations in input file formats, extensions, and the presence or absence of index files.
-  input: [meta, vcf]
-  output: [meta, vcf, tbi]
+Deal with variations in input file formats, extensions, and the presence or absence of index files.
+input: [meta, vcf]
+output: [meta, vcf, tbi]
 */
 def standardize_input_vcf_files(input_channel) {
     def view_input = input_channel.map{meta,  vcf -> 
@@ -158,6 +158,11 @@ def standardize_input_vcf_files(input_channel) {
 }
 
 workflow POSTPROCESSING {
+
+    take:
+    ch_samplesheet
+
+    main:
     //Local Temp Params
     def referenceGenome = file(params.referenceGenome)
     def pathReferenceGenomeFasta = file(params.referenceGenome + "/" + params.referenceGenomeFasta)
@@ -168,13 +173,10 @@ workflow POSTPROCESSING {
     def dbsnpFileIndex = params.dbsnpFileIndex? file(params.dbsnpFileIndex) : []
     def exomiserLocalFrequencyFile = params.exomiser_local_frequency_path? file(params.exomiser_local_frequency_path) : []
     def exomiserLocalFrequencyIndexFile = params.exomiser_local_frequency_index_path? file(params.exomiser_local_frequency_index_path) : []
-   
+
+    def HOMO_SAPIENS_SPECIES = "homo_sapiens"
+    
     file(params.outdir).mkdirs()
-
-    take:
-    ch_samplesheet
-
-    main:
 
     ch_versions = Channel.empty()
 
@@ -227,7 +229,16 @@ workflow POSTPROCESSING {
     def ch_output_from_vep //declaring vep output channel early so that it can be accessed outside the if block
     //Annotating variants with VEP
     if (isVepToolIncluded()) {
-        def vep_cache = file(params.vep_cache)
+
+        // Download VEP cache if download = true. Assuming we want to download even if cache provided. 
+        if (params.download_cache) {
+            ensemblvep_info = Channel.of([ [ id:"${params.vep_cache_version}_${params.vep_genome}" ], params.vep_genome, HOMO_SAPIENS_SPECIES, params.vep_cache_version ])
+            ENSEMBLVEP_DOWNLOAD(ensemblvep_info)
+            vep_cache = ENSEMBLVEP_DOWNLOAD.out.cache.collect().map{ _meta, cache -> [ cache ] }
+            ch_versions = ch_versions.mix(ENSEMBLVEP_DOWNLOAD.out.versions.first())
+        } else {
+            vep_cache = file(params.vep_cache)
+        }
 
         ch_output_from_vep = vep(
             ch_output_from_splitMultiAllelics, 

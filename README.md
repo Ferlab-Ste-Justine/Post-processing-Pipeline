@@ -22,7 +22,7 @@ It performs joint genotyping, tags low-quality variants, and optionally annotate
 6. Tag false positive variants with either:
   - For whole genome sequencing data: [Variant quality score recalibration (VQSR)](https://gatk.broadinstitute.org/hc/en-us/articles/360036510892-VariantRecalibrator)
   - For whole exome sequencing data: [Hard-Filtering](https://gatk.broadinstitute.org/hc/en-us/articles/360036733451-VariantFiltration)
-7. Optionnally annotate variants with [Variant effect predictor (VEP)](https://useast.ensembl.org/info/docs/tools/vep/index.html)
+7. Optionnally annotate variants with [Variant effect predictor (VEP)](https://useast.ensembl.org/info/docs/tools/vep/index.html) and download reference cache (if not provided)
 8. Optionnally integrate phenotype data to annotate, filter and prioritise variants likely to be disease-causing with [exomiser](https://www.sanger.ac.uk/tool/exomiser/)
 
 
@@ -76,7 +76,7 @@ See [docs/output.md](docs/output.md) for more details about pipeline outputs.
 
 ## Credits
 
-Ferlab-Ste-Justine/Post-processing-Pipeline was originally written by Damien Geneste, David Morais, Felix-Antoine Le Sieur, Jeremy Costanza, Lysiane Bouchard.
+Ferlab-Ste-Justine/Post-processing-Pipeline was originally written by Damien Geneste, David Morais, Felix-Antoine Le Sieur, Jeremy Costanza, Lysiane Bouchard, Georgette Femerling.
 
 
 ## Contributions and Support

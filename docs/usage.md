@@ -12,15 +12,15 @@ The Ferlab-Ste-Justine/Post-processing-Pipeline is a bioinformatics pipeline des
 
 ## Samplesheet input
 
-You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use the `--input` parameter to specify its location. The samplesheet has to be a comma separated file (.csv).
+You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use the `--input` parameter to specify its location. The samplesheet has to be a comma separated file (`.csv`).
 
 The samplesheet must contains the following columns at the minimum: 
 - *familyId*: The identifier used for the sample family
 - *sample*: The identifier used for the sample
 - *sequencingType*: Must be either WES (Whole Exome Sequencing) or WGS (Whole Genome Sequencing)
-- *gvcf*: Path to the sample .gvcf.gz file
+- *gvcf*: Path to the sample `.gvcf.gz` file
 
-Additionnally, there is an optional *phenoFamily* column that can contain a .yml/.json file providing phenotype 
+Additionally, there is an optional *phenoFamily* column that can contain a `.yml/.json` file providing phenotype 
 information on the family in phenopacket format. This column is only necessary if using the exomiser tool.
 
 
@@ -54,7 +54,7 @@ These files must be correctly downloaded and specified through pipeline paramete
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run -c cluster.config Ferlab-Ste-Justine/Post-processing-Pipeline -r "v2.4.1" \
+nextflow run -c fusion.config Ferlab-Ste-Justine/Post-processing-Pipeline -r "v2.5.0" \
     -params-file params.json  \
    --input samplesheet.csv \
    --outdir results/dir \
@@ -73,9 +73,8 @@ work                # Directory containing the nextflow working files
 
 If you wish to repeatedly use the same parameters for multiple runs, rather than specifying each flag in the command, you can specify these in a params file (json or yaml).
 
-:::warning
+> <b>WARNING</b>:  
 Do not use `-c <file>` to specify parameters as this will result in errors. Custom config files specified with `-c` must only be used for [tuning process resource specifications](https://nf-co.re/docs/usage/configuration#tuning-workflow-resources), other infrastructural tweaks (such as output directories), or module arguments (args).
-:::
 
 ### Skip exclude MNPs
 
@@ -136,22 +135,22 @@ For tests with real data, see documentation in the [test configuration profile](
 When you run the above command, Nextflow automatically pulls the pipeline code from GitHub and stores it as a cached version. When running the pipeline after this, it will always use the cached version if available - even if the pipeline has been updated since. To make sure that you're running the latest version of the pipeline, make sure that you regularly update the cached version of the pipeline:
 
 ```bash
-nextflow pull ferlab/postprocessing
+nextflow pull Ferlab-Ste-Justine/Post-processing-Pipeline
 ```
 
 ### Reproducibility
 
 It is a good idea to specify a pipeline version when running the pipeline on your data. This ensures that a specific version of the pipeline code and software are used when you run your pipeline. If you keep using the same tag, you'll be running the same version of the pipeline, even if there have been changes to the code since.
 
-First, go to the [ferlab/postprocessing releases page](https://github.com/ferlab/postprocessing/releases) and find the latest pipeline version - numeric only (eg. `1.3.1`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r 1.3.1`. Of course, you can switch to another version by changing the number after the `-r` flag.
+First, go to the [Ferlab-Ste-Justine/Post-processing-Pipeline releases page](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/tags) and find the latest pipeline version - numeric only (eg. `2.5.0`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r 2.5.0`. Of course, you can switch to another version by changing the number after the `-r` flag.
 
 This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future. For example, at the bottom of the MultiQC reports.
 
-To further assist in reproducbility, you can use share and re-use [parameter files](#running-the-pipeline) to repeat pipeline runs with the same settings without having to write out a command with every single parameter.
+To further assist in reproducibility, you can use share and re-use [parameter files](#running-the-pipeline) to repeat pipeline runs with the same settings without having to write out a command with every single parameter.
 
-:::tip
+> <b>TIP</b>:  
 If you wish to share such profile (such as upload as supplementary material for academic publications), make sure to NOT include cluster specific paths to files, nor institutional specific profiles.
-:::
+
 
 
 ### Core Nextflow arguments

@@ -1,17 +1,22 @@
-# ferlab/postprocessing: Changelog
+# ferlab/Post-Processing-Pipeline: Changelog
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased 
+## Unreleased
+
+## v2.5.0 - <small>2025-01-30</small>
 
 ### `Added`
-- [#61](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/61) Add download VEP module form nf-core
+- [#61](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/61) Add download VEP module form nf-core. Addresses [#BIOINFO-20](https://ferlab-crsj.atlassian.net/browse/BIOINFO-20), no cache version issues were found.
 
 ### `Changed`
 - [#59](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/59) Add ".snv" to VEP output filename prefix
   
-## v2.4.1-dev - 16/01/2025
+### `Deprecated`
+- Changelog versioning format vx.y.z-dev is deprecated as of now. We will now keep an [Unreleased section](#unreleased) at the top to track upcoming changes. When bumping the version, move the Unreleased section changes under the new version section. Listed changes will now be associated with the specific tag.
+
+## v2.4.1-dev - <small>2025-01-16</small>
 
 ## v2.4.0-dev
 

@@ -1,0 +1,113 @@
+nextflow_function {
+
+    name "Test Subworkflow UTILS_NFCORE_POSTPROCESSING_PIPELINE validatePhenopacketFiles function"
+    script "subworkflows/local/utils_nfcore_postprocessing_pipeline/main.nf"
+    tag "local"
+
+    function "validatePhenopacketFiles"
+
+    test("Test Function validatePhenopacketFiles with familypheno meta missing for all family members") {
+        when {
+            function {
+                //The validation should succeed
+                """
+                input[0] = "family2"
+                input[1] = [
+                    [[sample:"NA07019", familyId:"family2", sequencingType:"WES"], "data-test/gvcf/NA07019.chr22_50000000-51000000.g.vcf.gz"],
+                    [[sample:"NA07022", familyId:"family2", sequencingType:"WES"], "data-test/gvcf/NA07022.chr22_50000000-51000000.g.vcf.gz"],
+                    [[sample:"NA07056", familyId:"family2", sequencingType:"WES"], "data-test/gvcf/NA07056.chr22_50000000-51000000.g.vcf.gz"]
+                ]
+                """
+            }
+            then {
+                assertAll(
+                    { assert function.success }
+                )
+            } 
+        }
+    }
+
+    test("Test Function validatePhenopacketFiles with familypheno meta empty for all family members") {
+        when {
+            function {
+                //The validation should succeed
+                """
+                input[0] = "family2"
+                input[1] = [
+                    [[sample:"NA07019", familyId:"family2", sequencingType:"WES", familypheno: ""], "data-test/gvcf/NA07019.chr22_50000000-51000000.g.vcf.gz"],
+                    [[sample:"NA07022", familyId:"family2", sequencingType:"WES", familypheno: ""], "data-test/gvcf/NA07022.chr22_50000000-51000000.g.vcf.gz"],
+                    [[sample:"NA07056", familyId:"family2", sequencingType:"WES", familypheno: ""], "data-test/gvcf/NA07056.chr22_50000000-51000000.g.vcf.gz"]
+                ]
+                """
+            }
+            then {
+                assertAll(
+                    { assert function.success }
+                )
+            } 
+        }
+    }
+
+    test("Test Function validatePhenopacketFiles with familypheno meta specified and identical for all family members") {
+        when {
+            function {
+                //The validation should succeed
+                """
+                input[0] = "family2"
+                input[1] = [
+                    [[sample:"NA07019", familyId:"family2", sequencingType:"WES", familypheno: "data-test/pheno/family2.yml"], "data-test/gvcf/NA07019.chr22_50000000-51000000.g.vcf.gz"],
+                    [[sample:"NA07022", familyId:"family2", sequencingType:"WES", familypheno: "data-test/pheno/family2.yml"], "data-test/gvcf/NA07022.chr22_50000000-51000000.g.vcf.gz"],
+                    [[sample:"NA07056", familyId:"family2", sequencingType:"WES", familypheno: "data-test/pheno/family2.yml"], "data-test/gvcf/NA07056.chr22_50000000-51000000.g.vcf.gz"]
+                ]
+                """
+            }
+            then {
+                assertAll(
+                    { assert function.success }
+                )
+            } 
+        }
+    }
+
+    test("Test Function validatePhenopacketFiles with familypheno meta not always specified") {
+        when {
+            function {
+                //The validation should fail as we expect familypheno to be the same for all family members
+                """
+                input[0] = "family2"
+                input[1] = [
+                    [[sample:"NA07019", familyId:"family2", sequencingType:"WES", familypheno: "data-test/pheno/family2.yml"], "data-test/gvcf/NA07019.chr22_50000000-51000000.g.vcf.gz"],
+                    [[sample:"NA07022", familyId:"family2", sequencingType:"WES", familypheno: "data-test/pheno/family2.yml"], "data-test/gvcf/NA07022.chr22_50000000-51000000.g.vcf.gz"],
+                    [[sample:"NA07056", familyId:"family2", sequencingType:"WES"], "data-test/gvcf/NA07056.chr22_50000000-51000000.g.vcf.gz"]
+                ]
+                """
+            }
+            then {
+                assertAll(
+                    { assert function.failed }
+                )
+            } 
+        }
+    }
+
+    test("Test Function validatePhenopacketFiles with familypheno meta specified but different") {
+        when {
+            function {
+                //The validation should fail as we expect familypheno to be the same for all family members
+                """
+                input[0] = "family2"
+                input[1] = [
+                    [[sample:"NA07019", familyId:"family2", sequencingType:"WES", familypheno: "data-test/pheno/family2.yml"], "data-test/gvcf/NA07019.chr22_50000000-51000000.g.vcf.gz"],
+                    [[sample:"NA07022", familyId:"family2", sequencingType:"WES", familypheno: "data-test/pheno/family2.yml"], "data-test/gvcf/NA07022.chr22_50000000-51000000.g.vcf.gz"],
+                    [[sample:"NA07056", familyId:"family2", sequencingType:"WES", familypheno: "data-test/pheno/family1.yml"], "data-test/gvcf/NA07056.chr22_50000000-51000000.g.vcf.gz"]
+                ]
+                """
+            }
+            then {
+                assertAll(
+                    { assert function.failed }
+                )
+            } 
+        }
+    }
+}

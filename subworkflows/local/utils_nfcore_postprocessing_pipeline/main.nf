@@ -83,18 +83,15 @@ workflow PIPELINE_INITIALISATION {
     Channel
         .fromSamplesheet("input")
         .map {
-            meta, file ->
-                if (isExomiserToolIncluded()) {
-                    if (!meta.familypheno) {
-                        error("Samplesheet must contains familyPheno file for each sample when using exomiser tool")
-                    }
-                }
-            [meta.familyId, [meta, file]]
+            meta, file -> [meta.familyId, [meta, file]]
         }
         .tap{ch_sample_simple} //Save this channel to join later
         .groupTuple()
         .map{
             familyId, ch_items ->
+            if(isExomiserToolIncluded()){
+                validatePhenopacketFiles(familyId, ch_items)
+            }
             [familyId, ch_items.size()]
         }
         .combine(ch_sample_simple,by:0)
@@ -185,6 +182,13 @@ def getPipelineInfoFolder(outdir) {
         error "Output directory not provided"
     }
     return "${outdir}/pipeline_info"
+}
+
+def validatePhenopacketFiles(family_id, metafiles) {
+    def phenopacket_files =  metafiles.collect{it[0].familypheno}.unique(false)
+    if(phenopacket_files.size() > 1){
+        error("All samples in the same family must have the same familyPheno value in the input samplesheet. Found ${phenopacket_files} in family ${family_id}.")
+    }
 }
 
 //_____________Template functions_____________

@@ -95,7 +95,7 @@ Together with the `exomiser_data_dir` parameter, these parameters must be provid
 
 ## Exomiser analysis files
 In addition to the reference data, exomiser requires an analysis file (.yml/.json) that contains, among others 
-things, the variant frequency sources for prioritization of rare variants, variant pathogenicity sources to consider, the list of filters and prioretizers to apply, etc.
+things, the variant frequency sources for prioritization of rare variants, variant pathogenicity sources to consider, the list of filters and prioritizers to apply, etc.
 
 Typically, different analysis settings are used for whole exome sequencing (WES) and whole genome sequencing (WGS) data.
 Defaults analysis files are provided for each sequencing type in the assets folder:

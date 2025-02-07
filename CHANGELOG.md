@@ -5,6 +5,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### `Added`
+
+- [#63](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/63) Allow to skip exomiser for specific families
+
 ## v2.5.0 - <small>2025-01-30</small>
 
 ### `Added`

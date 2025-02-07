@@ -67,13 +67,15 @@ def exomiser(inputChannel,
     cadd_snv_filename,
     cadd_indel_filename
     ) {
-    def ch_input_for_exomiser = inputChannel.map{meta, vcf, tbi -> [
-        meta,
-        vcf,
-        tbi,
-        meta.familypheno, 
-        meta.sequencingType == "WES"? file(analysis_wes_path) : file(analysis_wgs_path)
-    ]}
+    def ch_input_for_exomiser = inputChannel
+        .filter{ meta, vcf, tbi -> meta.familypheno} //only run exomiser on families for which a phenopacket file is specified
+        .map{meta, vcf, tbi -> [
+            meta,
+            vcf,
+            tbi,
+            meta.familypheno, 
+            meta.sequencingType == "WES"? file(analysis_wes_path) : file(analysis_wgs_path)
+        ]}
     def remm_input = ["", ""]
     if (remm_version) {
         remm_input = [remm_version, remm_filename]

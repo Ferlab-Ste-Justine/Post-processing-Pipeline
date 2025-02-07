@@ -69,7 +69,7 @@ process EXOMISER {
 
     java -Xmx${avail_mem}M -cp \$( cat /app/jib-classpath-file ) \$( cat /app/jib-main-class-file ) \\
         --vcf ${vcfFile} \\
-        --assembly "${params.exomiser_genome}" \\
+        --assembly "${exomiserGenome}" \\
         --analysis "${analysisFile}" \\
         --sample ${phenoFile} \\
         --output-format=HTML,JSON,TSV_GENE,TSV_VARIANT,VCF \\

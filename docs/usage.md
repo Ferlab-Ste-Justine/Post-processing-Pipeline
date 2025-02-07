@@ -20,9 +20,7 @@ The samplesheet must contains the following columns at the minimum:
 - *sequencingType*: Must be either WES (Whole Exome Sequencing) or WGS (Whole Genome Sequencing)
 - *gvcf*: Path to the sample `.gvcf.gz` file
 
-Additionally, there is an optional *phenoFamily* column that can contain a `.yml/.json` file providing phenotype 
-information on the family in phenopacket format. This column is only necessary if using the exomiser tool.
-
+Additionally, there is an optional *phenoFamily* column that can contain a `.yml/.json` file providing phenotype information on the family in phenopacket format. This column is only necessary if using the exomiser tool. If exomiser is enabled, it must consistently contain either an empty string or the same phenopacket file for all members of the family. For more details, refer to the exomiser tool section below.
 
 **sample.csv**
 ```csv
@@ -37,16 +35,15 @@ CONGE-YYY,03,WGS,CONGE-YYY-03.hard-filtered.gvcf.gz,CONGE-YYY.pheno.yml
 
 > [!NOTE]
 > The sequencing type (WES or WGS) will determine the variant filtering approach used by the pipeline.
-> In the case of Whole Genome Sequencing, VQSR (Variant Quality Score Recalibration) is used.
-> In the case of Whole Exome Sequencing, VQSR is replaced by a hard filtering approach as VQSR cannot be applied in this case.
+> In the case of Whole Genome Sequencing (WGS), VQSR (Variant Quality Score Recalibration) is used.
+> In the case of Whole Exome Sequencing (WES), VQSR is replaced by a hard filtering approach as VQSR cannot be applied in this case.
 > Additionally, a different analysis file will be used when running the exomiser tool based on the sequencing type.
 
 ## Reference Data
 
 Reference files are essential at various stages of the workflow, including joint-genotyping, VQSR, the Variant Effect Predictor (VEP), and exomiser. 
 
-These files must be correctly downloaded and specified through pipeline parameters. For more details about how to this, see 
-[reference_data.md](reference_data.md).
+These files must be correctly downloaded and specified through pipeline parameters. For more details about how to do this, see [reference_data.md](reference_data.md).
 
 
 ## Running the pipeline
@@ -87,17 +84,23 @@ Note that MNPs are not supported by the VQSR procedure, so you cannot skip this 
 ### Tools
 
 You can include additional analysis in your pipeline  via the `tools` parameter. Currently, the pipeline supports 
-two tools: `vep` (Variant Effect Predictor) and `exomizer`. 
+two tools: `vep` (Variant Effect Predictor) and `exomiser`. 
 
 VEP is a widely used tool for annotating genetic variants with information such as gene names, 
-variant consequences, and population frequencies. It provides valuable insights into the functional impact 
-of genetic variants.
+variant consequences, and population frequencies. It provides valuable insights into the functional impact of genetic variants.
 
-Exomiser, on the other hand, is a tool specifically designed for the analysis of rare genetic diseases. It 
-integrates phenotype data with variant information to prioritize variants that are likely to be disease-causing. 
+Exomiser, on the other hand, is a tool specifically designed for the analysis of rare genetic diseases. It integrates phenotype data with variant information to prioritize variants that are likely to be disease-causing. 
 This can greatly assist in the identification of potential disease-causing variants in exome sequencing data.
 
-### Exomiser input data
+### Exomiser tool
+
+To run exomiser, activate it via the `tools` parameter (see section above). 
+
+Additionally, provide the exomiser phenopacket file in the samplesheet for each family member in the phenoFamily column. If the phenopacket file is not specified for a family, exomiser will be skipped for that family.
+
+Note that the value for the phenoFamily column must always be identical for the same family.
+
+#### Exomiser input data
 
 By default, both vep and exomiser steps, if applicable, run in parallel and consume the output of the normalization step.
 
@@ -105,7 +108,7 @@ To have the Exomiser step start from the VEP output instead, set the parameter `
 
 Note that the parameter `exomiser_start_from_vep` will be ignored if vep is not specified via the `tools` parameter.
 
-### Exomiser CLI options
+#### Exomiser CLI options
 
 We typically allow passing extra arguments in our process scripts via the process `task.ext` directive (`task.ext.args` key).
 

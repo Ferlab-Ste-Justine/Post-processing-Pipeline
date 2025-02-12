@@ -2,68 +2,6 @@
 
 
 /**
-Build a recalibration model to score SNP variant quality for filtering purposes
-
-Note: pre-requisite step for applyVQSRSNP
-*/
-process variantRecalibratorSNP {
-    label 'medium'
-
-
-    input:
-    tuple val(meta), path(vcf)
-    path referenceGenome
-    path broadResource
-
-    output:
-    tuple val(meta), path("*.recal*"), path("*.tranches")
-    
-    script:
-    def prefix = meta.familyId
-    def args = task.ext.args ?: ''
-    def argsjava = task.ext.args ?: ''
-    def exactVcfFile = vcf.find { it.name.endsWith("vcf.gz") }
-    def tranches = ["100.0", "99.95", "99.9", "99.8", "99.6", "99.5", "99.4", "99.3", "99.0"].collect{"-tranche $it"}.join(' ')
-    def annotationValues = ["QD","MQRankSum","ReadPosRankSum","FS","MQ","SOR","DP"].collect{"-an $it"}.join(' ')
-
-    def avail_mem = 3072
-    if (!task.memory) {
-        log.info '[GATK VariantRecalibrator] Available memory not known - defaulting to 3GB. Specify process memory requirements to change this.'
-    } else {
-        avail_mem = (task.memory.mega*0.8).intValue()
-    }
-
-    """
-    set -e
-    echo $prefix > file
-    gatk --java-options "-Xmx${avail_mem}M -XX:-UsePerfData ${argsjava}" \\
-        VariantRecalibrator \\
-        $tranches \\
-        --trust-all-polymorphic \\
-        -R $referenceGenome/${params.referenceGenomeFasta} \\
-        -V ${exactVcfFile} \\
-        --resource:hapmap,known=false,training=true,truth=true,prior=15 \\
-        ${broadResource}/hapmap_3.3.hg38.vcf.gz  \\
-        --resource:omni,known=false,training=true,truth=false,prior=12 \\
-        ${broadResource}/1000G_omni2.5.hg38.vcf.gz \\
-        --resource:1000G,known=false,training=true,truth=false,prior=10 \\
-        ${broadResource}/1000G_phase1.snps.high_confidence.hg38.vcf.gz \\
-        --resource:dbsnp,known=true,training=false,truth=false,prior=7 ${broadResource}/Homo_sapiens_assembly38.dbsnp138.vcf \\
-        $annotationValues \\
-        --max-gaussians 6 \\
-        -mode SNP -O ${prefix}.recal --tranches-file ${prefix}.tranches \\
-        $args
-    """
-
-    stub:
-    def prefix = meta.familyId
-    """
-    touch ${prefix}.recal
-    touch ${prefix}.tranches
-    """
-}
-
-/**
 Build a recalibration model to score Indel variant quality for filtering purposes
 
 Note: pre-requisite step for applyVQSRIndel

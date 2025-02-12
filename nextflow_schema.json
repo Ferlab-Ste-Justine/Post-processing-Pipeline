@@ -51,12 +51,6 @@
           "hidden": true,
           "help_text": "Do not load `igenomes.config` when running the pipeline. You may choose this option if you observe clashes between custom parameters and those supplied in `igenomes.config`."
         },
-        "broad": {
-          "type": "string",
-          "description": "Directory containing the references for vqsr",
-          "help_text": "Path to the directory containing 4 important files: \\n1. The Hapmap file for vqsr training\\n2. The omni2.5 file for vqsr training\\n3. The 1000G SNP reference file for vqsr training\\n4. The dbsnp database for vqsr training",
-          "format": "directory-path"
-        },
         "intervalsFile": {
           "type": "string",
           "description": "Path to interval file",
@@ -301,6 +295,25 @@
         }
       }
     },
+    "vqsr": {
+      "title": "VQSR",
+      "type": "object",
+      "description": "VQSR parameters",
+      "default": "",
+      "properties": {
+        "broad": {
+          "type": "string",
+          "description": "Directory containing the references for vqsr",
+          "help_text": "Path to the directory containing 4 important files: \\n1. The Hapmap file for vqsr training\\n2. The omni2.5 file for vqsr training\\n3. The 1000G SNP reference file for vqsr training\\n4. The dbsnp database for vqsr training",
+          "format": "directory-path"
+        },
+        "vqsr_snp_resources": {
+          "type": "string",
+          "description": "Specifies reference datasets for VQSR to build a model for filtering SNPs.",
+          "help_text":  "Specifies reference datasets for VQSR to build a model for filtering SNPs. Specifies reference datasets for VQSR to filter SNPs. Do not set this parameter yet; it will be automatically configured by the pipeline."
+        }
+      }
+    },
     "vep": {
       "title": "vep",
       "type": "object",
@@ -324,13 +337,13 @@
           "help text": "Ex: GRCh38"
         },
         "download_cache": {
-            "type": "boolean",
-            "description": "Whether to download the vep cache or not"
+          "type": "boolean",
+          "description": "Whether to download the vep cache or not"
         },
         "outdir_cache": {
-            "type": "string",
-            "description": "Path where vep cache will be downloaded. If not provided, will default to ${outdir}/cache.",
-            "format": "directory-path"
+          "type": "string",
+          "description": "Path where vep cache will be downloaded. If not provided, will default to ${outdir}/cache.",
+          "format": "directory-path"
         }
       },
       "if": {
@@ -497,6 +510,9 @@
     },
     {
       "$ref": "#/definitions/generic_options"
+    },
+    {
+      "$ref": "#/definitions/vqsr"
     },
     {
       "$ref": "#/definitions/vep"

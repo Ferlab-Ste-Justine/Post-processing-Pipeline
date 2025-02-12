@@ -39,7 +39,7 @@ def tagArtifacts(ch_artifact_input, hardFilters, pathFasta, pathFai, pathDict) {
     def ch_vqsr_input = ch_artifact_input.filter{it[0].sequencingType == "WGS"}.map{ meta, vcf, tbi -> [meta, [vcf,tbi]]}
     def ch_variantfiltration_input = ch_artifact_input.filter{it[0].sequencingType == "WES"}
 
-    def ch_vqsr_output = VQSR(ch_vqsr_input)
+    def ch_vqsr_output = VQSR(ch_vqsr_input, pathFasta, pathFai, pathDict).output
 
     def ch_gatk4_variantfiltration_output = GATK4_VARIANTFILTRATION(
         ch_variantfiltration_input,

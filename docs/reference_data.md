@@ -38,6 +38,30 @@ These are all highly validated variance ressources currently required by VQSR.
 
 Extra settings (ex: resource prior probabilities, tranches, etc.) required to run the different VQSR steps are injected through pipeline parameters or hard coded in the vqsr modules. The values chosen for these settings are based on NIH [Biowulf](https://hpc.nih.gov/training/gatk_tutorial/vqsr.html) 
 
+We aim to fully configure VQSR settings in the future and remove any hard-coded values, including reference data files. We are progressively adding configuration parameters for each VQSR process, but this work is not yet complete. If a parameter is not specified, it will default to the previous hard-coded value. To maintain harmonization, it is best NOT to specify the parameter or use a value equivalent to the default. Available configuration parameters involving VQSR reference data files are documented below.
+
+#### vqsr_snp_resources parameter
+
+> **⚠️ Warning: We recommend not setting this parameter for now until all VQSR processes are configurable.**
+
+The `vqsr_snp_resources` parameter is used to specify the reference datasets for Variant Quality Score Recalibration (VQSR) for SNPs. VQSR is a machine learning-based approach that uses known, high-confidence variants to build a model of variant quality. This model is then applied to the variants in your dataset to assign quality scores, which can be used to filter out low-quality variants.
+
+The `vqsr_snp_resources` parameter is a list of dictionaries, each containing the following keys:
+- `labels`: A string specifying the labels for the resource. Refer to the [gatk VariantRecalibrator documentation](https://gatk.broadinstitute.org/hc/en-us/articles/360036510892-VariantRecalibrator#--resource) for a description of the expected format.
+- `vcf`: The path to the VCF file containing the reference variants.
+- `index`: The path to the index file for the VCF file.
+
+Here is an example:
+
+```
+   vqsr_snp_resources = [
+        [labels: "hapmap,known=false,training=true,truth=true,prior=15", vcf: "data-test/reference/broad/hapmap_3.3.hg38.vcf.gz", index: "data-test/reference/broad/hapmap_3.3.hg38.vcf.gz.tbi"],
+        [labels: "omni,known=false,training=true,truth=false,prior=12", vcf: "data-test/reference/broad/1000G_omni2.5.hg38.vcf.gz", index: "data-test/reference/broad/1000G_omni2.5.hg38.vcf.gz.tbi"],
+        [labels: "1000G,known=false,training=true,truth=false,prior=10", vcf: "data-test/reference/broad/1000G_phase1.snps.high_confidence.hg38.vcf.gz", index: "data-test/reference/broad/1000G_phase1.snps.high_confidence.hg38.vcf.gz.tbi"],
+        [labels: "dbsnp,known=true,training=false,truth=false,prior=7", vcf: "data-test/reference/broad/Homo_sapiens_assembly38.dbsnp138.vcf", index: "data-test/reference/broad/Homo_sapiens_assembly38.dbsnp138.vcf.idx"]
+    ]
+```
+
 ## Interval file 
 The `intervalFile` parameter specifies the path to an interval file (ex: `broad/wgs_calling_regions.hg38.interval_list`).
 

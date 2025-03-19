@@ -20,11 +20,11 @@ The samplesheet must contains the following columns at the minimum:
 - *sequencingType*: Must be either WES (Whole Exome Sequencing) or WGS (Whole Genome Sequencing)
 - *gvcf*: Path to the sample `.gvcf.gz` file
 
-Additionally, there is an optional *phenoFamily* column that can contain a `.yml/.json` file providing phenotype information on the family in phenopacket format. This column is only necessary if using the exomiser tool. If exomiser is enabled, it must consistently contain either an empty string or the same phenopacket file for all members of the family. For more details, refer to the exomiser tool section below.
+Additionally, there is an optional *familyPheno* column that can contain a `.yml/.json` file providing phenotype information on the family in phenopacket format. This column is only necessary if using the exomiser tool. If exomiser is enabled, it must consistently contain either an empty string or the same phenopacket file for all members of the family. For more details, refer to the exomiser tool section below.
 
 **sample.csv**
 ```csv
-**familyId**,**sample**,**sequencingType**,**gvcf**,**phenoFamily**
+**familyId**,**sample**,**sequencingType**,**gvcf**,**familyPheno**
 CONGE-XXX,01,WES,CONGE-XXX-01.hard-filtered.gvcf.gz,CONGE-XXX.pheno.yml
 CONGE-XXX,02,WES,CONGE-XXX-02.hard-filtered.gvcf.gz,CONGE-XXX.pheno.yml
 CONGE-XXX,03,WES,CONGE-XXX-03.hard-filtered.gvcf.gz,CONGE-XXX.pheno.yml
@@ -73,13 +73,11 @@ If you wish to repeatedly use the same parameters for multiple runs, rather than
 > <b>WARNING</b>:  
 Do not use `-c <file>` to specify parameters as this will result in errors. Custom config files specified with `-c` must only be used for [tuning process resource specifications](https://nf-co.re/docs/usage/configuration#tuning-workflow-resources), other infrastructural tweaks (such as output directories), or module arguments (args).
 
-### Skip exclude MNPs
+### MNPs
 
-At the beginning of our workflow, we separate MNPs into individual SNPs.  
+At the start of the workflow, MNPs are separated into individual SNPs to ensure compatibility with our joint genotyping procedure. Invalid MNPs likely caused by bugs are removed.
 
-You can optionally skip this step by setting the `exclude_mnps` parameter to `false` (default is `true`).
-
-Note that MNPs are not supported by the VQSR procedure, so you cannot skip this step if you have whole genome data.
+If you are confident that there will be no MNPs, you can skip this step to save resources and reduce execution time. To do so, set the `skip_handle_mnps` parameter to `true` (default is `false`).
 
 ### Tools
 
@@ -96,9 +94,9 @@ This can greatly assist in the identification of potential disease-causing varia
 
 To run exomiser, activate it via the `tools` parameter (see section above). 
 
-Additionally, provide the exomiser phenopacket file in the samplesheet for each family member in the phenoFamily column. If the phenopacket file is not specified for a family, exomiser will be skipped for that family.
+Additionally, provide the exomiser phenopacket file in the samplesheet for each family member in the familyPheno column. If the phenopacket file is not specified for a family, exomiser will be skipped for that family.
 
-Note that the value for the phenoFamily column must always be identical for the same family.
+Note that the value for the familyPheno column must always be identical for the same family.
 
 #### Exomiser input data
 
@@ -201,7 +199,7 @@ Parameters summary
 | `vep_genome` | _Optional_ | Genome assembly version of the vep cache  |
 | `download_cache` | _Optional_ | Download vep cache (default: false) |
 | `outdir_cache` | _Optional_ |  Path to write the cache to. If not declared, cache will be written to `<outputdir>/cache/` |
-| `exclude_mnps` | _Optional_ | Replace MNPs by individual SNPs (default: true). Must be true on whole genome data. |
+| `skip_handle_mnps` | _Optional_ | Skip the logic handling MPNs at the beginning of the workflow (default: false). You can set it to false if you are certain there will be no MNPs. |
 | `exomiser_data_dir` | _Optional_ | Path to the exomiser reference data directory |
 | `exomiser_genome` | _Optional_ | Genome assembly version to be used by exomiser(`hg19` or `hg38`) |
 | `exomiser_data_version` | _Optional_ | Exomiser data version (e.g., `2402`)|

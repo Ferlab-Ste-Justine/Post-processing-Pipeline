@@ -8,7 +8,7 @@
 include { paramsSummaryMap        } from 'plugin/nf-validation'
 include { paramsSummaryMultiqc    } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML  } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { EXCLUDE_MNPS            } from "../subworkflows/local/exclude_mnps"
+include { HANDLE_MNPS            } from "../subworkflows/local/handle_mnps"
 include { VQSR                    } from "../subworkflows/local/vqsr"
 include { BCFTOOLS_VIEW           } from '../modules/nf-core/bcftools/view/main' 
 include { EXOMISER                } from '../modules/local/exomiser'
@@ -136,15 +136,6 @@ process writemeta{
 }
 
 
-def handle_mnps(input_channel, do_exclude_mnps) {
-    if(!do_exclude_mnps) {
-        return input_channel.map{meta, vcf, tbi -> [meta, [vcf, tbi]]}
-    }
-    def ch_input_excludemnps = input_channel.map{meta, vcf, tbi -> [meta, vcf]}
-    return EXCLUDE_MNPS(ch_input_excludemnps).ch_output_excludemnps
-}
-
-
 /* 
 Deal with variations in input file formats, extensions, and the presence or absence of index files.
 input: [meta, vcf]
@@ -191,9 +182,8 @@ workflow POSTPROCESSING {
 
     def ch_samplesheet_standard = standardize_input_vcf_files(ch_samplesheet)
     
-    def ch_output_from_handle_mnps = handle_mnps(ch_samplesheet_standard, params.exclude_mnps)
-        
-    def grouped_by_family = ch_output_from_handle_mnps
+    HANDLE_MNPS(ch_samplesheet_standard, params.skip_handle_mnps, pathReferenceGenomeFasta)
+    def grouped_by_family = HANDLE_MNPS.out.output
          //Create groupkey for the grouptuple and separate the vcf (file[0]) and the index (files[1])
         .map{meta, files -> tuple(groupKey(meta.familyId, meta.sampleSize),meta,files[0],files[1])}
         .groupTuple()

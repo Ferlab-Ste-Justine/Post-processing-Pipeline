@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [#66](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/66) Allow to configure the first step of VQSR SNP variant recalibration (model building) via parameters
 
+### `Changed`
+- [#67](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/67) Replace parameter exclude_mnps by parameter skip_handle_mnps.
+
 
 ## v2.6.0 - <small>2025-02-07</small>
 

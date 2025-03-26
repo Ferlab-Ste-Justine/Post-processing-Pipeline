@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## v2.7.0 - <small>2025-03-26</small>
+
 ### `Added`
 
 - [#66](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/66) Allow to configure the first step of VQSR SNP variant recalibration (model building) via parameters

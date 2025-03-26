@@ -29,7 +29,7 @@
             "gvcf": {
                 "errorMessage": "Filename must have extension '.gvcf' or contain 'g' and end by 'vcf'",
                 "type": "string",
-                "pattern": "^\\S+\\.g(enome)?(\\.)?vcf(\\.gz)?$",
+                "pattern": "^\\S+\\.(vcf|gvcf)(\\.gz)?$",
                 "format": "file-path",
                 "exists": true
             },

@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### `Fixed`
+- [#68](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/68) Corrected documentation for the exclude_mnps parameter and familyPheno samplesheet column
+
 ## v2.7.0 - <small>2025-03-26</small>
 
 ### `Added`

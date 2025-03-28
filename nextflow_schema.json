@@ -289,8 +289,8 @@
         },
         "exclude_mnps": {
           "type": "boolean",
-          "description": "If true, exclude MNPs from the VEP annotation",
-          "help_text": "If true (default), exclude MNPs from the VEP annotation. Must be true on whole genome data.",
+          "description": "If true (default), remove lines from input gvcf files that cause compatibility issues with specific pipeline steps.",
+          "help_text": "If true (default), Remove lines from input gvcf files that cause compatibility issues with specific pipeline steps. See usage documentation for more details.",
           "default": true
         }
       }

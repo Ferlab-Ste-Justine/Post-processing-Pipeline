@@ -20,12 +20,12 @@ process EXOMISER {
 
 
     output:
-    tuple val(meta), path("results/*vcf.gz")         , optional:true, emit: vcf
-    tuple val(meta), path("results/*vcf.gz.tbi")     , optional:true, emit: tbi
-    tuple val(meta), path("results/*html")           , optional:true, emit: html
-    tuple val(meta), path("results/*json")           , optional:true, emit: json
-    tuple val(meta), path("results/*genes.tsv")      , optional:true, emit: genetsv
-    tuple val(meta), path("results/*variants.tsv")   , optional:true, emit: variantstsv
+    tuple val(meta), path("*vcf.gz")         , optional:true, emit: vcf
+    tuple val(meta), path("*vcf.gz.tbi")     , optional:true, emit: tbi
+    tuple val(meta), path("*html")           , optional:true, emit: html
+    tuple val(meta), path("*json")           , optional:true, emit: json
+    tuple val(meta), path("*genes.tsv")      , optional:true, emit: genetsv
+    tuple val(meta), path("*variants.tsv")   , optional:true, emit: variantstsv
     path("versions.yml")            , emit: versions
 
     when:
@@ -73,6 +73,7 @@ process EXOMISER {
         --analysis "${analysisFile}" \\
         --sample ${phenoFile} \\
         --output-format=HTML,JSON,TSV_GENE,TSV_VARIANT,VCF \\
+        --output-directory=/`pwd` \\
         ${args} \\
         --exomiser.data-directory=/`pwd`/${datadir} \\
         ${localFrequencyFileArgs} \\
@@ -92,13 +93,12 @@ process EXOMISER {
     def familyId = meta.familyId
     """
     #!/bin/bash -eo pipefail
-    mkdir results
-    touch results/${familyId}.exomiser.genes.tsv
-    touch results/${familyId}.exomiser.html
-    touch results/${familyId}.exomiser.json
-    touch results/${familyId}.exomiser.variants.tsv
-    touch results/${familyId}.exomiser.vcf.gz
-    touch results/${familyId}.exomiser.vcf.gz.tbi
+    touch ${familyId}.exomiser.genes.tsv
+    touch ${familyId}.exomiser.html
+    touch ${familyId}.exomiser.json
+    touch ${familyId}.exomiser.variants.tsv
+    touch ${familyId}.exomiser.vcf.gz
+    touch ${familyId}.exomiser.vcf.gz.tbi
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

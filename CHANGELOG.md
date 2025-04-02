@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+
+### `Added`
+- [#71](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/71) Add parameters exomiser_outdir and vep_outdir to allow separate publish folders for exomiser and vep
+
+### `Changed`
+- [#71](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/71) Replaces the exomiser/results output folder with exomiser
+- [#71](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/71) Only publish the output of the splitmultiallelics process when publish_all parameter is set to true
+
 ### `Fixed`
 - [#68](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/68) Corrected documentation for the exclude_mnps parameter and familyPheno samplesheet column
 

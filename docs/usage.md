@@ -73,6 +73,17 @@ If you wish to repeatedly use the same parameters for multiple runs, rather than
 > <b>WARNING</b>:  
 Do not use `-c <file>` to specify parameters as this will result in errors. Custom config files specified with `-c` must only be used for [tuning process resource specifications](https://nf-co.re/docs/usage/configuration#tuning-workflow-resources), other infrastructural tweaks (such as output directories), or module arguments (args).
 
+
+### Output Customization
+
+By default, all pipeline outputs are saved in the directory specified by the `--outdir` parameter. However, you can customize the output locations for specific steps using the following parameters:
+
+- **`vep_outdir`**: Specifies a custom directory for vep output files. If not provided, vep output will be saved in the `ensemblvep` subfolder within the main output directory.
+- **`exomiser_outdir`**: Specifies a custom directory for exomiser output files. If not provided, exomiser output will be saved in the `exomiser` subfolder within the main output directory.
+
+For more details on the pipeline outputs, see [output.md](output.md)
+
+
 ### Enable or Disable GVCF Cleaning with `exclude_mnps`
 
 At the start of the workflow, by default, we run steps to filter out lines in the input gVCF files that could cause compatibility issues with the joint genotyping procedure.
@@ -208,6 +219,7 @@ Parameters summary
 | `vep_genome` | _Optional_ | Genome assembly version of the vep cache  |
 | `download_cache` | _Optional_ | Download vep cache (default: false) |
 | `outdir_cache` | _Optional_ |  Path to write the cache to. If not declared, cache will be written to `<outputdir>/cache/` |
+| `vep_outdir` | _Optional_ | If specified, publish vep output files to this location |
 | `exclude_mnps` | _Optional_ | Remove lines from input gvcf files that cause compatibility issues with specific pipeline steps (default: true). |
 | `exomiser_data_dir` | _Optional_ | Path to the exomiser reference data directory |
 | `exomiser_genome` | _Optional_ | Genome assembly version to be used by exomiser(`hg19` or `hg38`) |
@@ -220,3 +232,4 @@ Parameters summary
 | `exomiser_analysis_wes` | _Optional_ | Path to the exomiser analysis file for WES data, if different from the default |
 | `exomiser_analysis_wgs` | _Optional_ | Path to the exomiser analysis file for WGS data, if different from the default |
 | `exomiser_start_from_vep` | _Optional_ | If `true` (default `false`), run the exomiser analysis on the VEP annotated VCF file. Ignored if vep is not activated via `tools` parameter. |
+| `exomiser_outdir` | _Optional_ | If specified, publish exomiser output files to this location |

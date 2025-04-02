@@ -352,6 +352,12 @@
           "type": "string",
           "description": "Path where vep cache will be downloaded. If not provided, will default to ${outdir}/cache.",
           "format": "directory-path"
+        },
+        "vep_outdir": {
+          "type": "string",
+          "description": "When specified, publishes the VEP output to this folder",
+          "format": "directory-path",
+          "fa_icon": "fas fa-folder-open"
         }
       },
       "if": {
@@ -443,6 +449,12 @@
         "exomiser_start_from_vep": {
           "type": "boolean",
           "description": "If true, run the exomiser analysis on the VEP annotated VCF file"
+        },
+        "exomiser_outdir": {
+          "type": "string",
+          "description": "When specified, publishes the exomiser output to this folder",
+          "format": "directory-path",
+          "fa_icon": "fas fa-folder-open"
         }
       },
       "allOf": [

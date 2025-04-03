@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## v2.8.0 - <small>2025-04-23</small>
 
 ### `Added`
 - [#71](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/71) Add parameters exomiser_outdir and vep_outdir to allow separate publish folders for exomiser and vep

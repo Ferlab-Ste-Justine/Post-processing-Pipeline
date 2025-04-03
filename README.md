@@ -71,6 +71,8 @@ Pipeline Output
 -----
 Path to output directory must be specified via the `outdir` parameter.
 
+By default, all pipeline outputs are written to this directory. However, you can specify separate output directories for vep and exomiser results using the `vep_outdir` and `exomiser_outdir` parameters, respectively.
+
 See [docs/output.md](docs/output.md) for more details about pipeline outputs.
 
 

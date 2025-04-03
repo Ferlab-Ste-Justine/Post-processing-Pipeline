@@ -3,15 +3,20 @@
 ## Introduction
 
 This document describes the output produced by the pipeline.
-The directories described below will be created in the output directory after the pipeline has finished. All paths are relative to the top-level output directory.
+
+The directories described below will be created in the output directory after the pipeline has finished. 
+
+For the vep and exomiser steps, it is possible to specify custom output directories via `vep_outdir` and `exomiser_outdir` parameters. If these parameters are not specified, the output for these steps will be included in the main output directory defined by the `outdir` parameter. 
+
+Unless stated otherwise, this document assumes that the default output locations are used for vep and exomiser steps.
 
 ## Overview
 
 The pipeline output is saved step-by-step in the output directory as each step is completed. Below, we provide a description of the output folders corresponding to the main steps, as well as the `pipeline_info` folder, which contains details about the submitted job.
 
+
 - [Directory Structure](#directory-structure)
 - [Pipeline Information: pipeline_info](#pipeline-information-pipeline_info)
-- [Normalization Step: splitmutiallelics](#normalization-step-splitmultiallelics)
 - [Vep Step: ensemblvep](#vep-step-ensemblvep)
 - [Exomiser Step: exomiser/results](#exomiser-step-exomiserresults)
 - [Other Steps](#others-steps)
@@ -22,19 +27,16 @@ The output directory structure is as follow:
 
 ```
 |_ pipeline_info/
-|_ splitmultiallelics/
 |_ ensemblvep/
-|_ exomiser/results/
+|_ exomiser/
 ...
 ```
 
 The `pipeline_info` subdirectory contains details about the pipeline execution and metadata relevant to reproducibility, performance optimization and troubleshooting.
 
-The `splitmultiallelics` subdirectory contains the output of the pipeline after completing the normalization step, just before running the vep or exomiser tools.
-
 The `ensemblvep` subdirectory contains the output after running vep and will appear only if vep is specified in the `tools` parameters.
 
-The `exomiser/results` subdirectory contains the output after running exomiser and will appear only if exomiser is specified in the `tools` parameters.
+The `exomiser` subdirectory contains the output after running exomiser and will appear only if exomiser is specified in the `tools` parameters.
 
 ## Pipeline Information: pipeline_info
 
@@ -68,27 +70,9 @@ Here we describe in more details the content of the `pipeline_info `subdirectory
 
   The `nextflow.log` file is a copy the nextflow log file.  Note that it will miss logs written after the `workflow.onComplete` handler is run.
 
-
-## Normalization Step: splitmultiallelics
-
-The `splitmultiallelics` subdirectory contains the output of the pipeline after the normalization step, just before running vep and exomiser.
-
-```
-|_ splitmultiallelics/
-   |_ family1.splitted.vcf.gz
-   |_ family1.splitted.vcf.gz.tbi
-   ... 
-```
-
-It contains one pair of `vcf.gz`, `vcf.gz.tbi` files per family. Specifically, we use the following naming scheme:
-- `<FAMILY_ID>.splitted.vcf.gz`
-- `<FAMILY_ID>.splitted.vcf.gz.tbi`
-
-The family ID should match the family ID in the input sample sheet.
-
 ## VEP Step: ensemblvep
 
-The `ensemblvep` subdirectory contains the output of the pipeline after the vep step, if vep was specified in the `tools` parameter.
+The `ensemblvep` subdirectory contains the output of the pipeline after the vep step. 
 
 ```
 |_ ensemblvep/
@@ -103,12 +87,17 @@ It contains one pair of `vcf.gz`, `vcf.gz.tbi` files per family. Specifically, w
 
 The family ID should match the family ID in the input sample sheet.
 
-## Exomiser Step: exomiser/results
+Note that, if vep is not specified in the `tools` parameter, the vep step will not be executed, and the `ensemblvep` subdirectory will not be created.
 
-The `exomiser/results` subdirectory contains the output fo the pipeline after the exomiser step, if exomiser was specified in the `tools` parameter.
+By default, VEP output is saved in the `ensemblvep` subfolder within the main output directory. To save the output to a different location, use the `vep_outdir` parameter. 
+In this case, the .vcf.gz and .vcf.gz.tbi files will be saved at the root of the specified location.
+
+## Exomiser Step: exomiser
+
+The `exomiser` subdirectory contains the output fo the pipeline after the exomiser step.
 
 ```
-|_ exomiser/results
+|_ exomiser
    |_ family1.exomiser.genes.tsv
    |_ family1.exomiser.html
    |_ family1.exomiser.json
@@ -130,9 +119,13 @@ The family ID should match the family ID in the input sample sheet.
 
 For more details about the content of each of these files, you can have a look at the exomiser documentation [here](https://exomiser.readthedocs.io/en/latest/result_interpretation.html)
 
+Note that, if exomiser is not specified in the `tools` parameter, the exomiser step will not be executed, and the `exomiser` subdirectory will not be created.
+
+By default, exomiser output is saved in the `exomiser` subfolder within the main output directory. To save the output to a different location, use the `exomiser_outdir` parameter. In this case, the exomiser files will be written at the root of the specified location.
+
+
 ## Others Steps
 
-If needed, you can set the parameter `publish_all` to `true`, and the output from all pipeline steps will be published. 
-The names of the subdirectories will match the nextflow process names.
+If needed, you can set the parameter `publish_all` to `true` to publish the outputs from all pipeline steps. These outputs will be saved in subdirectories within the main output directory specified by the `outdir` parameter. The names of the subdirectories will match the nextflow process names.
 
 We don't recommend using this in production. This is primarily useful for testing, debugging or troubleshooting.

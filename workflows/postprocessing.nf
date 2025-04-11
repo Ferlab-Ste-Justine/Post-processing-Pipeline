@@ -211,7 +211,7 @@ workflow POSTPROCESSING {
     .concat(filtered_one)
 
     //Perform joint genotyping on one or more samples  
-    def ch_input_for_genotypegvcf = ch_output_from_combinegvcf.map{meta,vcf,tbi -> [meta,vcf,tbi, [], []]}
+    def ch_input_for_genotypegvcf = ch_output_from_combinegvcf.map{meta,vcf,tbi -> [meta,vcf,tbi, pathIntervalFile, []]}
     def ch_output_from_genotypegvcf = GATK4_GENOTYPEGVCFS(
     ch_input_for_genotypegvcf,
     [[:], pathReferenceGenomeFasta],

@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### `Removed`
+- [75](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/75) Remove the nextflow docker image
+
 ## v2.8.1 - 2025-04-11 
 ### `Changed`
 - [#73] Pass intervals file to GenotypeGVCFs if available.

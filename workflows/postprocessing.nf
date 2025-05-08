@@ -18,7 +18,8 @@ include { COMBINEGVCFS            } from '../modules/local/combine_gvcfs'
 include { GATK4_GENOTYPEGVCFS     } from '../modules/nf-core/gatk4/genotypegvcfs'
 include { GATK4_VARIANTFILTRATION } from '../modules/nf-core/gatk4/variantfiltration'
 include { ENSEMBLVEP_DOWNLOAD     } from '../modules/nf-core/ensemblvep/download/main'
-
+include { CHANNEL_CREATE_CSV as CHANNEL_CREATE_CSV_VEP } from '../subworkflows/local/channel_create_csv'
+include { CHANNEL_CREATE_CSV as CHANNEL_CREATE_CSV_GENOTYPE } from '../subworkflows/local/channel_create_csv'
 //functions
 include { isExomiserToolIncluded  } from '../subworkflows/local/utils_nfcore_postprocessing_pipeline/utils'
 include { isVepToolIncluded       } from '../subworkflows/local/utils_nfcore_postprocessing_pipeline/utils'
@@ -189,48 +190,53 @@ workflow POSTPROCESSING {
     writemeta()
 
 
-    def ch_samplesheet_standard = standardize_input_vcf_files(ch_samplesheet)
-    
-    def ch_output_from_handle_mnps = handle_mnps(ch_samplesheet_standard, params.exclude_mnps)
+    if (params.step == 'genotype') {
+        def ch_samplesheet_standard = standardize_input_vcf_files(ch_samplesheet)
         
-    def grouped_by_family = ch_output_from_handle_mnps
-         //Create groupkey for the grouptuple and separate the vcf (file[0]) and the index (files[1])
-        .map{meta, files -> tuple(groupKey(meta.familyId, meta.sampleSize),meta,files[0],files[1])}
-        .groupTuple()
-        .map{ familyId, meta, vcf, tbi -> 
-        //now that samples are grouped together, we no longer follow sample in meta, and the id no longer needs the sampleId
-            def updated_meta = meta[0].findAll{!["sample", "id"].contains(it.key) }
-            updated_meta["id"] = updated_meta.familyId
-            [updated_meta, vcf.flatten(), tbi.flatten()]}
+        def ch_output_from_handle_mnps = handle_mnps(ch_samplesheet_standard, params.exclude_mnps)
+            
+        def grouped_by_family = ch_output_from_handle_mnps
+            //Create groupkey for the grouptuple and separate the vcf (file[0]) and the index (files[1])
+            .map{meta, files -> tuple(groupKey(meta.familyId, meta.sampleSize),meta,files[0],files[1])}
+            .groupTuple()
+            .map{ familyId, meta, vcf, tbi -> 
+            //now that samples are grouped together, we no longer follow sample in meta, and the id no longer needs the sampleId
+                def updated_meta = meta[0].findAll{!["sample", "id"].contains(it.key) }
+                updated_meta["id"] = updated_meta.familyId
+                [updated_meta, vcf.flatten(), tbi.flatten()]}
 
-    //Combine per-sample gVCF files into a multi-sample gVCF file
-    def filtered_one = grouped_by_family.filter{it[0].sampleSize == 1}
-    def ch_input_for_combinegvcf = grouped_by_family.filter{it[0].sampleSize > 1}    
-    def ch_output_from_combinegvcf = COMBINEGVCFS(ch_input_for_combinegvcf , pathReferenceGenomeFasta,pathReferenceGenomeFai,pathReferenceDict,pathIntervalFile).combined_gvcf
-    .join(COMBINEGVCFS.out.tbi)
-    .concat(filtered_one)
+        //Combine per-sample gVCF files into a multi-sample gVCF file
+        def filtered_one = grouped_by_family.filter{it[0].sampleSize == 1}
+        def ch_input_for_combinegvcf = grouped_by_family.filter{it[0].sampleSize > 1}    
+        def ch_output_from_combinegvcf = COMBINEGVCFS(ch_input_for_combinegvcf , pathReferenceGenomeFasta,pathReferenceGenomeFai,pathReferenceDict,pathIntervalFile).combined_gvcf
+        .join(COMBINEGVCFS.out.tbi)
+        .concat(filtered_one)
 
-    //Perform joint genotyping on one or more samples  
-    def ch_input_for_genotypegvcf = ch_output_from_combinegvcf.map{meta,vcf,tbi -> [meta,vcf,tbi, pathIntervalFile, []]}
-    def ch_output_from_genotypegvcf = GATK4_GENOTYPEGVCFS(
-    ch_input_for_genotypegvcf,
-    [[:], pathReferenceGenomeFasta],
-    [[:], pathReferenceGenomeFai],
-    [[:], pathReferenceDict],
-    [[:], dbsnpFile],
-    [[:], dbsnpFileIndex]
-    ).vcf
-    .join(GATK4_GENOTYPEGVCFS.out.tbi)
+        //Perform joint genotyping on one or more samples  
+        def ch_input_for_genotypegvcf = ch_output_from_combinegvcf.map{meta,vcf,tbi -> [meta,vcf,tbi, pathIntervalFile, []]}
+        def ch_output_from_genotypegvcf = GATK4_GENOTYPEGVCFS(
+        ch_input_for_genotypegvcf,
+        [[:], pathReferenceGenomeFasta],
+        [[:], pathReferenceGenomeFai],
+        [[:], pathReferenceDict],
+        [[:], dbsnpFile],
+        [[:], dbsnpFileIndex]
+        ).vcf
+        .join(GATK4_GENOTYPEGVCFS.out.tbi)
 
-    //tag variants that are probable artifacts
-    def ch_output_from_tagArtifacts = tagArtifacts(ch_output_from_genotypegvcf, params.hardFilters,pathReferenceGenomeFasta,pathReferenceGenomeFai,pathReferenceDict)
-    //normalize variants
-    def ch_output_from_splitMultiAllelics = splitMultiAllelics(ch_output_from_tagArtifacts, referenceGenome)
+        //tag variants that are probable artifacts
+        def ch_output_from_tagArtifacts = tagArtifacts(ch_output_from_genotypegvcf, params.hardFilters,pathReferenceGenomeFasta,pathReferenceGenomeFai,pathReferenceDict)
+        //normalize variants
+        ch_output_from_splitMultiAllelics = splitMultiAllelics(ch_output_from_tagArtifacts, referenceGenome)
 
+        // TODO: Refactor splitMultiAllelics and tagArtifacts into subworkflows 
+        //create a csv file with the sample information
+        // CHANNEL_CREATE_CSV_GENOTYPE(ch_output_from_splitMultiAllelics,"genotyped",params.outdir) 
+    }
 
-    def ch_output_from_vep //declaring vep output channel early so that it can be accessed outside the if block
-    //Annotating variants with VEP
-    if (isVepToolIncluded()) {
+    if (params.step in ['genotype', 'annotate'] && isVepToolIncluded() ) {
+
+        //Annotating variants with VEP
 
         // Download VEP cache if download = true. Assuming we want to download even if cache provided. 
         if (params.download_cache) {
@@ -242,22 +248,36 @@ workflow POSTPROCESSING {
             vep_cache = file(params.vep_cache)
         }
 
+        //TODO: define input sample
+        vcf_for_vep = params.step == 'genotype' ? ch_output_from_splitMultiAllelics : ch_samplesheet // ch_samplesheet will be the csv retrieved from outdir
         ch_output_from_vep = vep(
-            ch_output_from_splitMultiAllelics, 
+            vcf_for_vep, 
             params.vep_genome,
             HOMO_SAPIENS_SPECIES,
             pathReferenceGenomeFasta, 
             vep_cache,
             params.vep_cache_version
         )
+
+        CHANNEL_CREATE_CSV_VEP(ch_output_from_vep,"ensemblvep",params.outdir)
+
     }
 
-    if (isExomiserToolIncluded()) {
-        def ch_exomiser_input = ch_output_from_splitMultiAllelics
-        if (isVepToolIncluded() && params.exomiser_start_from_vep){
+    if (params.step in ['genotype', 'annotate', 'exomiser'] && isExomiserToolIncluded()) {
+
+        // op 1 pipeline ran from beginning (step == genotype) and start_from_vep is false -> start from output from multiallelics
+        // op 2 pipeline ran from begining OR annotate, vep included and exomiser_start_from_vep == true -> start from ch_output_from_vep
+        // op 3 step is exomiser and exomiser_start_from_Vep == false, retrieve ch_samplesheet csv of split multiallelics
+        // op 4 step is exomiser and exomiser_start_from vep == true, retrieve ch_samplesheet csv of vep
+
+        if(params.exomiser_start_from_vep){
             log.info("Running the exomiser analysis using the vep annotated vcf file as input")
-            ch_exomiser_input = ch_output_from_vep
+            ch_exomiser_input = params.step == 'exomiser' ? ch_samplesheet : ch_output_from_vep
         }
+        else {
+            ch_exomiser_input = params.step == 'exomiser' ? ch_samplesheet : ch_output_from_splitMultiAllelics
+        }
+        
         exomiser(
             ch_exomiser_input,
             params.exomiser_genome,
@@ -273,8 +293,8 @@ workflow POSTPROCESSING {
             params.exomiser_cadd_snv_filename,
             params.exomiser_cadd_indel_filename
         )
+        
     }
-
     emit:
     versions = ch_versions
 }

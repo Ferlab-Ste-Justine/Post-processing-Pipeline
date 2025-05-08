@@ -292,6 +292,17 @@
           "description": "If true (default), remove lines from input gvcf files that cause compatibility issues with specific pipeline steps.",
           "help_text": "If true (default), Remove lines from input gvcf files that cause compatibility issues with specific pipeline steps. See usage documentation for more details.",
           "default": true
+        },
+        "step" : {
+          "type": "string",
+          "description": "Step from which to start the pipeline",
+          "enum": [
+            "genotype",
+            "annotate",
+            "exomiser"
+          ],
+          "default": "genotype",
+          "help_text": "Step to run. If not specified, pipeline will start from first step: genotype. If specified, pipeline will start from that step."
         }
       }
     },

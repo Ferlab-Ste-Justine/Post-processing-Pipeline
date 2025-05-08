@@ -76,7 +76,7 @@ workflow PIPELINE_INITIALISATION {
     //
     validateInputParameters()
 
-        //_________Local___________
+    //_________Local___________
     //
     // Create channel from input file provided through params.input
     //
@@ -103,6 +103,11 @@ workflow PIPELINE_INITIALISATION {
                     metasfile[1]                       //file
                 ]
         }.set {ch_samplesheet}
+
+    //
+    // Channel.fromPath()
+    //         .splitCsv(header: true)
+
     emit:
     samplesheet = ch_samplesheet
     versions    = ch_versions
@@ -191,6 +196,21 @@ def validatePhenopacketFiles(family_id, metafiles) {
     }
 }
 
+def findIntermediateInput(step, outdir, start_from_vep) {
+    switch (step) {
+        case "genotype": //TODO
+            return "${outdir}/gatk4_genotypegvcfs/${params.genome}/intermediate_input"
+        case "annotation":
+            log.warn("Using file ${outdir}/csv/genotyped.csv as input for annotation step.")
+            return file("${outdir}/csv/genotyped.csv",checkIfExists: true)
+        case "exomiser":
+            start_from_vep ? log.warn("Using file ${outdir}/csv/annotated.csv as input for exomiser step.") : log.warn("Using file ${outdir}/csv/genotyped.csv as input for exomiser step.")
+            return start_from_vep ? file("${outdir}/csv/annotated.csv",checkIfExists: true) : file("${outdir}/csv/genotyped.csv",checkIfExists: true)
+        default:
+            error("Unknown step: ${step}")
+    }
+
+}
 //_____________Template functions_____________
 //
 // Check and validate pipeline parameters

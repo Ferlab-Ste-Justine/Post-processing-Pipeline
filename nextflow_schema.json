@@ -298,7 +298,7 @@
           "description": "Step from which to start the pipeline",
           "enum": [
             "genotype",
-            "annotate",
+            "annotation",
             "exomiser"
           ],
           "default": "genotype",

@@ -15,20 +15,25 @@ Unless stated otherwise, this document assumes that the default output locations
 The pipeline output is saved step-by-step in the output directory as each step is completed. Below, we provide a description of the output folders corresponding to the main steps, as well as the `pipeline_info` folder, which contains details about the submitted job.
 
 
-- [Directory Structure](#directory-structure)
-- [Pipeline Information: pipeline_info](#pipeline-information-pipeline_info)
-- [Vep Step: ensemblvep](#vep-step-ensemblvep)
-- [Exomiser Step: exomiser/results](#exomiser-step-exomiserresults)
-- [Other Steps](#others-steps)
+- [ferlab/postprocessing: Output](#ferlabpostprocessing-output)
+  - [Introduction](#introduction)
+  - [Overview](#overview)
+  - [Directory Structure](#directory-structure)
+  - [Output](#output)
+  - [Pipeline Information: pipeline\_info](#pipeline-information-pipeline_info)
+  - [VEP Step: ensemblvep](#vep-step-ensemblvep)
+  - [Exomiser Step: exomiser](#exomiser-step-exomiser)
 
 ## Directory Structure
 
-The output directory structure is as follow:
+The output directory structure is as follows:
 
 ```
-|_ pipeline_info/
-|_ ensemblvep/
-|_ exomiser/
+{outdir}
+├── pipeline_info/
+├── csv/
+├── ensemblvep/
+├── exomiser/
 ...
 ```
 
@@ -37,6 +42,17 @@ The `pipeline_info` subdirectory contains details about the pipeline execution a
 The `ensemblvep` subdirectory contains the output after running vep and will appear only if vep is specified in the `tools` parameters.
 
 The `exomiser` subdirectory contains the output after running exomiser and will appear only if exomiser is specified in the `tools` parameters.
+
+The `csv` subdirectory includes index csv files auto-generated for some intermediate steps. They keep the original output channel structure. They are used by the pipeline to further process/re-start from previously generated output.
+
+## Output
+
+By default, **only annotated VCFs (ensemblvep) and Exomiser results are published.**
+
+If needed, you can set the parameter `publish_all` to `true` to publish the outputs from all pipeline steps. These outputs will be saved in subdirectories within the main output directory specified by the `outdir` parameter. The names of the subdirectories will match the nextflow process names.
+
+> [!IMPORTANT]
+> We don't recommend using `publish_all = true` in production. This is primarily useful for testing, debugging or troubleshooting.
 
 ## Pipeline Information: pipeline_info
 
@@ -119,13 +135,7 @@ The family ID should match the family ID in the input sample sheet.
 
 For more details about the content of each of these files, you can have a look at the exomiser documentation [here](https://exomiser.readthedocs.io/en/latest/result_interpretation.html)
 
-Note that, if exomiser is not specified in the `tools` parameter, the exomiser step will not be executed, and the `exomiser` subdirectory will not be created.
+> [!NOTE]
+> If exomiser is not specified in the `tools` parameter, the exomiser step will not be executed, and the `exomiser` subdirectory will not be created.
 
 By default, exomiser output is saved in the `exomiser` subfolder within the main output directory. To save the output to a different location, use the `exomiser_outdir` parameter. In this case, the exomiser files will be written at the root of the specified location.
-
-
-## Others Steps
-
-If needed, you can set the parameter `publish_all` to `true` to publish the outputs from all pipeline steps. These outputs will be saved in subdirectories within the main output directory specified by the `outdir` parameter. The names of the subdirectories will match the nextflow process names.
-
-We don't recommend using this in production. This is primarily useful for testing, debugging or troubleshooting.

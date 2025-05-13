@@ -16,7 +16,9 @@ workflow CHANNEL_CREATE_CSV {
     def dir = "${outdir}/${tool}"
 
     ch_input.map { channel -> 
-        def meta = channel[0]
+        def meta = channel[0].collectEntries { k, v ->
+                    [ k, v instanceof Path ? v.toUriString() : v]
+                }  // to not loose the complete path when there are meta fields that are files. 
         def files = channel[1..-1]
         [meta, files]
         }

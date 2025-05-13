@@ -69,12 +69,12 @@ def exomiser(inputChannel,
     cadd_indel_filename
     ) {
     def ch_input_for_exomiser = inputChannel
-        .filter{ meta, vcf, tbi -> meta.familypheno} //only run exomiser on families for which a phenopacket file is specified
+        .filter{ meta, vcf, tbi -> meta.familyPheno} //only run exomiser on families for which a phenopacket file is specified
         .map{meta, vcf, tbi -> [
             meta,
             vcf,
             tbi,
-            meta.familypheno, 
+            meta.familyPheno, 
             meta.sequencingType == "WES"? file(analysis_wes_path) : file(analysis_wgs_path)
         ]}
     def remm_input = ["", ""]
@@ -277,7 +277,8 @@ workflow POSTPROCESSING {
         else {
             ch_exomiser_input = params.step == 'exomiser' ? ch_samplesheet : ch_output_from_splitMultiAllelics
         }
-        
+
+
         exomiser(
             ch_exomiser_input,
             params.exomiser_genome,

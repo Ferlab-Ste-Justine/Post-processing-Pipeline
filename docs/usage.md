@@ -70,9 +70,16 @@ work                # Directory containing the nextflow working files
 
 If you wish to repeatedly use the same parameters for multiple runs, rather than specifying each flag in the command, you can specify these in a params file (json or yaml).
 
-> <b>WARNING</b>:  
-Do not use `-c <file>` to specify parameters as this will result in errors. Custom config files specified with `-c` must only be used for [tuning process resource specifications](https://nf-co.re/docs/usage/configuration#tuning-workflow-resources), other infrastructural tweaks (such as output directories), or module arguments (args).
+> [!WARNING]  
+> Do not use `-c <file>` to specify parameters as this will result in errors. Custom config files specified with `-c` must only be used for [tuning process resource specifications](https://nf-co.re/docs/usage/configuration#tuning-workflow-resources), other infrastructural tweaks (such as output directories), or module arguments (args).
 
+#### Starting with Exomiser `--step 'exomiser'`
+
+Exomiser can be run from valid annotated VCF files previously produced by the pipeline. Currently this feature only supports starting from ensemblvep `--exomiser_start_from_vep true`. 
+
+This option depends on the [output directory structure](output.md#directory-structure) being respected as it looks at the `csv` directory to retrieve the paths to the data.
+
+See [Exomiser tool](#exomiser-tool) for details on required input.
 
 ### Output Customization
 
@@ -214,6 +221,7 @@ Parameters summary
 | `broad` | _Optional_ | Path to the directory containing Broad reference data (for VQSR) |
 | `intervalsFile` | _Optional_ | Path to the file containg the genome intervals list on which to operate |
 | `tools` | _Optional_ | Additional tools to run separated by commas. Supported tools are `vep` and `exomiser` |
+| `step` | _Optional_ | Step from which to restart the pipeline. Options: `genotype`(default),`annotation`,`exomiser` |
 | `vep_cache` | _Optional_ | Path to the vep cache data directory |
 | `vep_cache_version` | _Optional_ | Version of the vep cache. e.g. `111` |
 | `vep_genome` | _Optional_ | Genome assembly version of the vep cache  |

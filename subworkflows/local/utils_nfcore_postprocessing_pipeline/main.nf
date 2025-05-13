@@ -77,36 +77,57 @@ workflow PIPELINE_INITIALISATION {
     validateInputParameters()
 
     //_________Local___________
+
     //
     // Create channel from input file provided through params.input
     //
-    Channel
-        .fromSamplesheet("input")
-        .map {
-            meta, file -> [meta.familyId, [meta, file]]
-        }
-        .tap{ch_sample_simple} //Save this channel to join later
-        .groupTuple()
-        .map{
-            familyId, ch_items ->
-            if(isExomiserToolIncluded()){
-                validatePhenopacketFiles(familyId, ch_items)
+    if (params.step == 'genotype' && params.input) {
+        log.info("Reading input samplesheet")
+        Channel
+            .fromSamplesheet("input")
+            .map {
+                meta, gvcf, _vcf, _tbi -> //note use vcf and tbi for now. TODO: implement starting from a different step given a custom samplesheet.
+                [meta.familyId, [meta, gvcf]]
             }
-            [familyId, ch_items.size()]
-        }
-        .combine(ch_sample_simple,by:0)
-        .map {
-            id,size,metasfile -> //include sample count in meta
-                def meta = metasfile[0]
-                [
-                    meta + [sampleSize: size] + [id: meta.familyId + "." + meta.sample], //meta.id is referenced in modules
-                    metasfile[1]                       //file
-                ]
-        }.set {ch_samplesheet}
+            .tap{ch_sample_simple} //Save this channel to join later
+            .groupTuple()
+            .map{
+                familyId, ch_items ->
+                if(isExomiserToolIncluded()){
+                    validatePhenopacketFiles(familyId, ch_items)
+                }
+                [familyId, ch_items.size()]
+            }
+            .combine(ch_sample_simple,by:0)
+            .map {
+                id,size,metasfile -> //include sample count in meta
+                    def meta = metasfile[0]
+                    [
+                        meta + [sampleSize: size] + [id: meta.familyId + "." + meta.sample], //meta.id is referenced in modules
+                        metasfile[1]                       //file
+                    ]
+            }.set {ch_samplesheet}
+    } 
+    else {
+        input_restart = findIntermediateInput(params.step, outdir, params.exomiser_start_from_vep)
 
-    //
-    // Channel.fromPath()
-    //         .splitCsv(header: true)
+        Channel.fromPath(input_restart,checkIfExists: true)
+            .splitCsv(header: true)
+            .map { row -> 
+                def meta = row.subMap('id','familyId', 'sequencingType')
+                meta += ['familyPheno': row.familyPheno == 'null' ? [] : row.familyPheno ]
+                def vcf = file(row.vcf, checkIfExists: true)
+                def tbi = file(row.tbi, checkIfExists:true) ?: (file("${vcf}.tbi", checkIfExists:true) ?: null)
+                if (!tbi) {
+                    log.warn "No TBI file found for VCF: ${vcf}"
+                    }
+                [meta, vcf, tbi]
+            }
+            .set { ch_samplesheet }
+
+    }
+
+
 
     emit:
     samplesheet = ch_samplesheet
@@ -196,21 +217,26 @@ def validatePhenopacketFiles(family_id, metafiles) {
     }
 }
 
-def findIntermediateInput(step, outdir, start_from_vep) {
-    switch (step) {
-        case "genotype": //TODO
-            return "${outdir}/gatk4_genotypegvcfs/${params.genome}/intermediate_input"
-        case "annotation":
-            log.warn("Using file ${outdir}/csv/genotyped.csv as input for annotation step.")
-            return file("${outdir}/csv/genotyped.csv",checkIfExists: true)
-        case "exomiser":
-            start_from_vep ? log.warn("Using file ${outdir}/csv/annotated.csv as input for exomiser step.") : log.warn("Using file ${outdir}/csv/genotyped.csv as input for exomiser step.")
-            return start_from_vep ? file("${outdir}/csv/annotated.csv",checkIfExists: true) : file("${outdir}/csv/genotyped.csv",checkIfExists: true)
-        default:
-            error("Unknown step: ${step}")
+def findIntermediateInput(step, outdir, exomiser_start_from_vep) {
+    if (step == "genotype") {
+        error("Must provide samplesheet as input for genotype step.")
+    } else if (step == "annotation") {
+        error("Starting from annotation step with intermediate files is not yet supported.")
+        // log.warn("Using intermediate file ${outdir}/csv/genotyped.csv as input for annotation step.")
+        // return "${outdir}/csv/genotyped.csv"
+    } else if (step == "exomiser") {
+        if (exomiser_start_from_vep) {
+            log.info("Using intermediate file ${outdir}/csv/ensemblvep.csv as input for exomiser step.")
+            return "${outdir}/csv/ensemblvep.csv"
+        } else {
+            log.info("Using intermediate file ${outdir}/csv/genotyped.csv as input for exomiser step.")
+            return "${outdir}/csv/genotyped.csv"
+        }
+    } else {
+        error("Unknown step: ${step}")
     }
-
 }
+
 //_____________Template functions_____________
 //
 // Check and validate pipeline parameters
@@ -218,6 +244,10 @@ def findIntermediateInput(step, outdir, start_from_vep) {
 def validateInputParameters() {
     if (params.allow_old_gatk_data) {
         log.warn "The 'allow_old_gatk_data' parameter is set to true, allowing the pipeline to run with older GATK data in GATK4_GENOTYPEGVCFS. Not recommended for production."
+    }
+    if (params.step == 'exomiser' && !isExomiserToolIncluded()) {
+        log.warn "Step is exomiser but Exomiser is not included in tools. Appending exomiser to tools list."
+        params.tools = "exomiser," + params.tools
     }
     genomeExistsError()
 }

@@ -20,6 +20,7 @@ include { GATK4_VARIANTFILTRATION } from '../modules/nf-core/gatk4/variantfiltra
 include { ENSEMBLVEP_DOWNLOAD     } from '../modules/nf-core/ensemblvep/download/main'
 include { CHANNEL_CREATE_CSV as CHANNEL_CREATE_CSV_VEP } from '../subworkflows/local/channel_create_csv'
 include { CHANNEL_CREATE_CSV as CHANNEL_CREATE_CSV_GENOTYPE } from '../subworkflows/local/channel_create_csv'
+include { CHANNEL_CREATE_CSV as CHANNEL_CREATE_CSV_EXOMISER } from '../subworkflows/local/channel_create_csv'
 //functions
 include { isExomiserToolIncluded  } from '../subworkflows/local/utils_nfcore_postprocessing_pipeline/utils'
 include { isVepToolIncluded       } from '../subworkflows/local/utils_nfcore_postprocessing_pipeline/utils'
@@ -229,12 +230,13 @@ workflow POSTPROCESSING {
         //normalize variants
         ch_output_from_splitMultiAllelics = splitMultiAllelics(ch_output_from_tagArtifacts, referenceGenome)
 
-        // TODO: Refactor splitMultiAllelics and tagArtifacts into subworkflows 
-        //create a csv file with the sample information
-        // CHANNEL_CREATE_CSV_GENOTYPE(ch_output_from_splitMultiAllelics,"genotyped",params.outdir) 
+        if (params.save_genotyped || params.tools.isBlank()) {
+            //create a csv file with the sample information
+            CHANNEL_CREATE_CSV_GENOTYPE(ch_output_from_splitMultiAllelics, "normalized_genotypes", params.outdir, [])
+        }
     }
 
-    if (params.step in ['genotype', 'annotate'] && isVepToolIncluded() ) {
+    if ( (params.step in ['genotype'] && isVepToolIncluded() ) || params.step == 'annotation' ) {
 
         //Annotating variants with VEP
 
@@ -248,7 +250,6 @@ workflow POSTPROCESSING {
             vep_cache = file(params.vep_cache)
         }
 
-        //TODO: define input sample
         vcf_for_vep = params.step == 'genotype' ? ch_output_from_splitMultiAllelics : ch_samplesheet // ch_samplesheet will be the csv retrieved from outdir
         ch_output_from_vep = vep(
             vcf_for_vep, 
@@ -259,16 +260,11 @@ workflow POSTPROCESSING {
             params.vep_cache_version
         )
 
-        CHANNEL_CREATE_CSV_VEP(ch_output_from_vep,"ensemblvep",params.outdir)
+        CHANNEL_CREATE_CSV_VEP(ch_output_from_vep, "ensemblvep", params.outdir, params.vep_outdir ?: [])
 
     }
 
-    if (params.step in ['genotype', 'annotate', 'exomiser'] && isExomiserToolIncluded()) {
-
-        // op 1 pipeline ran from beginning (step == genotype) and start_from_vep is false -> start from output from multiallelics
-        // op 2 pipeline ran from begining OR annotate, vep included and exomiser_start_from_vep == true -> start from ch_output_from_vep
-        // op 3 step is exomiser and exomiser_start_from_Vep == false, retrieve ch_samplesheet csv of split multiallelics
-        // op 4 step is exomiser and exomiser_start_from vep == true, retrieve ch_samplesheet csv of vep
+    if ((params.step in ['genotype', 'annotate'] && isExomiserToolIncluded()) || params.step == 'exomiser'){
 
         if(params.exomiser_start_from_vep){
             log.info("Running the exomiser analysis using the vep annotated vcf file as input")
@@ -276,8 +272,8 @@ workflow POSTPROCESSING {
         }
         else {
             ch_exomiser_input = params.step == 'exomiser' ? ch_samplesheet : ch_output_from_splitMultiAllelics
+        
         }
-
 
         exomiser(
             ch_exomiser_input,
@@ -293,6 +289,13 @@ workflow POSTPROCESSING {
             params.exomiser_cadd_version,
             params.exomiser_cadd_snv_filename,
             params.exomiser_cadd_indel_filename
+        )
+
+        CHANNEL_CREATE_CSV_EXOMISER(
+            EXOMISER.out.vcf.join(EXOMISER.out.tbi, failOnDuplicate: true, failOnMismatch: true),
+            "exomiser",
+            params.outdir,
+            params.exomiser_outdir ?: []
         )
         
     }

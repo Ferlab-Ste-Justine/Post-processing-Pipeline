@@ -55,10 +55,9 @@
                 "exists": true
             }
             },
-        "dependentRequired": {
-            "gvcf": ["sample"],
-            "tbi": ["vcf"]
-        },
-        "required": ["familyId", "sequencingType"]
+        "oneOf": [
+            {"required": ["familyId", "sample", "sequencingType", "gvcf"]},
+            {"required": ["familyId", "sequencingType", "vcf"]}
+        ]
     }
 }

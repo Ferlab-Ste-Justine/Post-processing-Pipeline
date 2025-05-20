@@ -32,6 +32,7 @@ The output directory structure is as follows:
 {outdir}
 ├── pipeline_info/
 ├── csv/
+├── normalized_genotypes/
 ├── ensemblvep/
 ├── exomiser/
 ...
@@ -39,17 +40,20 @@ The output directory structure is as follows:
 
 The `pipeline_info` subdirectory contains details about the pipeline execution and metadata relevant to reproducibility, performance optimization and troubleshooting.
 
+The `csv` subdirectory includes auto-generated index csv files for each of the analysis steps included. They keep the original output channel structure. They are used by the pipeline to further process/re-start from previously generated output.
+
+The `normalized_genotypes` subdirectory contains the output after running GATK GenotypeGVCFs and normalizing the variants and will appear if `save_genotyped = true`.
+
 The `ensemblvep` subdirectory contains the output after running vep and will appear only if vep is specified in the `tools` parameters.
 
 The `exomiser` subdirectory contains the output after running exomiser and will appear only if exomiser is specified in the `tools` parameters.
 
-The `csv` subdirectory includes index csv files auto-generated for some intermediate steps. They keep the original output channel structure. They are used by the pipeline to further process/re-start from previously generated output.
 
 ## Output
 
-By default, **only annotated VCFs (ensemblvep) and Exomiser results are published.**
+By default, if vep and/or exomiser are included as tools, **only annotated VCFs (ensemblvep) and Exomiser results are published.** If no tools are included, the final joint-genotyped results are published.
 
-If needed, you can set the parameter `publish_all` to `true` to publish the outputs from all pipeline steps. These outputs will be saved in subdirectories within the main output directory specified by the `outdir` parameter. The names of the subdirectories will match the nextflow process names.
+If needed, you can set `save_genotyped` to `true` to publish the normalized joint-genotyping results or `publish_all` to `true` to publish the outputs from all pipeline steps. These outputs will be saved in subdirectories within the main output directory specified by the `outdir` parameter. The names of the subdirectories will match the nextflow process names.
 
 > [!IMPORTANT]
 > We don't recommend using `publish_all = true` in production. This is primarily useful for testing, debugging or troubleshooting.
@@ -86,7 +90,7 @@ Here we describe in more details the content of the `pipeline_info `subdirectory
 
   The `nextflow.log` file is a copy the nextflow log file.  Note that it will miss logs written after the `workflow.onComplete` handler is run.
 
-## VEP Step: ensemblvep
+## Annotation Step: ensemblvep
 
 The `ensemblvep` subdirectory contains the output of the pipeline after the vep step. 
 

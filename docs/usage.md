@@ -19,6 +19,7 @@ The samplesheet must contains the following columns at the minimum:
 - *sample*: The identifier used for the sample
 - *sequencingType*: Must be either WES (Whole Exome Sequencing) or WGS (Whole Genome Sequencing)
 - *gvcf*: Path to the sample `.gvcf.gz` file
+- *vcf*: Path to the joint-genotyped `vcf.gz` file. **_If starting from vep or exomiser_**
 
 Additionally, there is an optional *familyPheno* column that can contain a `.yml/.json` file providing phenotype information on the family in phenopacket format. This column is only necessary if using the exomiser tool. If exomiser is enabled, it must consistently contain either an empty string or the same phenopacket file for all members of the family. For more details, refer to the exomiser tool section below.
 
@@ -73,13 +74,25 @@ If you wish to repeatedly use the same parameters for multiple runs, rather than
 > [!WARNING]  
 > Do not use `-c <file>` to specify parameters as this will result in errors. Custom config files specified with `-c` must only be used for [tuning process resource specifications](https://nf-co.re/docs/usage/configuration#tuning-workflow-resources), other infrastructural tweaks (such as output directories), or module arguments (args).
 
-#### Starting with Exomiser `--step 'exomiser'`
+### Starting with vep anotation (`--step 'annotation'`) or Exomiser (`--step 'exomiser'`)
+To start from either the annotation step or from exomiser, the csv samplesheet must contain the columns `familyId`, `sequencingType`, and `vcf`, with the optional `tbi`. To start from exomiser, the column `familyPheno` is required.
 
-Exomiser can be run from valid annotated VCF files previously produced by the pipeline. Currently this feature only supports starting from ensemblvep `--exomiser_start_from_vep true`. 
+**sample.csv**
+```csv
+**familyId**,**sequencingType**,**vcf**,**tbi**,**familyPheno**
+CONGE-XXX,WES,CONGE-XXX.snv.vep.vcf.gz,CONGE-XXX.snv.vep.vcf.gz.tbi,CONGE-XXX.pheno.yml
+CONGE-YYY,WES,CONGE-YYY.normalized.vcf.gz,CONGE-YYY.normalized.vcf.gz.tbi,CONGE-YYY.pheno.yml
+```
 
-This option depends on the [output directory structure](output.md#directory-structure) being respected as it looks at the `csv` directory to retrieve the paths to the data.
+#### **This feauture supports using results from a previous run as input.** 
+Both annotation and exomiser can be started from previously generated joint-genotyped VCFs. Optionally, exomiser can be started from previous results of ensemblvep.
 
-See [Exomiser tool](#exomiser-tool) for details on required input.
+If in a previous run `save_genotyped = true` and/or vep was run, the CSV files will be stored under `$outdir/csv/normalized_genotypes.csv` and `$outdir/csv/ensemblvep.csv`.
+
+If the required CSV is found in the same output directory, it will automatically be used as an input when specifying the parameter `allow_intermediate input = true`. This option depends on the [output directory structure](output.md#directory-structure) being respected as it looks at the `csv` directory to retrieve the paths to the data. If output directory is different, the csv will need to be passed manually.
+
+
+See [tools](#tools) for details on required input for each step.
 
 ### Output Customization
 
@@ -122,7 +135,7 @@ This can greatly assist in the identification of potential disease-causing varia
 To run exomiser, activate it via the `tools` parameter (see section above). 
 
 Additionally, provide the exomiser phenopacket file in the samplesheet for each family member in the familyPheno column. If the phenopacket file is not specified for a family, exomiser will be skipped for that family.
-
+`
 Note that the value for the familyPheno column must always be identical for the same family.
 
 #### Exomiser input data
@@ -222,6 +235,8 @@ Parameters summary
 | `intervalsFile` | _Optional_ | Path to the file containg the genome intervals list on which to operate |
 | `tools` | _Optional_ | Additional tools to run separated by commas. Supported tools are `vep` and `exomiser` |
 | `step` | _Optional_ | Step from which to restart the pipeline. Options: `genotype`(default),`annotation`,`exomiser` |
+| `allow_intermediate_input` | _Optional_ | When starting from subsequent steps, use intermediate csv as input samplesheet if found. (default `true`) |
+| `save_genotyped` | _Optional_ | If true, save joint-genotyping results |
 | `vep_cache` | _Optional_ | Path to the vep cache data directory |
 | `vep_cache_version` | _Optional_ | Version of the vep cache. e.g. `111` |
 | `vep_genome` | _Optional_ | Genome assembly version of the vep cache  |

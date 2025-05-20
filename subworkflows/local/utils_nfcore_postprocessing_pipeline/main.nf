@@ -18,6 +18,8 @@ include { nfCoreLogo                } from '../../nf-core/utils_nfcore_pipeline'
 include { UTILS_NFCORE_PIPELINE     } from '../../nf-core/utils_nfcore_pipeline'
 include { workflowCitation          } from '../../nf-core/utils_nfcore_pipeline'
 include { isExomiserToolIncluded } from './utils'
+include { isVepToolIncluded } from './utils'
+
 
 /*
 ========================================================================================
@@ -81,12 +83,12 @@ workflow PIPELINE_INITIALISATION {
     //
     // Create channel from input file provided through params.input
     //
-    if (params.step == 'genotype' && params.input) {
+    if (params.step == 'genotype' && input) {
         log.info("Reading input samplesheet")
         Channel
             .fromSamplesheet("input")
             .map {
-                meta, gvcf, _vcf, _tbi -> //note use vcf and tbi for now. TODO: implement starting from a different step given a custom samplesheet.
+                meta, gvcf, _vcf, _tbi ->
                 [meta.familyId, [meta, gvcf]]
             }
             .tap{ch_sample_simple} //Save this channel to join later
@@ -109,25 +111,34 @@ workflow PIPELINE_INITIALISATION {
             }.set {ch_samplesheet}
     } 
     else {
+        // check if there is an intermediate file already available in the output directory
         input_restart = findIntermediateInput(params.step, outdir, params.exomiser_start_from_vep)
 
-        Channel.fromPath(input_restart,checkIfExists: true)
-            .splitCsv(header: true)
-            .map { row -> 
-                def meta = row.subMap('id','familyId', 'sequencingType')
-                meta += ['familyPheno': row.familyPheno == 'null' ? [] : row.familyPheno ]
-                def vcf = file(row.vcf, checkIfExists: true)
-                def tbi = file(row.tbi, checkIfExists:true) ?: (file("${vcf}.tbi", checkIfExists:true) ?: null)
-                if (!tbi) {
-                    log.warn "No TBI file found for VCF: ${vcf}"
-                    }
-                [meta, vcf, tbi]
+        if (input_restart && params.allow_intermediate_input) {
+            log.info("Using intermediate input file: ${input_restart}")
+            Channel.fromPath(input_restart,checkIfExists: true)
+                .splitCsv(header: true)
+                .map { row -> 
+                    def meta = row.subMap('id','familyId', 'sequencingType')
+                    meta += ['familyPheno': row.familyPheno ?: [] ]
+                    def vcf = file(row.vcf, checkIfExists: true)
+                    def tbi = row.tbi ? file(row.tbi, checkIfExists:true) : (file("${vcf}.tbi").exists() ? file("${vcf}.tbi") : [])
+                    if (!tbi) {
+                        log.warn "No TBI file found for VCF: ${vcf}"
+                        }
+                    [meta, vcf, tbi]
+                }
+                .set { ch_samplesheet }
+        } else {
+            Channel
+                .fromSamplesheet("input")
+                .map {
+                    meta, gvcf, vcf, tbi ->
+                    [ [ id:meta.familyId ] + meta, vcf, tbi]
             }
             .set { ch_samplesheet }
-
+        }
     }
-
-
 
     emit:
     samplesheet = ch_samplesheet
@@ -211,30 +222,33 @@ def getPipelineInfoFolder(outdir) {
 }
 
 def validatePhenopacketFiles(family_id, metafiles) {
-    def phenopacket_files =  metafiles.collect{it[0].familypheno}.unique(false)
+    def phenopacket_files =  metafiles.collect{it[0].familyPheno}.unique(false)
     if(phenopacket_files.size() > 1){
         error("All samples in the same family must have the same familyPheno value in the input samplesheet. Found ${phenopacket_files} in family ${family_id}.")
     }
 }
 
 def findIntermediateInput(step, outdir, exomiser_start_from_vep) {
+    def input_file = null
+    def intermediate_file = null
     if (step == "genotype") {
         error("Must provide samplesheet as input for genotype step.")
     } else if (step == "annotation") {
-        error("Starting from annotation step with intermediate files is not yet supported.")
-        // log.warn("Using intermediate file ${outdir}/csv/genotyped.csv as input for annotation step.")
-        // return "${outdir}/csv/genotyped.csv"
+        intermediate_file = file(outdir + "/csv/normalized_genotypes.csv")
     } else if (step == "exomiser") {
         if (exomiser_start_from_vep) {
-            log.info("Using intermediate file ${outdir}/csv/ensemblvep.csv as input for exomiser step.")
-            return "${outdir}/csv/ensemblvep.csv"
+            intermediate_file = file(outdir + "/csv/ensemblvep.csv")
         } else {
-            log.info("Using intermediate file ${outdir}/csv/genotyped.csv as input for exomiser step.")
-            return "${outdir}/csv/genotyped.csv"
+            intermediate_file = file(outdir + "/csv/normalized_genotypes.csv")
         }
     } else {
         error("Unknown step: ${step}")
     }
+    if (intermediate_file.exists()) {
+        input_file = intermediate_file
+    }
+
+    return input_file
 }
 
 //_____________Template functions_____________
@@ -245,10 +259,19 @@ def validateInputParameters() {
     if (params.allow_old_gatk_data) {
         log.warn "The 'allow_old_gatk_data' parameter is set to true, allowing the pipeline to run with older GATK data in GATK4_GENOTYPEGVCFS. Not recommended for production."
     }
-    if (params.step == 'exomiser' && !isExomiserToolIncluded()) {
-        log.warn "Step is exomiser but Exomiser is not included in tools. Appending exomiser to tools list."
-        params.tools = "exomiser," + params.tools
+    if (params.allow_intermediate_input && params.step != 'genotype') {
+        log.warn "The 'allow_intermediate_input' parameter is set to true, pipeline will use intermediate input files if available."
     }
+    if (params.step == 'exomiser' && !isExomiserToolIncluded()) {
+        log.warn "Step is exomiser but Exomiser is not included in tools. Running Exomiser by default."
+    }
+    if (params.step == 'annotation' && !isVepToolIncluded()) {
+        log.warn "Step is annotation but Ensembl VEP is not included in tools. Running VEP for annotation by default."
+    }
+    if ( params.step == 'genotype' && (params.tools.isBlank() && !params.save_genotyped ) ){
+        log.warn "No tools provided. Publishing genotyped results by default."
+    }
+    
     genomeExistsError()
 }
 

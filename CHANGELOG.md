@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### `Added`
-- [#76](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/76) Allow to start exomiser from previous ensemblvep results
+- [#76](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/76) Allow to start/re-start pipeline from defined steps. 
   
 ### `Removed`
 - [#75](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/75) Remove the nextflow docker image

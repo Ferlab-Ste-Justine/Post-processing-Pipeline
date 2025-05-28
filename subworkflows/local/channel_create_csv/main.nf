@@ -26,13 +26,14 @@ workflow CHANNEL_CREATE_CSV {
 		.collectFile(keepHeader: true, skip: 1, sort: true, storeDir: "${outdir}/csv") { meta, files -> 
 			def column_names = meta.keySet().sort()
 			def column_values = column_names.collect{ key -> meta[key] }
+			def header = column_names.join(",") // create header from the keys of the meta map
 			// generate output directory path for each file in files, check if they exist
 			def files_path = files.collect { outfile ->
 								def filetype = outfile.name.replaceAll(/\.gz$/, '').tokenize('.')[-1]
 								header += ",${filetype}" // get type of file and add to header
 								return "${dir}/${outfile.name}" // return the final ouput path of the file
 							}.join(",") // if multiple files, join the paths with a comma
-			["${tool}.csv", "${column_names.join(",")}\n${column_values.join(",")},${files_path}\n"]
+			["${tool}.csv", "${header}\n${column_values.join(",")},${files_path}\n"]
 	}
 
 }

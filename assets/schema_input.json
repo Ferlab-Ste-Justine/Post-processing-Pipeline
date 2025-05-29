@@ -26,6 +26,13 @@
                 "default": "WGS",
                 "enum": ["WGS", "WES"]
             },
+            "familyPheno": {
+                "errorMessage": "Filename of the pedigree file, mandatory for exomiser",
+                "meta": ["familyPheno"],
+                "format": "file-path",
+                "pattern": "^\\S+\\.(yml|yaml|json){1}$",
+                "exists": true
+            },
             "gvcf": {
                 "errorMessage": "Filename must have extension '.gvcf' or contain 'g' and end by 'vcf'",
                 "type": "string",
@@ -33,15 +40,24 @@
                 "format": "file-path",
                 "exists": true
             },
-            "familyPheno": {
-                "errorMessage": "Filename of the pedigree file, mandatory for exomiser",
-                "meta": ["familypheno"],
+            "vcf": {
+                "errorMessage": "Filename must have extension '.vcf' or '.vcf.gz",
+                "type": "string",
                 "format": "file-path",
-                "pattern": "^\\S+\\.(yml|yaml|json){1}$",
+                "pattern": "^\\S+\\.vcf(\\.gz)?$",
                 "exists": true
-
+            },
+            "tbi": {
+                "errorMessage": "Filename must have extension '.vcf.tbi' or '.vcf.gz.tbi",
+                "type": "string",
+                "format": "file-path",
+                "pattern": "^\\S+\\.vcf(\\.gz)?.tbi$",
+                "exists": true
             }
-        },
-        "required": ["familyId", "sample", "sequencingType","gvcf"]
+            },
+        "oneOf": [
+            {"required": ["familyId", "sample", "sequencingType", "gvcf"]},
+            {"required": ["familyId", "sequencingType", "vcf"]}
+        ]
     }
 }

@@ -28,6 +28,11 @@
           "format": "directory-path",
           "description": "The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.",
           "fa_icon": "fas fa-folder-open"
+        },
+        "allow_intermediate_input": {
+          "type": "boolean",
+          "description": "When re-starting from a subsequent step, allow the pipeline to use intermediate CSV files as input samplesheet when available.",
+          "default": true
         }
       }
     },
@@ -292,6 +297,23 @@
           "description": "If true (default), remove lines from input gvcf files that cause compatibility issues with specific pipeline steps.",
           "help_text": "If true (default), Remove lines from input gvcf files that cause compatibility issues with specific pipeline steps. See usage documentation for more details.",
           "default": true
+        },
+        "step" : {
+          "type": "string",
+          "description": "Step from which to start the pipeline",
+          "enum": [
+            "genotype",
+            "annotation",
+            "exomiser"
+          ],
+          "default": "genotype",
+          "help_text": "Step to run. If not specified, pipeline will start from first step: genotype. If specified, pipeline will start from that step."
+        },
+        "save_genotyped": {
+          "type": "boolean",
+          "description": "If true, publish the genotyped and normalized vcf files to the output directory.",
+          "help_text": "If true, save the normalized genotyped vcf files to the output directory. If false, only the final vcf files will be saved. Default when no tools are specified",
+          "default": false
         }
       }
     },

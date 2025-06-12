@@ -43,3 +43,4 @@ repository_type: pipeline
 template:
   prefix: ferlab
   skip: []
+  version: 2.9.0

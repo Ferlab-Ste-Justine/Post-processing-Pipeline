@@ -4,11 +4,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## Unreleased
+## v2.9.0 - 2025-06-12
 
 ### `Added`
-- [#76](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/76) Allow to start/re-start pipeline from defined steps. 
-  
+- [#76](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/76) Allow to start/re-start pipeline from defined intermediate steps. Creates csv files of published results. 
+
+### `Changed`
+- [#76](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/76) Changed meta field familypheno to familyPheno.
+
 ### `Removed`
 - [#75](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/75) Remove the nextflow docker image
   

@@ -264,7 +264,7 @@ workflow POSTPROCESSING {
 
     }
 
-    if ((params.step in ['genotype', 'annotate'] && isExomiserToolIncluded()) || params.step == 'exomiser'){
+    if ((params.step in ['genotype', 'annotation'] && isExomiserToolIncluded()) || params.step == 'exomiser'){
 
         if(params.exomiser_start_from_vep){
             log.info("Running the exomiser analysis using the vep annotated vcf file as input")

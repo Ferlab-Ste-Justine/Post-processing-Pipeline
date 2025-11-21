@@ -7,6 +7,14 @@ on:
     tags:
       - v*
   pull_request:
+    paths-ignore:
+      - "docs/**"
+      - "**/meta.yml"
+      - "**/*.md"
+      - "**/*.png"
+      - "**/*.svg"
+      - "LICENSE"
+      - ".gitignore"
 
 env:
   NXF_ANSI_LOG: false
@@ -17,16 +25,30 @@ concurrency:
 
 jobs:
   test:
-    name: Run pipeline with test data
+    name: "Run pipeline with test data (${{ matrix.NXF_VER }} | ${{ matrix.test_name }} | ${{ matrix.profile }})"
     runs-on: ubuntu-latest
     strategy:
       matrix:
         NXF_VER:
           - "23.10.1"
+          - "24.10.5"
           - "latest-stable"
+        profile:
+          - "docker"
+        test_name:
+          - "test"
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
+        with:
+          fetch-depth: 0
+
+      - name: Copy test data from S3
+        run: | # the s3 client is already installed in the ubuntu-latest image
+          AWS_ACCESS_KEY_ID="${{ secrets.FERLAB_PUBLIC_DATASET_READ_AWS_ACCESS_KEY_ID }}" \
+          AWS_SECRET_ACCESS_KEY="${{ secrets.FERLAB_PUBLIC_DATASET_READ_AWS_SECRET_ACCESS_KEY }}" \
+          AWS_DEFAULT_REGION=ca-central-1 \
+          aws s3 cp s3://ferlab-public-dataset/nextflow/Post-Processing-Pipeline/V6/data-test data-test --recursive
 
       - name: Install Nextflow
         uses: nf-core/setup-nextflow@v2
@@ -36,13 +58,10 @@ jobs:
       - name: Disk space cleanup
         uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
 
-      - name: Run pipeline with test data
-       # Add as many test runs as needed here. Remember that you can parallelise this by
-       # using strategy.matrix.
-
-        # Using the stub mode until our test data setup is ready
+      - name:
+          "Run pipeline with test data ${{ matrix.NXF_VER }} | ${{ matrix.test_name }} | ${{ matrix.profile }}"
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -stub-run -profile test,docker --input "${GITHUB_WORKSPACE}/assets/TestSampleSheet.csv"
+          nextflow run ${GITHUB_WORKSPACE} -profile ${{ matrix.test_name }},${{ matrix.profile }} --outdir ./results
 
       - name: Display nextflow.log on error
         if: failure()

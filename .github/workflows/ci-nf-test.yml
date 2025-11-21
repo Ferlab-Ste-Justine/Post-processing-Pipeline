@@ -1,11 +1,16 @@
 name: nf-test CI
 # Run nf-test
 on:
-  push:
-    branches:
-      - main
-
   pull_request:
+    paths-ignore:
+      - "docs/**"
+      - "**/meta.yml"
+      - "**/*.md"
+      - "**/*.png"
+      - "**/*.svg"
+      - ".github/**"
+      - "LICENSE"
+      - ".gitignore"
 
 
 jobs:
@@ -15,12 +20,22 @@ jobs:
     strategy:
       matrix:
         NXF_VER:
-          - "23.10.1"  
+          - "23.10.1"
+          - "24.10.5"
+          - "latest-stable" 
+
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
         with:
           fetch-depth: 2  # Fetch enough history to detect changed files for nf-test
+
+      - name: Copy test data from S3
+        run: | # the s3 client is already installed in the ubuntu-latest image
+          AWS_ACCESS_KEY_ID="${{ secrets.FERLAB_PUBLIC_DATASET_READ_AWS_ACCESS_KEY_ID }}" \
+          AWS_SECRET_ACCESS_KEY="${{ secrets.FERLAB_PUBLIC_DATASET_READ_AWS_SECRET_ACCESS_KEY }}" \
+          AWS_DEFAULT_REGION=ca-central-1 \
+          aws s3 cp s3://ferlab-public-dataset/nextflow/Post-Processing-Pipeline/V6/data-test data-test --recursive
 
       - name: Install Nextflow
         uses: nf-core/setup-nextflow@v2

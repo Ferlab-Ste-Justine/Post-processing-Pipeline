@@ -179,7 +179,8 @@ workflow POSTPROCESSING {
     def exomiserLocalFrequencyIndexFile = params.exomiser_local_frequency_index_path? file(params.exomiser_local_frequency_index_path) : []
 
     def HOMO_SAPIENS_SPECIES = "homo_sapiens"
-    
+    def cache_species = params.cache_species ?: HOMO_SAPIENS_SPECIES
+
     file(params.outdir).mkdirs()
 
     ch_versions = Channel.empty()
@@ -242,7 +243,7 @@ workflow POSTPROCESSING {
 
         // Download VEP cache if download = true. Assuming we want to download even if cache provided. 
         if (params.download_cache) {
-            ensemblvep_info = Channel.of([ [ id:"${params.vep_cache_version}_${params.vep_genome}" ], params.vep_genome, HOMO_SAPIENS_SPECIES, params.vep_cache_version ])
+            ensemblvep_info = Channel.of([ [ id:"${params.vep_cache_version}_${params.vep_genome}" ], params.vep_genome, cache_species, params.vep_cache_version ])
             ENSEMBLVEP_DOWNLOAD(ensemblvep_info)
             vep_cache = ENSEMBLVEP_DOWNLOAD.out.cache.collect().map{ _meta, cache -> [ cache ] }
             ch_versions = ch_versions.mix(ENSEMBLVEP_DOWNLOAD.out.versions.first())

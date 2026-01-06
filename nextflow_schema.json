@@ -1,5 +1,5 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema",
+  "$schema": "https://json-schema.org/draft-07/schema",
   "$id": "https://raw.githubusercontent.com/ferlab/postprocessing/master/nextflow_schema.json",
   "title": "ferlab/postprocessing pipeline parameters",
   "description": "Variant analysis for genome and exome GVCFs",
@@ -298,14 +298,10 @@
           "help_text": "If true (default), Remove lines from input gvcf files that cause compatibility issues with specific pipeline steps. See usage documentation for more details.",
           "default": true
         },
-        "step" : {
+        "step": {
           "type": "string",
           "description": "Step from which to start the pipeline",
-          "enum": [
-            "genotype",
-            "annotation",
-            "exomiser"
-          ],
+          "enum": ["genotype", "annotation", "exomiser"],
           "default": "genotype",
           "help_text": "Step to run. If not specified, pipeline will start from first step: genotype. If specified, pipeline will start from that step."
         },
@@ -369,6 +365,17 @@
         "download_cache": {
           "type": "boolean",
           "description": "Whether to download the vep cache or not"
+        },
+        "cache_species": {
+          "type": "string",
+          "default": "homo_sapiens",
+          "enum": [
+              "homo_sapiens",
+              "homo_sapiens_merged",
+              "homo_sapiens_refseq"
+          ],
+          "description": "VEP cache species to install.",
+          "help_text": "To install the RefSeq cache, add _refseq to the species name, e.g. homo_sapiens_refseq, or _merged to install the merged Ensembl/RefSeq cache."
         },
         "outdir_cache": {
           "type": "string",

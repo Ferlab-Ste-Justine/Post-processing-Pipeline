@@ -263,7 +263,7 @@ def validateVepCacheVersion() {
         version_ok = version_ok && vep_download_container.value.contains(cache_version)
         vep_container = [ vep_container ]  + [ vep_download_container ]
     }
-    version_ok ?: log.error("The specified VEP cache version '${cache_version}' does not correspond to the VEP version in one or more of the specified container(s):\n\n${vep_container}\n\nPlease provide the correct container(s) in the config file.\n")
+    version_ok ?: error("ERROR ~ The specified VEP cache version '${cache_version}' does not correspond to the VEP version in one or more of the specified container(s):\n\n${vep_container}\n\nPlease provide the correct container(s) in the config file.\n")
 }
 
 //_____________Template functions_____________

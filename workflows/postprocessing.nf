@@ -179,7 +179,7 @@ workflow POSTPROCESSING {
     def exomiserLocalFrequencyIndexFile = params.exomiser_local_frequency_index_path? file(params.exomiser_local_frequency_index_path) : []
 
     def HOMO_SAPIENS_SPECIES = "homo_sapiens"
-    def cache_species = params.cache_species ?: HOMO_SAPIENS_SPECIES
+    def cache_species = params.download_cache_species
 
     file(params.outdir).mkdirs()
 

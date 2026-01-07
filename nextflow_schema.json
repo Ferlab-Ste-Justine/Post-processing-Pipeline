@@ -366,7 +366,7 @@
           "type": "boolean",
           "description": "Whether to download the vep cache or not"
         },
-        "cache_species": {
+        "download_cache_species": {
           "type": "string",
           "default": "homo_sapiens",
           "enum": [

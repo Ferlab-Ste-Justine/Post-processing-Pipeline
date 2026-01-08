@@ -251,11 +251,31 @@ def findIntermediateInput(step, outdir, exomiser_start_from_vep) {
     return input_file
 }
 
+//
+// Validate that the provided VEP cache version corresponds to the VEP version in the container(s)
+//
+def validateVepCacheVersion() {
+    def vep_container = workflow.container.find{ it -> it.key.contains('ENSEMBLVEP_VEP') }
+    def cache_version = params.vep_cache_version
+    def version_ok = vep_container.value.contains(cache_version)
+    if (params.download_cache) {  
+        def vep_download_container = workflow.container.find{ it -> it.key.contains('ENSEMBLVEP_DOWNLOAD') }
+        version_ok = version_ok && vep_download_container.value.contains(cache_version)
+        vep_container = [ vep_container ]  + [ vep_download_container ]
+    }
+    version_ok ?: error("ERROR ~ The specified VEP cache version '${cache_version}' does not correspond to the VEP version in one or more of the specified container(s):\n\n${vep_container}\n\nPlease provide the correct container(s) in the config file.\n")
+}
+
 //_____________Template functions_____________
 //
 // Check and validate pipeline parameters
 //
 def validateInputParameters() {
+
+    if ((isVepToolIncluded() || (params.step == 'annotation')) || params.download_cache) {
+        validateVepCacheVersion()
+    }
+    
     if (params.allow_old_gatk_data) {
         log.warn "The 'allow_old_gatk_data' parameter is set to true, allowing the pipeline to run with older GATK data in GATK4_GENOTYPEGVCFS. Not recommended for production."
     }

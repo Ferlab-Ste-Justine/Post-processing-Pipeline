@@ -5,6 +5,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### `Added`
+- [#80](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/80) Added param --cache_species to allow the download of different cache types.
+
 ### `Changed`
 - [#79](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/79) Updated CI workflow to include new test data from S3.
 

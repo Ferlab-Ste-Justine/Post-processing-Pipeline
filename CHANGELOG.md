@@ -3,6 +3,11 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased 
+
+### `Added`
+- [#82](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/82) Updated CODEOWNERS to add new maintainers.
+
 ## v2.10.0 - 2026-01-08
 
 ### `Added`

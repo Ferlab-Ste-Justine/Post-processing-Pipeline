@@ -1,5 +1,5 @@
 lint:
-  actions_ci: False
+  actions_ci: false
   files_exist:
   - CODE_OF_CONDUCT.md
   - assets/nf-core-postprocessing_logo_light.png
@@ -31,7 +31,7 @@ lint:
   - .github/workflows/linting_comment.yml
   - .github/workflows/linting.yml
   - LICENSE
-  multiqc_config: False
+  multiqc_config: false
   nextflow_config:
   - manifest.name
   - manifest.homePage
@@ -43,4 +43,4 @@ repository_type: pipeline
 template:
   prefix: ferlab
   skip: []
-  version: 2.9.1
+  version: 2.10.0

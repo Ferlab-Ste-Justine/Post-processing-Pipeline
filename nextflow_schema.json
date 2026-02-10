@@ -443,7 +443,8 @@
         "exomiser_data_dir": {
           "type": "string",
           "format": "directory-path",
-          "description": "Path to the  exomiser data directory"
+          "description": "Path to the  exomiser data directory",
+          "exists": true
         },
         "exomiser_data_version": {
           "type": "string",

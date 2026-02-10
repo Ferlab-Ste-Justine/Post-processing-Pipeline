@@ -276,6 +276,9 @@ def validateInputParameters() {
         validateVepCacheVersion()
     }
     
+    if (isExomiserToolIncluded() || (params.step == 'exomiser')) {
+       file(params.exomiser_data_dir).listFiles().size() > 0 ?: error("ERROR ~ The specified Exomiser data directory '${params.exomiser_data_dir}' is empty. Please provide a valid Exomiser data directory with the required data files.")
+    }
     if (params.allow_old_gatk_data) {
         log.warn "The 'allow_old_gatk_data' parameter is set to true, allowing the pipeline to run with older GATK data in GATK4_GENOTYPEGVCFS. Not recommended for production."
     }

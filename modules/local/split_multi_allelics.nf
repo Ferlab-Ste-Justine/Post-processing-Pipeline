@@ -1,6 +1,6 @@
 // This module does not follow nf-core standards. We plan to fix or replace it with an nf-core module in the future.
 process splitMultiAllelics{
-    label 'process_medium'
+    label 'process_single'
 
     input:
     tuple val(meta), path(vcfFile)

@@ -50,7 +50,7 @@ def tagArtifacts(ch_artifact_input, hardFilters, pathFasta, pathFai, pathDict) {
         [[:], pathDict])
         
     def ch_variantfiltration_output =  ch_gatk4_variantfiltration_output.vcf.join(ch_gatk4_variantfiltration_output.tbi)
-        .map{ meta, vcf, tbi -> [meta, [vcf,tbi]]}
+        .map{ meta, vcf, tbi -> [meta, vcf, tbi]}
 
     return ch_vqsr_output.concat(ch_variantfiltration_output)
 }
@@ -227,9 +227,14 @@ workflow POSTPROCESSING {
         .join(GATK4_GENOTYPEGVCFS.out.tbi)
 
         //tag variants that are probable artifacts
-        def ch_output_from_tagArtifacts = tagArtifacts(ch_output_from_genotypegvcf, params.hardFilters,pathReferenceGenomeFasta,pathReferenceGenomeFai,pathReferenceDict)
+        ch_output_from_tagArtifacts = tagArtifacts(ch_output_from_genotypegvcf, params.hardFilters,pathReferenceGenomeFasta,pathReferenceGenomeFai,pathReferenceDict)
+    }
+
+    if ( (params.step in ['genotype', 'normalize'] ) ){
+        vcf_for_norm = params.step == 'genotype' ? ch_output_from_tagArtifacts : ch_samplesheet // ch_samplesheet will be the csv retrieved from outdir
+
         //normalize variants
-        ch_output_from_splitMultiAllelics = splitMultiAllelics(ch_output_from_tagArtifacts, referenceGenome)
+        ch_output_from_splitMultiAllelics = splitMultiAllelics(vcf_for_norm, referenceGenome)
 
         if (params.save_genotyped || params.tools.isBlank()) {
             //create a csv file with the sample information
@@ -237,7 +242,7 @@ workflow POSTPROCESSING {
         }
     }
 
-    if ( (params.step in ['genotype'] && isVepToolIncluded() ) || params.step == 'annotation' ) {
+    if ( (params.step in ['genotype','normalize'] && isVepToolIncluded() ) || params.step == 'annotation' ) {
 
         //Annotating variants with VEP
 
@@ -251,7 +256,7 @@ workflow POSTPROCESSING {
             vep_cache = file(params.vep_cache)
         }
 
-        vcf_for_vep = params.step == 'genotype' ? ch_output_from_splitMultiAllelics : ch_samplesheet // ch_samplesheet will be the csv retrieved from outdir
+        vcf_for_vep = params.step in ['genotype', 'normalize'] ? ch_output_from_splitMultiAllelics : ch_samplesheet // ch_samplesheet will be the csv retrieved from outdir
         ch_output_from_vep = vep(
             vcf_for_vep, 
             params.vep_genome,
@@ -265,7 +270,7 @@ workflow POSTPROCESSING {
 
     }
 
-    if ((params.step in ['genotype', 'annotation'] && isExomiserToolIncluded()) || params.step == 'exomiser'){
+    if (isExomiserToolIncluded() || params.step == 'exomiser'){
 
         if(params.exomiser_start_from_vep){
             log.info("Running the exomiser analysis using the vep annotated vcf file as input")

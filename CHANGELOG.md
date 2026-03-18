@@ -5,6 +5,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v2.11.0 - 2026-03-18]
+
 ### `Added`
 - [#85](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/85) Allow to start from normalization step, accepting as input a hard-filtered VCF. 
 

@@ -50,7 +50,7 @@ def tagArtifacts(ch_artifact_input, hardFilters, pathFasta, pathFai, pathDict) {
         [[:], pathDict])
         
     def ch_variantfiltration_output =  ch_gatk4_variantfiltration_output.vcf.join(ch_gatk4_variantfiltration_output.tbi)
-        .map{ meta, vcf, tbi -> [meta, vcf, tbi]}
+        .map{ meta, vcf, tbi -> [meta, [vcf, tbi]]}
 
     return ch_vqsr_output.concat(ch_variantfiltration_output)
 }
@@ -231,7 +231,7 @@ workflow POSTPROCESSING {
     }
 
     if ( (params.step in ['genotype', 'normalize'] ) ){
-        vcf_for_norm = params.step == 'genotype' ? ch_output_from_tagArtifacts : ch_samplesheet // ch_samplesheet will be the csv retrieved from outdir
+        vcf_for_norm = params.step == 'genotype' ? ch_output_from_tagArtifacts.map{ meta, vcf_tbi -> [meta, vcf_tbi[0], vcf_tbi[1]] } : ch_samplesheet // ch_samplesheet will be the csv retrieved from outdir
 
         //normalize variants
         ch_output_from_splitMultiAllelics = splitMultiAllelics(vcf_for_norm, referenceGenome)

@@ -13,6 +13,12 @@
 **Ferlab-Ste-Justine/Post-processing-Pipeline** is a bioinformatics pipeline designed for family-based analysis of GVCFs from multiple samples. 
 It performs joint genotyping, tags low-quality variants, and optionally annotates the final vcf data using vep and/or prioritize variant using exomiser.
 
+The pipeline can be started from different entry points depending on your needs:
+- **From joint genotyping** (default): Start with GVCF files
+- **From normalization**: Start with already filtered VCF files  
+- **From annotation**: Start with normalized VCF files
+- **From exomiser**: Start with annotated VCF files
+
 ###  Summary:
 1. Standardize input vcf files using bcftools view
 2. Remove fake MNPs and duplicated positions using bcftools (optional)
@@ -44,6 +50,17 @@ nextflow run -c cluster.config Ferlab-Ste-Justine/Post-processing-Pipeline -r "v
    --input samplesheet.csv \
    --outdir results/dir \
    --tools vep,exomiser
+```
+
+To start from a specific step, use the `--step` parameter:
+
+```bash
+# Start from normalization step
+nextflow run -c cluster.config Ferlab-Ste-Justine/Post-processing-Pipeline -r "v2.10.1" \
+    --step normalize \
+    --input samplesheet.csv \
+    --outdir results/dir \
+    --tools vep
 ```
 
 > [!NOTE]

@@ -133,7 +133,7 @@ workflow PIPELINE_INITIALISATION {
             Channel
                 .fromSamplesheet("input")
                 .map {
-                    meta, gvcf, vcf, tbi ->
+                    meta, _gvcf, vcf, tbi ->
                     [ [ id:meta.familyId ] + meta, vcf, tbi]
             }
             .set { ch_samplesheet }
@@ -231,6 +231,9 @@ def validatePhenopacketFiles(family_id, metafiles) {
 def findIntermediateInput(step, outdir, exomiser_start_from_vep) {
     def input_file = null
     def intermediate_file = null
+    if (step == "normalize") {
+        return false
+    }
     if (step == "genotype") {
         error("Must provide samplesheet as input for genotype step.")
     } else if (step == "annotation") {
@@ -288,7 +291,7 @@ def validateInputParameters() {
     if (params.step == 'annotation' && !isVepToolIncluded()) {
         log.warn "Step is annotation but Ensembl VEP is not included in tools. Running VEP for annotation by default."
     }
-    if ( params.step == 'genotype' && (params.tools.isBlank() && !params.save_genotyped ) ){
+    if ( params.step in ['genotype','normalize'] && (params.tools.isBlank() && !params.save_genotyped ) ){
         log.warn "No tools provided. Publishing genotyped results by default."
     }
     

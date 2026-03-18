@@ -19,7 +19,7 @@ The samplesheet must contains the following columns at the minimum:
 - *sample*: The identifier used for the sample
 - *sequencingType*: Must be either WES (Whole Exome Sequencing) or WGS (Whole Genome Sequencing)
 - *gvcf*: Path to the sample `.gvcf.gz` file
-- *vcf*: Path to the joint-genotyped `vcf.gz` file. **_If starting from vep or exomiser_**
+- *vcf*: Path to the joint-genotyped/filtered `vcf.gz` file. **_If starting from normalization, vep or exomiser_**
 
 Additionally, there is an optional *familyPheno* column that can contain a `.yml/.json` file providing phenotype information on the family in phenopacket format. This column is only necessary if using the exomiser tool. If exomiser is enabled, it must consistently contain either an empty string or the same phenopacket file for all members of the family. For more details, refer to the exomiser tool section below.
 
@@ -74,7 +74,20 @@ If you wish to repeatedly use the same parameters for multiple runs, rather than
 > [!WARNING]  
 > Do not use `-c <file>` to specify parameters as this will result in errors. Custom config files specified with `-c` must only be used for [tuning process resource specifications](https://nf-co.re/docs/usage/configuration#tuning-workflow-resources), other infrastructural tweaks (such as output directories), or module arguments (args).
 
-### Starting with vep anotation (`--step 'annotation'`) or Exomiser (`--step 'exomiser'`)
+### Starting from intermediate steps
+
+#### Starting with normalization (`--step 'normalize'`)
+To start from the normalization step, the csv samplesheet must contain the columns `familyId`, `sample`, `sequencingType`, and `vcf`, with the optional `tbi`. This allows you to skip the joint genotyping and VQSR/hard filtering steps and start directly from the normalization of already processed VCF files.
+
+**sample.csv**
+```csv
+**familyId**,**sample**,**sequencingType**,**vcf**,**tbi**
+CONGE-XXX,01,WES,CONGE-XXX.filtered.vcf.gz,CONGE-XXX.filtered.vcf.gz.tbi
+CONGE-XXX,02,WES,CONGE-XXX.filtered.vcf.gz,CONGE-XXX.filtered.vcf.gz.tbi
+CONGE-XXX,03,WES,CONGE-XXX.filtered.vcf.gz,CONGE-XXX.filtered.vcf.gz.tbi
+```
+
+#### Starting with vep annotation (`--step 'annotation'`) or Exomiser (`--step 'exomiser'`)
 To start from either the annotation step or from exomiser, the csv samplesheet must contain the columns `familyId`, `sequencingType`, and `vcf`, with the optional `tbi`. To start from exomiser, the column `familyPheno` is required.
 
 **sample.csv**
@@ -84,12 +97,15 @@ CONGE-XXX,WES,CONGE-XXX.snv.vep.vcf.gz,CONGE-XXX.snv.vep.vcf.gz.tbi,CONGE-XXX.ph
 CONGE-YYY,WES,CONGE-YYY.normalized.vcf.gz,CONGE-YYY.normalized.vcf.gz.tbi,CONGE-YYY.pheno.yml
 ```
 
-#### **This feauture supports using results from a previous run as input.** 
-Both annotation and exomiser can be started from previously generated joint-genotyped VCFs. Optionally, exomiser can be started from previous results of ensemblvep.
+#### **This feature supports using results from a previous run as input.** 
+The normalize, annotation, and exomiser steps can be started from previously generated results:
+- Normalize step can start from previously generated joint-genotyped and filtered VCFs
+- Annotation step can start from previously generated normalized VCFs  
+- Exomiser step can start from previously generated joint-genotyped VCFs or from previous results of ensemblvep
 
 If in a previous run `save_genotyped = true` and/or vep was run, the CSV files will be stored under `$outdir/csv/normalized_genotypes.csv` and `$outdir/csv/ensemblvep.csv`.
 
-If the required CSV is found in the same output directory, it will automatically be used as an input when specifying the parameter `allow_intermediate input = true`. This option depends on the [output directory structure](output.md#directory-structure) being respected as it looks at the `csv` directory to retrieve the paths to the data. If output directory is different, the csv will need to be passed manually.
+If the required CSV is found in the same output directory, it will automatically be used as an input when specifying the parameter `allow_intermediate_input = true`. This option depends on the [output directory structure](output.md#directory-structure) being respected as it looks at the `csv` directory to retrieve the paths to the data. If output directory is different, the csv will need to be passed manually.
 
 
 See [tools](#tools) for details on required input for each step.
@@ -234,7 +250,7 @@ Parameters summary
 | `broad` | _Optional_ | Path to the directory containing Broad reference data (for VQSR) |
 | `intervalsFile` | _Optional_ | Path to the file containg the genome intervals list on which to operate |
 | `tools` | _Optional_ | Additional tools to run separated by commas. Supported tools are `vep` and `exomiser` |
-| `step` | _Optional_ | Step from which to restart the pipeline. Options: `genotype`(default),`annotation`,`exomiser` |
+| `step` | _Optional_ | Step from which to restart the pipeline. Options: `genotype`(default),`normalize`,`annotation`,`exomiser` |
 | `allow_intermediate_input` | _Optional_ | When starting from subsequent steps, use intermediate csv as input samplesheet if found. (default `true`) |
 | `save_genotyped` | _Optional_ | If true, save joint-genotyping results |
 | `vep_cache` | _Optional_ | Path to the vep cache data directory |

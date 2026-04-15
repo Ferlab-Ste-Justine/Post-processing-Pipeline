@@ -1,0 +1,126 @@
+{
+    "comphet_vcf": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "variants.test.snv.vep.ch.vcf.gz:md5,b08056b9d897997cd926d6ec370afc1b"
+                    ]
+                ],
+                "1": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "variants.test.snv.vep.ch.vcf.gz.tbi:md5,2bba7569df9c2df0efecec9a323b1fd5"
+                    ]
+                ],
+                "2": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.ch.slivar.summary.txt:md5,f58e3eb28dbc68af61e37aa87bb75612"
+                    ]
+                ],
+                "3": [
+                    "versions.yml:md5,31ae46fbca3e35705ece35ef39596d63"
+                ],
+                "summary": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.ch.slivar.summary.txt:md5,f58e3eb28dbc68af61e37aa87bb75612"
+                    ]
+                ],
+                "tbi": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "variants.test.snv.vep.ch.vcf.gz.tbi:md5,2bba7569df9c2df0efecec9a323b1fd5"
+                    ]
+                ],
+                "vcf": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "variants.test.snv.vep.ch.vcf.gz:md5,b08056b9d897997cd926d6ec370afc1b"
+                    ]
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.3",
+            "nextflow": "24.10.5"
+        },
+        "timestamp": "2026-04-15T13:40:44.033386"
+    },
+    "comphet_vcf-stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test_stub"
+                        },
+                        "variants.test_stub.snv.vep.ch.vcf.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                    ]
+                ],
+                "1": [
+                    [
+                        {
+                            "id": "test_stub"
+                        },
+                        "variants.test_stub.snv.vep.ch.vcf.gz.tbi:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "2": [
+                    [
+                        {
+                            "id": "test_stub"
+                        },
+                        "test_stub.ch.slivar.summary.txt:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "3": [
+                    "versions.yml:md5,31ae46fbca3e35705ece35ef39596d63"
+                ],
+                "summary": [
+                    [
+                        {
+                            "id": "test_stub"
+                        },
+                        "test_stub.ch.slivar.summary.txt:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "tbi": [
+                    [
+                        {
+                            "id": "test_stub"
+                        },
+                        "variants.test_stub.snv.vep.ch.vcf.gz.tbi:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "vcf": [
+                    [
+                        {
+                            "id": "test_stub"
+                        },
+                        "variants.test_stub.snv.vep.ch.vcf.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                    ]
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.3",
+            "nextflow": "24.10.5"
+        },
+        "timestamp": "2026-04-15T13:40:48.444244"
+    }
+}

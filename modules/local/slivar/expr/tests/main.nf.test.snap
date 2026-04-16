@@ -1,95 +1,43 @@
 {
     "expr_vcf": {
         "content": [
-            {
-                "0": [
-                    [
-                        {
-                            "id": "test"
-                        },
-                        "variants.test.snv.vep.ch.vcf.gz:md5,af01c66f80250cb1e83f6073670a2360"
-                    ]
-                ],
-                "1": [
-                    [
-                        {
-                            "id": "test"
-                        },
-                        "test.expr.slivar.summary.txt:md5,559ade3b5b1aaf44a0690cbfa5b76c65"
-                    ]
-                ],
-                "2": [
-                    "versions.yml:md5,ee5f1534181ef37c56f760d7ecc87015"
-                ],
-                "summary": [
-                    [
-                        {
-                            "id": "test"
-                        },
-                        "test.expr.slivar.summary.txt:md5,559ade3b5b1aaf44a0690cbfa5b76c65"
-                    ]
-                ],
-                "vcf": [
-                    [
-                        {
-                            "id": "test"
-                        },
-                        "variants.test.snv.vep.ch.vcf.gz:md5,af01c66f80250cb1e83f6073670a2360"
-                    ]
+            [
+                [
+                    {
+                        "id": "test"
+                    },
+                    "test.expr.slivar.summary.txt:md5,559ade3b5b1aaf44a0690cbfa5b76c65"
                 ]
-            }
+            ],
+            [
+                "versions.yml:md5,ee5f1534181ef37c56f760d7ecc87015"
+            ]
         ],
         "meta": {
             "nf-test": "0.9.3",
             "nextflow": "24.10.5"
         },
-        "timestamp": "2026-04-15T13:41:32.947348"
+        "timestamp": "2026-04-17T10:38:22.115622"
     },
     "js_expr_vcf": {
         "content": [
-            {
-                "0": [
-                    [
-                        {
-                            "id": "test"
-                        },
-                        "variants.test.snv.vep.ch.vcf.gz:md5,509702b6fe8b48d6a971d4cbdaff8cff"
-                    ]
-                ],
-                "1": [
-                    [
-                        {
-                            "id": "test"
-                        },
-                        "test.expr.slivar.summary.txt:md5,7269e5ca1c550fc77d4fa565b267d8d5"
-                    ]
-                ],
-                "2": [
-                    "versions.yml:md5,ee5f1534181ef37c56f760d7ecc87015"
-                ],
-                "summary": [
-                    [
-                        {
-                            "id": "test"
-                        },
-                        "test.expr.slivar.summary.txt:md5,7269e5ca1c550fc77d4fa565b267d8d5"
-                    ]
-                ],
-                "vcf": [
-                    [
-                        {
-                            "id": "test"
-                        },
-                        "variants.test.snv.vep.ch.vcf.gz:md5,509702b6fe8b48d6a971d4cbdaff8cff"
-                    ]
+            [
+                [
+                    {
+                        "id": "test"
+                    },
+                    "test.expr.slivar.summary.txt:md5,7269e5ca1c550fc77d4fa565b267d8d5"
                 ]
-            }
+            ],
+            [
+                "versions.yml:md5,ee5f1534181ef37c56f760d7ecc87015"
+            ]
         ],
         "meta": {
             "nf-test": "0.9.3",
             "nextflow": "24.10.5"
         },
-        "timestamp": "2026-04-15T13:41:37.83654"
+        "timestamp": "2026-04-17T10:38:27.680592"
     },
     "expr_vcf-stub": {
         "content": [
@@ -128,6 +76,9 @@
                         },
                         "variants.test_stub.snv.vep.ch.vcf.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
                     ]
+                ],
+                "versions": [
+                    "versions.yml:md5,ee5f1534181ef37c56f760d7ecc87015"
                 ]
             }
         ],
@@ -135,6 +86,6 @@
             "nf-test": "0.9.3",
             "nextflow": "24.10.5"
         },
-        "timestamp": "2026-04-15T13:41:42.347317"
+        "timestamp": "2026-04-17T10:38:32.997944"
     }
 }

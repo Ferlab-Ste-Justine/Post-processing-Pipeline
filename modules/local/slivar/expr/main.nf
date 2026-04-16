@@ -4,7 +4,6 @@ process SLIVAR_EXPR {
     tag "$meta.id"
     label 'process_single'
 
-    conda "${moduleDir}/environment.yml"
     container "docker.io/brentp/slivar"
 
     input:

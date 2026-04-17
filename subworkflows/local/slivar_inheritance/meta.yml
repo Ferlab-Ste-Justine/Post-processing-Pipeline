@@ -1,0 +1,46 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "slivar_inheritance"
+description: Filter variants by inheritance patterns using slivar expr and identify compound heterozygotes with slivar compound-hets
+keywords:
+  - vcf
+  - slivar
+  - inheritance
+  - compound-heterozygotes
+  - variant-filtering
+components:
+  - slivar/expr
+  - slivar/compoundhets
+input:
+  - ch_vcf_ped:
+      description: |
+        VCF file with index and pedigree file
+        Structure: [ val(meta), path(vcf), path(tbi), path(ped) ]
+  - val_regions_bed:
+      type: file
+      description: regions or BED file of regions to include (optional)
+  - val_exclude_bed:
+      type: file
+      description: BED file of regions to exclude (optional)
+  - val_gnotate_files:
+      type: file
+      description: Gnotate annotation files for population frequency filtering (optional)
+  - val_js:
+      type: file
+      description: JavaScript file with custom slivar functions (optional)
+output:
+  - vcf_tbi:
+      description: |
+        Compound-het filtered VCF file with tabix index
+        Structure: [ val(meta), path(vcf), path(tbi) ]
+  - expr_summary:
+      description: |
+        Summary statistics from slivar expr
+        Structure: [ val(meta), path(summary) ]
+  - ch_summary:
+      description: |
+        Summary statistics from slivar compound-hets
+        Structure: [ val(meta), path(summary) ]
+authors:
+  - "@georgette-femerling"
+maintainers:
+  - "@georgette-femerling"

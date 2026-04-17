@@ -1,0 +1,66 @@
+nextflow_process {
+
+    name "Test Process SLIVAR_COMPOUNDHETS"
+    script "../main.nf"
+    process "SLIVAR_COMPOUNDHETS"
+
+    tag "modules"
+    tag "modules_local"
+    tag "slivar"
+    tag "slivar/compoundhets"
+
+    test("comphet_vcf") {
+        config "./nextflow.config"
+        when {
+            params {
+                module_args = "--sample-field comphet_side"
+            }
+            process {
+                """
+                input[0] = [
+                    [ id:'test'], // meta map
+                    file('https://github.com/brentp/slivar/raw/refs/heads/master/tests/comphet-test-case.vcf', checkIfExists: true),
+                    file('https://github.com/brentp/slivar/raw/refs/heads/master/tests/comphet-test-case.ped', checkIfExists: true),
+                ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert path(process.out.vcf.get(0).get(1)).linesGzip.contains("##fileformat=VCFv4.2") },
+                { assert process.out.tbi[0][1].endsWith(".tbi") },
+                { assert snapshot(process.out.summary, process.out.versions).match() }
+            )
+        }
+
+    }
+
+    test("comphet_vcf-stub") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'test_stub'], // meta map
+                    file('https://github.com/brentp/slivar/raw/refs/heads/master/tests/comphet-test-case.vcf', checkIfExists: true),
+                    file('https://github.com/brentp/slivar/raw/refs/heads/master/tests/comphet-test-case.ped', checkIfExists: true),
+                ]
+                """
+            }
+        }
+
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(process.out).match() }
+            )
+        }
+
+    }
+
+}

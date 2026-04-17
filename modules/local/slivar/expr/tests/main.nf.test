@@ -1,0 +1,98 @@
+nextflow_process {
+
+    name "Test Process SLIVAR_EXPR"
+    script "../main.nf"
+    process "SLIVAR_EXPR"
+
+    tag "modules"
+    tag "modules_local"
+    tag "slivar"
+    tag "slivar/expr"
+
+    test("expr_vcf") {
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'test' ],
+                    file("https://github.com/brentp/slivar/raw/refs/heads/master/tests/test.vcf", checkIfExists: true),
+                    [],
+                    file("https://github.com/brentp/slivar/raw/refs/heads/master/tests/testa.ped", checkIfExists: true)
+                ]
+                input[1] = []
+                input[2] = []
+                input[3] = []
+                input[4] = []
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert path(process.out.vcf.get(0).get(1)).linesGzip.contains("##fileformat=VCFv4.1") },
+                { assert snapshot(process.out.summary, process.out.versions).match() }
+            )
+        }
+    }
+
+    test("js_expr_vcf") {
+        config "./nextflow.config"
+        when {
+            params {
+                module_args = "--trio 'good_qual_trio:hq(kid, mom, dad)' --family-expr 'good_qual_fam:fam.every(hq1)'"
+            }
+            process {
+                """
+                input[0] = [
+                    [ id:'test' ],
+                    file("https://github.com/brentp/slivar/raw/refs/heads/master/tests/test.vcf", checkIfExists: true),
+                    [],
+                    file("https://github.com/brentp/slivar/raw/refs/heads/master/tests/testa.ped", checkIfExists: true)
+                ]
+                input[1] = []
+                input[2] = []
+                input[3] = []
+                input[4] = file("${moduleTestDir}/test-functions.js", checkIfExists: true)
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert path(process.out.vcf.get(0).get(1)).linesGzip.contains("##fileformat=VCFv4.1") },
+                { assert snapshot(process.out.summary, process.out.versions).match() }
+            )
+        }
+    }
+
+    test("expr_vcf-stub") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'test_stub' ],
+                    file("https://github.com/brentp/slivar/raw/refs/heads/master/tests/test.vcf", checkIfExists: true),
+                    [],
+                    file("https://github.com/brentp/slivar/raw/refs/heads/master/tests/testa.ped", checkIfExists: true)
+                ]
+                input[1] = []
+                input[2] = []
+                input[3] = []
+                input[4] = []
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(process.out).match() }
+            )
+        }
+    }
+}

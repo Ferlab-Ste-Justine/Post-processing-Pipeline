@@ -1,5 +1,3 @@
-include { SLIVAR_COMPOUNDHETS } from '../compoundhets/main.nf'
-
 process SLIVAR_EXPR {
     tag "$meta.id"
     label 'process_single'
@@ -36,7 +34,6 @@ process SLIVAR_EXPR {
 
     slivar expr \\
         --vcf $vcf \\
-        --info 'variant.FILTER == \"PASS\" && variant.ALT[0] != \"*\"' \\
         $ped_arg \\
         $exclude_arg \\
         $regions_arg \\

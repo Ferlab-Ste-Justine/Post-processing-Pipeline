@@ -10,14 +10,14 @@
                 ]
             ],
             [
-                "versions.yml:md5,31ae46fbca3e35705ece35ef39596d63"
+                "versions.yml:md5,3363070dc272d333e5ea413e9385759e"
             ]
         ],
         "meta": {
             "nf-test": "0.9.3",
             "nextflow": "24.10.5"
         },
-        "timestamp": "2026-04-17T10:37:44.870969"
+        "timestamp": "2026-04-28T10:17:23.991912"
     },
     "comphet_vcf-stub": {
         "content": [
@@ -47,7 +47,7 @@
                     ]
                 ],
                 "3": [
-                    "versions.yml:md5,31ae46fbca3e35705ece35ef39596d63"
+                    "versions.yml:md5,3363070dc272d333e5ea413e9385759e"
                 ],
                 "summary": [
                     [
@@ -74,7 +74,7 @@
                     ]
                 ],
                 "versions": [
-                    "versions.yml:md5,31ae46fbca3e35705ece35ef39596d63"
+                    "versions.yml:md5,3363070dc272d333e5ea413e9385759e"
                 ]
             }
         ],
@@ -82,6 +82,6 @@
             "nf-test": "0.9.3",
             "nextflow": "24.10.5"
         },
-        "timestamp": "2026-04-17T10:36:27.425898"
+        "timestamp": "2026-04-28T10:17:28.134506"
     }
 }

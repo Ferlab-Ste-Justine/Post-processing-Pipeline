@@ -44,7 +44,7 @@ process SLIVAR_EXPR {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        slivar: \$(slivar 2>&1 | head -n1 | sed 's/^.*version //; s/ .*\$//')
+        slivar: \$(slivar 2>&1 | head -n1 | sed 's/^.*version: //; s/ .*\$//')
         bcftools : \$(bcftools --version 2>&1 | head -n1 | sed 's/^.*bcftools //; s/ .*\$//')
     END_VERSIONS
     """
@@ -60,7 +60,7 @@ process SLIVAR_EXPR {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        slivar: \$(slivar 2>&1 | head -n1 | sed 's/^.*version //; s/ .*\$//')
+        slivar: \$(slivar 2>&1 | head -n1 | sed 's/^.*version: //; s/ .*\$//')
         bcftools : \$(bcftools --version 2>&1 | head -n1 | sed 's/^.*bcftools //; s/ .*\$//')
     END_VERSIONS
     """

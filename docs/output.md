@@ -6,7 +6,7 @@ This document describes the output produced by the pipeline.
 
 The directories described below will be created in the output directory after the pipeline has finished. 
 
-For the vep and exomiser steps, it is possible to specify custom output directories via `vep_outdir` and `exomiser_outdir` parameters. If these parameters are not specified, the output for these steps will be included in the main output directory defined by the `outdir` parameter. 
+For the vep and exomiser steps, it is possible to specify custom output directories via `vep_outdir` and `exomiser_outdir` parameters. If these parameters are not specified, the output for these steps will be included in the main output directory defined by the `outdir` parameter. Slivar output is always written under `outdir`.
 
 Unless stated otherwise, this document assumes that the default output locations are used for vep and exomiser steps.
 
@@ -22,6 +22,7 @@ The pipeline output is saved step-by-step in the output directory as each step i
   - [Output](#output)
   - [Pipeline Information: pipeline\_info](#pipeline-information-pipeline_info)
   - [VEP Step: ensemblvep](#vep-step-ensemblvep)
+  - [Slivar Step: slivar](#slivar-step-slivar)
   - [Exomiser Step: exomiser](#exomiser-step-exomiser)
 
 ## Directory Structure
@@ -34,6 +35,7 @@ The output directory structure is as follows:
 ├── csv/
 ├── normalized_genotypes/
 ├── ensemblvep/
+├── slivar/
 ├── exomiser/
 ...
 ```
@@ -46,12 +48,14 @@ The `normalized_genotypes` subdirectory contains the output after running GATK G
 
 The `ensemblvep` subdirectory contains the output after running vep and will appear only if vep is specified in the `tools` parameters.
 
+The `slivar` subdirectory contains the output of the slivar inheritance step. It will appear only if slivar is run (either by including `slivar` in the `tools` parameter alongside `vep`, or by setting `--step inheritance`) and at least one family in the samplesheet has a `familyPed` value.
+
 The `exomiser` subdirectory contains the output after running exomiser and will appear only if exomiser is specified in the `tools` parameters.
 
 
 ## Output
 
-By default, if vep and/or exomiser are included as tools, **only annotated VCFs (ensemblvep) and Exomiser results are published.** If no tools are included, the final joint-genotyped results are published.
+By default, if vep, exomiser, and/or slivar are included as tools, **only annotated VCFs (ensemblvep), slivar inheritance results, and Exomiser results are published.** If no tools are included, the final joint-genotyped results are published.
 
 If needed, you can set `save_genotyped` to `true` to publish the normalized joint-genotyping results or `publish_all` to `true` to publish the outputs from all pipeline steps. These outputs will be saved in subdirectories within the main output directory specified by the `outdir` parameter. The names of the subdirectories will match the nextflow process names.
 
@@ -111,6 +115,31 @@ Note that, if vep is not specified in the `tools` parameter, the vep step will n
 
 By default, VEP output is saved in the `ensemblvep` subfolder within the main output directory. To save the output to a different location, use the `vep_outdir` parameter. 
 In this case, the .vcf.gz and .vcf.gz.tbi files will be saved at the root of the specified location.
+
+## Slivar Step: slivar
+
+The `slivar` subdirectory contains the output of the slivar inheritance subworkflow, which runs per family after VEP when slivar is enabled and a `familyPed` is provided in the samplesheet.
+
+```
+|_ slivar/
+   |_ variants.family1.snv.vep.slivar.vcf.gz
+   |_ variants.family1.snv.vep.slivar.vcf.gz.tbi
+   |_ family1.expr.slivar.summary.txt
+   |_ family1.ch.slivar.summary.txt
+   ...
+```
+
+For each family, the directory contains:
+- `variants.<FAMILY_ID>.snv.vep.slivar.vcf.gz` and `.vcf.gz.tbi`: the VEP-annotated VCF re-annotated with the slivar inheritance tags (`denovo`, `recessive`, `dominant`, `x_denovo`, `x_recessive`, `x_dominant`) and the compound-het annotation (`slivar_comphet`). The intermediate `comphet_side`/`het_side` INFO fields used to drive compound-het detection are stripped from the published file.
+- `<FAMILY_ID>.expr.slivar.summary.txt`: per-expression hit counts emitted by `slivar expr`.
+- `<FAMILY_ID>.ch.slivar.summary.txt`: per-expression hit counts emitted by `slivar compound-hets`.
+
+The family ID should match the family ID in the input sample sheet.
+
+> [!NOTE]
+> If slivar is not enabled (via the `tools` parameter or `--step inheritance`), or if no family in the samplesheet has a `familyPed` value, the slivar step will not be executed and the `slivar` subdirectory will not be created.
+
+Slivar output is always written to the `slivar` subfolder within the main output directory; this location is not configurable.
 
 ## Exomiser Step: exomiser
 

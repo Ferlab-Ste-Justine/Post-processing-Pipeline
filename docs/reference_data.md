@@ -1,6 +1,6 @@
 # Ferlab-Ste-Justine/Post-processing-Pipeline: Reference Data
 
-Reference files are essential at various steps of the pipeline, including joint-genotyping, VQSR, the Variant Effect Predictor (VEP), and exomiser. 
+Reference files are essential at various steps of the pipeline, including joint-genotyping, VQSR, the Variant Effect Predictor (VEP), slivar, and exomiser. 
 
 These files must be correctly downloaded and specified through pipeline parameters. This document provides a comprehensive list of the required reference files and explains how to set the pipeline parameters appropriately.
 
@@ -77,6 +77,31 @@ The vep cache is not automatically populated by the pipeline. It must be pre-dow
 data by following the [vep installation procedure](https://github.com/Ensembl/ensembl-vep). Generally, we only need the human files obtainable from [Ensembl](https://ftp.ensembl.org/pub/release-111/variation/vep/homo_sapiens_vep_111_GRCh38.tar.gz).
 Make sure to use the data release matching the vep version used (i.e. configured docker container for the vep process).
 
+## Slivar reference data
+
+The slivar inheritance step uses [gnotate](https://github.com/brentp/slivar#gnotation-files) zip files to annotate variants with population-frequency information (gnomAD popmax allele frequency, gnomAD homozygous-alt count, TOPMed allele frequency). These annotations drive the rare-variant and inheritance filters applied by `slivar expr`.
+
+Gnotate files are optional. If a gnotate file is omitted, the corresponding population-frequency guards are dropped from the slivar expressions automatically — the inheritance segregation logic still runs, but is no longer rarity-filtered against that population.
+
+### gnomAD gnotate file
+The `slivar_gnomad_gnotate` parameter specifies the path to a gnomAD-based slivar gnotate `.zip` file. When provided, the slivar expressions add `INFO.gnomad_popmax_af` and `INFO.gnomad_nhomalt` guards (tunable via the `gnomad_popmax_af_*` and `gnomad_nhomalt` parameters — see [usage.md](usage.md#slivar-inheritance-thresholds)).
+
+Pre-built file for hg38 (gnomAD genomes v3): https://slivar.s3.amazonaws.com/gnomad.hg38.genomes.v3.fix.zip
+
+For other assemblies or to build your own, see the [slivar gnotation files documentation](https://github.com/brentp/slivar#gnotation-files).
+
+### TOPMed gnotate file
+The `slivar_topmed_gnotate` parameter specifies the path to a TOPMed-based slivar gnotate `.zip` file. When provided, the general `--info` filter additionally enforces `INFO.topmed_af < topmed_af_rare`.
+
+See the [slivar gnotation files documentation](https://github.com/brentp/slivar#gnotation-files) for details on building or obtaining a TOPMed gnotate file.
+
+### Optional BED files
+- `slivar_regions_bed`: BED file restricting analysis to the specified regions (passed to `slivar expr --regions`).
+- `slivar_exclude_bed`: BED file of regions to exclude from analysis, e.g. low-complexity or blacklist regions (passed to `slivar expr --exclude`).
+
+### Slivar JavaScript helpers
+The `slivar_js` parameter points to a JavaScript file defining helper functions used in the slivar expressions (segregation, quality checks, etc.). It defaults to the bundled `assets/slivar-functions.js` and only needs to be overridden when using customized helper functions.
+
 ## Exomiser reference data
 The exomiser reference data is only required if `exomiser` is specified via the `tools` parameter.
 
@@ -144,6 +169,11 @@ analysis file should contain only the `analysis` section.
 | `broad` | _Optional_ | Path to the directory containing Broad reference data (for VQSR) |
 | `intervalsFile` | _Optional_ | Path to the file containg the genome intervals list on which to operate |
 | `vepCache` | _Optional_ | Path to the vep cache data directory |
+| `slivar_gnomad_gnotate` | _Optional_ | Path to the gnomAD slivar gnotate (`.zip`) file. Required to apply gnomAD-based population-frequency guards in the inheritance expressions. |
+| `slivar_topmed_gnotate` | _Optional_ | Path to the TOPMed slivar gnotate (`.zip`) file. Required to apply the TOPMed-based population-frequency guard. |
+| `slivar_regions_bed` | _Optional_ | BED file restricting slivar analysis to the specified regions. |
+| `slivar_exclude_bed` | _Optional_ | BED file of regions to exclude from slivar analysis. |
+| `slivar_js` | _Optional_ | JavaScript file defining helper functions used in the slivar expressions. Defaults to `assets/slivar-functions.js`. |
 | `exomiser_data_dir` | _Optional_ | Path to the exomiser reference data directory |
 | `exomiser_genome` | _Optional_ | Genome assembly version to be used by exomiser(`hg19` or `hg38`) |
 | `exomiser_data_version` | _Optional_ | Exomiser data version (e.g., `2402`) |

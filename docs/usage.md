@@ -23,15 +23,17 @@ The samplesheet must contains the following columns at the minimum:
 
 Additionally, there is an optional *familyPheno* column that can contain a `.yml/.json` file providing phenotype information on the family in phenopacket format. This column is only necessary if using the exomiser tool. If exomiser is enabled, it must consistently contain either an empty string or the same phenopacket file for all members of the family. For more details, refer to the exomiser tool section below.
 
+There is also an optional *familyPed* column that can point to a `.ped` pedigree file for the family. This column is required to run the [slivar inheritance step](#slivar-inheritance-step), which tags variants by mode of inheritance and identifies compound heterozygotes from a VEP-annotated VCF. As with `familyPheno`, the value must be identical for all members of the same family.
+
 **sample.csv**
 ```csv
-**familyId**,**sample**,**sequencingType**,**gvcf**,**familyPheno**
-CONGE-XXX,01,WES,CONGE-XXX-01.hard-filtered.gvcf.gz,CONGE-XXX.pheno.yml
-CONGE-XXX,02,WES,CONGE-XXX-02.hard-filtered.gvcf.gz,CONGE-XXX.pheno.yml
-CONGE-XXX,03,WES,CONGE-XXX-03.hard-filtered.gvcf.gz,CONGE-XXX.pheno.yml
-CONGE-YYY,01,WGS,CONGE-YYY-01.hard-filtered.gvcf.gz,CONGE-YYY.pheno.yml
-CONGE-YYY,02,WGS,CONGE-YYY-02.hard-filtered.gvcf.gz,CONGE-YYY.pheno.yml
-CONGE-YYY,03,WGS,CONGE-YYY-03.hard-filtered.gvcf.gz,CONGE-YYY.pheno.yml
+**familyId**,**sample**,**sequencingType**,**gvcf**,**familyPheno**,**familyPed**
+CONGE-XXX,01,WES,CONGE-XXX-01.hard-filtered.gvcf.gz,CONGE-XXX.pheno.yml,CONGE-XXX.ped
+CONGE-XXX,02,WES,CONGE-XXX-02.hard-filtered.gvcf.gz,CONGE-XXX.pheno.yml,CONGE-XXX.ped
+CONGE-XXX,03,WES,CONGE-XXX-03.hard-filtered.gvcf.gz,CONGE-XXX.pheno.yml,CONGE-XXX.ped
+CONGE-YYY,01,WGS,CONGE-YYY-01.hard-filtered.gvcf.gz,CONGE-YYY.pheno.yml,CONGE-YYY.ped
+CONGE-YYY,02,WGS,CONGE-YYY-02.hard-filtered.gvcf.gz,CONGE-YYY.pheno.yml,CONGE-YYY.ped
+CONGE-YYY,03,WGS,CONGE-YYY-03.hard-filtered.gvcf.gz,CONGE-YYY.pheno.yml,CONGE-YYY.ped
 ```
 
 > [!NOTE]
@@ -97,11 +99,24 @@ CONGE-XXX,WES,CONGE-XXX.snv.vep.vcf.gz,CONGE-XXX.snv.vep.vcf.gz.tbi,CONGE-XXX.ph
 CONGE-YYY,WES,CONGE-YYY.normalized.vcf.gz,CONGE-YYY.normalized.vcf.gz.tbi,CONGE-YYY.pheno.yml
 ```
 
-#### **This feature supports using results from a previous run as input.** 
-The normalize, annotation, and exomiser steps can be started from previously generated results:
+#### Starting with the slivar inheritance step (`--step 'inheritance'`)
+To start from the slivar inheritance step, the input VCF is assumed to be already VEP-annotated. The csv samplesheet must contain the columns `familyId`, `sequencingType`, `vcf`, and `familyPed`, with the optional `tbi`.
+
+**sample.csv**
+```csv
+**familyId**,**sequencingType**,**vcf**,**tbi**,**familyPed**
+CONGE-XXX,WES,CONGE-XXX.snv.vep.vcf.gz,CONGE-XXX.snv.vep.vcf.gz.tbi,CONGE-XXX.ped
+CONGE-YYY,WES,CONGE-YYY.snv.vep.vcf.gz,CONGE-YYY.snv.vep.vcf.gz.tbi,CONGE-YYY.ped
+```
+
+When `--step inheritance` is set, slivar is run by default even if not listed in `tools`. Families without a `familyPed` value are silently skipped.
+
+#### **This feature supports using results from a previous run as input.**
+The normalize, annotation, exomiser, and inheritance steps can be started from previously generated results:
 - Normalize step can start from previously generated joint-genotyped and filtered VCFs
-- Annotation step can start from previously generated normalized VCFs  
+- Annotation step can start from previously generated normalized VCFs
 - Exomiser step can start from previously generated joint-genotyped VCFs or from previous results of ensemblvep
+- Inheritance step can start from previously generated VEP-annotated VCFs
 
 If in a previous run `save_genotyped = true` and/or vep was run, the CSV files will be stored under `$outdir/csv/normalized_genotypes.csv` and `$outdir/csv/ensemblvep.csv`.
 
@@ -116,6 +131,8 @@ By default, all pipeline outputs are saved in the directory specified by the `--
 
 - **`vep_outdir`**: Specifies a custom directory for vep output files. If not provided, vep output will be saved in the `ensemblvep` subfolder within the main output directory.
 - **`exomiser_outdir`**: Specifies a custom directory for exomiser output files. If not provided, exomiser output will be saved in the `exomiser` subfolder within the main output directory.
+
+Slivar output is always written to the `slivar` subfolder of `--outdir`.
 
 For more details on the pipeline outputs, see [output.md](output.md)
 
@@ -137,14 +154,16 @@ By default, the gvcf cleaning feature is enabled to maintain previous behaviour 
 
 ### Tools
 
-You can include additional analysis in your pipeline  via the `tools` parameter. Currently, the pipeline supports 
-two tools: `vep` (Variant Effect Predictor) and `exomiser`. 
+You can include additional analysis in your pipeline via the `tools` parameter. Currently, the pipeline supports
+three tools: `vep` (Variant Effect Predictor), `exomiser`, and `slivar`.
 
-VEP is a widely used tool for annotating genetic variants with information such as gene names, 
+VEP is a widely used tool for annotating genetic variants with information such as gene names,
 variant consequences, and population frequencies. It provides valuable insights into the functional impact of genetic variants.
 
-Exomiser, on the other hand, is a tool specifically designed for the analysis of rare genetic diseases. It integrates phenotype data with variant information to prioritize variants that are likely to be disease-causing. 
+Exomiser is a tool specifically designed for the analysis of rare genetic diseases. It integrates phenotype data with variant information to prioritize variants that are likely to be disease-causing.
 This can greatly assist in the identification of potential disease-causing variants in exome sequencing data.
+
+Slivar runs an inheritance subworkflow that tags variants by mode of inheritance and identifies compound heterozygotes from a VEP-annotated VCF and a family PED file. It must be combined with `vep` in `tools` (or used via `--step inheritance` on already VEP-annotated input).
 
 ### Exomiser tool
 
@@ -172,10 +191,58 @@ Regular CLI options should be added to `task.ext.args`.
 
 Options that correspond to application properties (e.g., typically `--exomiser.some-property=value`) must be added to `task.ext.application_properties_args`. These options need to be grouped at the end of the exomiser command to ensure that regular exomiser cli options are parsed correctly.
 
+### Slivar inheritance step
+
+The pipeline can run a [slivar](https://github.com/brentp/slivar)-based inheritance subworkflow that:
+
+1. Tags variants by mode of inheritance (de novo, recessive, dominant, X-linked variants, and compound-het candidate sides) using `slivar expr`.
+2. Identifies compound heterozygotes from the tagged VCF using `slivar compound-hets`.
+3. Merges the compound-het annotations back into the expression-tagged VCF using `bcftools annotate`.
+
+This step runs per family when either:
+- `slivar` is included in the `tools` parameter. In this case `vep` must also be in `tools` so that slivar can consume the VEP-annotated VCF (the schema enforces this dependency).
+- `--step inheritance` is set, in which case the input VCF is assumed to be already VEP-annotated and slivar is run by default.
+
+In both modes, only families with a `familyPed` value in the samplesheet are processed; families without a PED file are silently skipped.
+
+#### Slivar reference data
+
+To apply the population-frequency filters embedded in the inheritance expressions, provide one or both of the following [slivar gnotate](https://github.com/brentp/slivar/wiki/gnotate) zip files:
+
+- `slivar_gnomad_gnotate`: gnomAD-based gnotate file. When provided, the expressions add `INFO.gnomad_popmax_af` and `INFO.gnomad_nhomalt` guards driven by the `gnomad_popmax_af_*` and `gnomad_nhomalt` parameters.
+- `slivar_topmed_gnotate`: TOPMed-based gnotate file. When provided, the general `--info` filter additionally enforces `INFO.topmed_af < topmed_af_rare`.
+
+If a gnotate file is omitted, the corresponding population-frequency guards are dropped from the expressions automatically — the inheritance segregation logic still runs, but is no longer rarity-filtered against that population.
+
+You can additionally provide:
+- `slivar_regions_bed`: restrict analysis to regions in this BED file (`slivar expr --regions`).
+- `slivar_exclude_bed`: skip variants overlapping regions in this BED file (`slivar expr --exclude`).
+- `slivar_js`: custom JavaScript helper functions. Defaults to the bundled `assets/slivar-functions.js`; override only if you have customized segregation/quality functions.
+
+#### Slivar inheritance thresholds
+
+The default population-frequency thresholds applied in the inheritance expressions can be tuned via parameters:
+
+| Parameter | Default | Used in |
+| --- | --- | --- |
+| `gnomad_popmax_af_rare` | `0.01` | General `--info` rare-variant filter |
+| `topmed_af_rare` | `0.05` | General `--info` rare-variant filter |
+| `gnomad_popmax_af_dominant` | `0.001` | `denovo`, `dominant`, `x_denovo`, `x_dominant` family expressions |
+| `gnomad_popmax_af_recessive` | `0.01` | `recessive`, `x_recessive` family expressions |
+| `gnomad_nhomalt` | `10` | `comphet_side` and `het_side` filters |
+
+Each threshold is only applied when the corresponding gnotate file is provided.
+
+#### Slivar output
+
+Slivar output is always written to the `slivar` subfolder within the main output directory (`--outdir`). For details on the slivar output files, see [output.md](output.md#slivar-step-slivar).
+
 ### Customize versions and commands
 
 If needed, it is possible to customize the options passed to the vep command by overriding the ext.args directive for the
 ENSEMBLVEP_VEP process. See [conf/modules.config](../conf/modules.config).
+
+The slivar expressions and the bcftools annotate command can also be tuned via the `SLIVAR_EXPR`, `SLIVAR_COMPOUNDHETS`, and `BCFTOOLS_ANNOTATE` `withName` blocks in [conf/modules.config](../conf/modules.config).
 
 
 ### Stub mode and quick tests
@@ -249,8 +316,8 @@ Parameters summary
 | `dbsnpFileIndex` | _Optional_ | Path to dbsnp file index. Must be specified if the dbsnpFile parameter is specified. |
 | `broad` | _Optional_ | Path to the directory containing Broad reference data (for VQSR) |
 | `intervalsFile` | _Optional_ | Path to the file containg the genome intervals list on which to operate |
-| `tools` | _Optional_ | Additional tools to run separated by commas. Supported tools are `vep` and `exomiser` |
-| `step` | _Optional_ | Step from which to restart the pipeline. Options: `genotype`(default),`normalize`,`annotation`,`exomiser` |
+| `tools` | _Optional_ | Additional tools to run separated by commas. Supported tools are `vep`, `exomiser`, and `slivar`. `slivar` requires `vep` to also be included. |
+| `step` | _Optional_ | Step from which to restart the pipeline. Options: `genotype`(default),`normalize`,`annotation`,`exomiser`,`inheritance` |
 | `allow_intermediate_input` | _Optional_ | When starting from subsequent steps, use intermediate csv as input samplesheet if found. (default `true`) |
 | `save_genotyped` | _Optional_ | If true, save joint-genotyping results |
 | `vep_cache` | _Optional_ | Path to the vep cache data directory |
@@ -272,3 +339,13 @@ Parameters summary
 | `exomiser_analysis_wgs` | _Optional_ | Path to the exomiser analysis file for WGS data, if different from the default |
 | `exomiser_start_from_vep` | _Optional_ | If `true` (default `false`), run the exomiser analysis on the VEP annotated VCF file. Ignored if vep is not activated via `tools` parameter. |
 | `exomiser_outdir` | _Optional_ | If specified, publish exomiser output files to this location |
+| `slivar_gnomad_gnotate` | _Optional_ | Path to the gnomAD slivar gnotate (`.zip`) file. Required to apply gnomAD-based population-frequency guards in the inheritance expressions. |
+| `slivar_topmed_gnotate` | _Optional_ | Path to the TOPMed slivar gnotate (`.zip`) file. Required to apply the TOPMed-based population-frequency guard. |
+| `slivar_regions_bed` | _Optional_ | BED file restricting slivar analysis to the specified regions. |
+| `slivar_exclude_bed` | _Optional_ | BED file of regions to exclude from slivar analysis. |
+| `slivar_js` | _Optional_ | JavaScript file defining helper functions used in the slivar expressions. Defaults to `assets/slivar-functions.js`. |
+| `gnomad_popmax_af_rare` | _Optional_ | Max gnomAD popmax AF for the general `--info` rare-variant filter (default `0.01`). |
+| `topmed_af_rare` | _Optional_ | Max TOPMed AF for the general `--info` rare-variant filter (default `0.05`). |
+| `gnomad_popmax_af_dominant` | _Optional_ | Max gnomAD popmax AF for dominant and de novo inheritance expressions (default `0.001`). |
+| `gnomad_popmax_af_recessive` | _Optional_ | Max gnomAD popmax AF for recessive inheritance expressions (default `0.01`). |
+| `gnomad_nhomalt` | _Optional_ | Max gnomAD homozygous-alt count allowed when tagging compound-het candidate sides (default `10`). |

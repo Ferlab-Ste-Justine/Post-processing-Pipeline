@@ -32,7 +32,7 @@ jobs:
         NXF_VER:
           - "23.10.1"
           - "24.10.5"
-          - "latest-stable"
+          - "25.10.4"
         profile:
           - "docker"
         test_name:
@@ -48,7 +48,7 @@ jobs:
           AWS_ACCESS_KEY_ID="${{ secrets.FERLAB_PUBLIC_DATASET_READ_AWS_ACCESS_KEY_ID }}" \
           AWS_SECRET_ACCESS_KEY="${{ secrets.FERLAB_PUBLIC_DATASET_READ_AWS_SECRET_ACCESS_KEY }}" \
           AWS_DEFAULT_REGION=ca-central-1 \
-          aws s3 cp s3://ferlab-public-dataset/nextflow/Post-Processing-Pipeline/V6/data-test data-test --recursive
+          aws s3 cp s3://ferlab-public-dataset/nextflow/Post-Processing-Pipeline/V7/data-test data-test --recursive
 
       - name: Install Nextflow
         uses: nf-core/setup-nextflow@v2

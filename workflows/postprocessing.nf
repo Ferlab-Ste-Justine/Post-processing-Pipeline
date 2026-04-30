@@ -10,6 +10,7 @@ include { paramsSummaryMultiqc    } from '../subworkflows/nf-core/utils_nfcore_p
 include { softwareVersionsToYAML  } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { EXCLUDE_MNPS            } from "../subworkflows/local/exclude_mnps"
 include { VQSR                    } from "../subworkflows/local/vqsr"
+include { SLIVAR_INHERITANCE      } from '../subworkflows/local/slivar_inheritance'
 include { BCFTOOLS_VIEW           } from '../modules/nf-core/bcftools/view/main' 
 include { EXOMISER                } from '../modules/local/exomiser'
 include { splitMultiAllelics      } from '../modules/local/split_multi_allelics'
@@ -24,6 +25,7 @@ include { CHANNEL_CREATE_CSV as CHANNEL_CREATE_CSV_EXOMISER } from '../subworkfl
 //functions
 include { isExomiserToolIncluded  } from '../subworkflows/local/utils_nfcore_postprocessing_pipeline/utils'
 include { isVepToolIncluded       } from '../subworkflows/local/utils_nfcore_postprocessing_pipeline/utils'
+include { isToolIncluded    } from '../subworkflows/local/utils_nfcore_postprocessing_pipeline/utils'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -177,6 +179,12 @@ workflow POSTPROCESSING {
     def dbsnpFileIndex = params.dbsnpFileIndex? file(params.dbsnpFileIndex) : []
     def exomiserLocalFrequencyFile = params.exomiser_local_frequency_path? file(params.exomiser_local_frequency_path) : []
     def exomiserLocalFrequencyIndexFile = params.exomiser_local_frequency_index_path? file(params.exomiser_local_frequency_index_path) : []
+    def slivarRegionsBed   = params.slivar_regions_bed   ? file(params.slivar_regions_bed)   : []
+    def slivarExcludeBed   = params.slivar_exclude_bed   ? file(params.slivar_exclude_bed)   : []
+    def gnomad_gnotate = params.slivar_gnomad_gnotate ? file(params.slivar_gnomad_gnotate) : []
+    def topmed_gnotate = params.slivar_topmed_gnotate ? file(params.slivar_topmed_gnotate) : []
+    def slivarGnotateFiles = [gnomad_gnotate, topmed_gnotate].findAll{ it -> it }
+    def slivarJs           = params.slivar_js            ? file(params.slivar_js)            : []
 
     def HOMO_SAPIENS_SPECIES = "homo_sapiens"
     def cache_species = params.download_cache_species
@@ -267,7 +275,22 @@ workflow POSTPROCESSING {
         )
 
         CHANNEL_CREATE_CSV_VEP(ch_output_from_vep, "ensemblvep", params.outdir, params.vep_outdir ?: [])
+    
+    }
 
+    if (isToolIncluded('slivar') || params.step == 'inheritance') {
+        if (params.step == 'inheritance') {
+            log.info("Step 'inheritance': assuming input VCF is already VEP-annotated")
+            ch_vcf_slivar = ch_samplesheet
+        } else {
+            ch_vcf_slivar = ch_output_from_vep
+        }
+
+        ch_slivar_input = ch_vcf_slivar
+            .filter{ meta, _vcf, _tbi -> meta.familyPed }
+            .map{ meta, vcf, tbi -> [meta, vcf, tbi, meta.familyPed] }
+
+        SLIVAR_INHERITANCE(ch_slivar_input, slivarRegionsBed, slivarExcludeBed, slivarGnotateFiles, slivarJs)
     }
 
     if (isExomiserToolIncluded() || params.step == 'exomiser'){

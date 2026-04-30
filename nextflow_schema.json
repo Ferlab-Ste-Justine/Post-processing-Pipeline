@@ -289,8 +289,8 @@
         },
         "tools": {
           "type": "string",
-          "pattern": "^(vep|exomiser)?(,(vep|exomiser))*$",
-          "description": "List of tools to use separate with comma.  Available tools: [vep, exomiser]"
+          "pattern": "^(vep|exomiser|slivar)?(,(vep|exomiser|slivar))*$",
+          "description": "List of tools to use separate with comma.  Available tools: [vep, exomiser, slivar]"
         },
         "exclude_mnps": {
           "type": "boolean",
@@ -301,9 +301,9 @@
         "step": {
           "type": "string",
           "description": "Step from which to start the pipeline",
-          "enum": ["genotype", "normalize", "annotation", "exomiser"],
+          "enum": ["genotype", "normalize", "annotation", "exomiser", "inheritance"],
           "default": "genotype",
-          "help_text": "Step to run. If not specified, pipeline will start from first step: genotype. If specified, pipeline will start from that step."
+          "help_text": "Step to run. If not specified, pipeline will start from first step: genotype. If specified, pipeline will start from that step. When `inheritance` is selected, the input VCF is assumed to be already VEP-annotated."
         },
         "save_genotyped": {
           "type": "boolean",
@@ -559,6 +559,100 @@
           }
         }
       ]
+    },
+    "slivar_options": {
+      "title": "Slivar options",
+      "type": "object",
+      "description": "Options for the slivar inheritance subworkflow, which tags variants by mode of inheritance and identifies compound heterozygotes from a VEP-annotated VCF and a PED file.",
+      "properties": {
+        "slivar_regions_bed": {
+          "type": "string",
+          "format": "file-path",
+          "pattern": "^\\S+\\.bed(\\.gz)?$",
+          "exists": true,
+          "description": "Optional BED file restricting slivar analysis to the specified regions.",
+          "help_text": "When provided, passed to `slivar expr --regions`. Only variants overlapping these regions will be evaluated."
+        },
+        "slivar_exclude_bed": {
+          "type": "string",
+          "format": "file-path",
+          "pattern": "^\\S+\\.bed(\\.gz)?$",
+          "exists": true,
+          "description": "Optional BED file of regions to exclude from slivar analysis.",
+          "help_text": "When provided, passed to `slivar expr --exclude`. Variants overlapping these regions are skipped (e.g., low-complexity or blacklist regions)."
+        },
+        "slivar_gnomad_gnotate": {
+          "type": "string",
+          "format": "file-path",
+          "pattern": "^\\S+\\.zip$",
+          "exists": true,
+          "description": "Path to the gnomAD slivar gnotate (.zip) file used to annotate gnomad_popmax_af and gnomad_nhomalt.",
+          "help_text": "When provided, enables the gnomAD-based population-frequency guards in the slivar `--info` and `--family-expr` expressions. See https://github.com/brentp/slivar/wiki/gnotate for how to build this file."
+        },
+        "slivar_topmed_gnotate": {
+          "type": "string",
+          "format": "file-path",
+          "pattern": "^\\S+\\.zip$",
+          "exists": true,
+          "description": "Path to the TOPMed slivar gnotate (.zip) file used to annotate topmed_af.",
+          "help_text": "When provided, enables the TOPMed-based population-frequency guard in the slivar `--info` expression."
+        },
+        "slivar_js": {
+          "type": "string",
+          "format": "file-path",
+          "pattern": "^\\S+\\.js$",
+          "default": "${projectDir}/assets/slivar-functions.js",
+          "description": "JavaScript file defining helper functions used in the slivar expressions.",
+          "help_text": "Defaults to the bundled `assets/slivar-functions.js`. Override only if you need custom segregation/quality functions.",
+          "hidden": true
+        },
+        "gnomad_popmax_af_rare": {
+          "type": "number",
+          "default": 0.01,
+          "description": "Max gnomAD popmax allele frequency used in the general `--info` rare-variant filter.",
+          "help_text": "Only applied when `slivar_gnomad_gnotate` is provided."
+        },
+        "topmed_af_rare": {
+          "type": "number",
+          "default": 0.05,
+          "description": "Max TOPMed allele frequency used in the general `--info` rare-variant filter.",
+          "help_text": "Only applied when `slivar_topmed_gnotate` is provided."
+        },
+        "gnomad_popmax_af_dominant": {
+          "type": "number",
+          "default": 0.001,
+          "description": "Max gnomAD popmax allele frequency for dominant and de novo inheritance calls.",
+          "help_text": "Only applied when `slivar_gnomad_gnotate` is provided."
+        },
+        "gnomad_popmax_af_recessive": {
+          "type": "number",
+          "default": 0.01,
+          "description": "Max gnomAD popmax allele frequency for recessive inheritance calls.",
+          "help_text": "Only applied when `slivar_gnomad_gnotate` is provided."
+        },
+        "gnomad_nhomalt": {
+          "type": "integer",
+          "default": 10,
+          "description": "Max gnomAD homozygous-alt count allowed when tagging compound-het candidate sides.",
+          "help_text": "Only applied when `slivar_gnomad_gnotate` is provided."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "tools": { "pattern": "slivar" },
+              "step": { "not": { "const": "inheritance" } }
+            },
+            "required": ["tools"]
+          },
+          "then": {
+            "properties": {
+              "tools": { "pattern": "vep" }
+            }
+          }
+        }
+      ]
     }
   },
   "allOf": [
@@ -585,6 +679,9 @@
     },
     {
       "$ref": "#/definitions/exomiser_option"
+    },
+    {
+      "$ref": "#/definitions/slivar_options"
     }
   ]
 }

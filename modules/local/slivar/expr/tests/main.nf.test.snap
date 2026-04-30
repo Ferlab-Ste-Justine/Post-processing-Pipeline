@@ -2,22 +2,17 @@
     "expr_vcf": {
         "content": [
             [
-                [
-                    {
-                        "id": "test"
-                    },
-                    "test.expr.slivar.summary.txt:md5,559ade3b5b1aaf44a0690cbfa5b76c65"
-                ]
+                
             ],
             [
-                "versions.yml:md5,ee5f1534181ef37c56f760d7ecc87015"
+                "versions.yml:md5,f2c5fa28f766c10ef67363cb41f63240"
             ]
         ],
         "meta": {
             "nf-test": "0.9.3",
             "nextflow": "24.10.5"
         },
-        "timestamp": "2026-04-17T10:38:22.115622"
+        "timestamp": "2026-04-28T10:15:25.207967"
     },
     "js_expr_vcf": {
         "content": [
@@ -30,14 +25,14 @@
                 ]
             ],
             [
-                "versions.yml:md5,ee5f1534181ef37c56f760d7ecc87015"
+                "versions.yml:md5,f2c5fa28f766c10ef67363cb41f63240"
             ]
         ],
         "meta": {
             "nf-test": "0.9.3",
             "nextflow": "24.10.5"
         },
-        "timestamp": "2026-04-17T10:38:27.680592"
+        "timestamp": "2026-04-28T10:15:29.786515"
     },
     "expr_vcf-stub": {
         "content": [
@@ -47,7 +42,7 @@
                         {
                             "id": "test_stub"
                         },
-                        "variants.test_stub.snv.vep.ch.vcf.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                        "variants.test_stub.snv.vep.expr.vcf.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
                     ]
                 ],
                 "1": [
@@ -59,7 +54,7 @@
                     ]
                 ],
                 "2": [
-                    "versions.yml:md5,ee5f1534181ef37c56f760d7ecc87015"
+                    "versions.yml:md5,f2c5fa28f766c10ef67363cb41f63240"
                 ],
                 "summary": [
                     [
@@ -74,11 +69,11 @@
                         {
                             "id": "test_stub"
                         },
-                        "variants.test_stub.snv.vep.ch.vcf.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                        "variants.test_stub.snv.vep.expr.vcf.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
                     ]
                 ],
                 "versions": [
-                    "versions.yml:md5,ee5f1534181ef37c56f760d7ecc87015"
+                    "versions.yml:md5,f2c5fa28f766c10ef67363cb41f63240"
                 ]
             }
         ],
@@ -86,6 +81,6 @@
             "nf-test": "0.9.3",
             "nextflow": "24.10.5"
         },
-        "timestamp": "2026-04-17T10:38:32.997944"
+        "timestamp": "2026-04-28T10:15:33.961466"
     }
 }

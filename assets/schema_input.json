@@ -33,6 +33,13 @@
                 "pattern": "^\\S+\\.(yml|yaml|json){1}$",
                 "exists": true
             },
+            "familyPed": {
+                "errorMessage": "PED file for the family, used by slivar for inheritance analysis",
+                "meta": ["familyPed"],
+                "format": "file-path",
+                "pattern": "^\\S+\\.ped$",
+                "exists": true
+            },
             "gvcf": {
                 "errorMessage": "Filename must have extension '.gvcf' or contain 'g' and end by 'vcf'",
                 "type": "string",

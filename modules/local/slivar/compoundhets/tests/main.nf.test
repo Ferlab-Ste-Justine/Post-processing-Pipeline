@@ -13,7 +13,7 @@ nextflow_process {
         config "./nextflow.config"
         when {
             params {
-                module_args = "--sample-field comphet_side"
+                args_modules = "--sample-field comphet_side"
             }
             process {
                 """

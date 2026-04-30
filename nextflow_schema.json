@@ -289,8 +289,8 @@
         },
         "tools": {
           "type": "string",
-          "pattern": "^(vep|exomiser)?(,(vep|exomiser))*$",
-          "description": "List of tools to use separate with comma.  Available tools: [vep, exomiser]"
+          "pattern": "^(vep|exomiser|slivar)?(,(vep|exomiser|slivar))*$",
+          "description": "List of tools to use separate with comma.  Available tools: [vep, exomiser, slivar]"
         },
         "exclude_mnps": {
           "type": "boolean",
@@ -301,9 +301,9 @@
         "step": {
           "type": "string",
           "description": "Step from which to start the pipeline",
-          "enum": ["genotype", "normalize", "annotation", "exomiser"],
+          "enum": ["genotype", "normalize", "annotation", "exomiser", "inheritance"],
           "default": "genotype",
-          "help_text": "Step to run. If not specified, pipeline will start from first step: genotype. If specified, pipeline will start from that step."
+          "help_text": "Step to run. If not specified, pipeline will start from first step: genotype. If specified, pipeline will start from that step. When `inheritance` is selected, the input VCF is assumed to be already VEP-annotated."
         },
         "save_genotyped": {
           "type": "boolean",
@@ -606,12 +606,6 @@
           "help_text": "Defaults to the bundled `assets/slivar-functions.js`. Override only if you need custom segregation/quality functions.",
           "hidden": true
         },
-        "slivar_outdir": {
-          "type": "string",
-          "format": "directory-path",
-          "description": "When specified, publishes the slivar output to this folder instead of `<outdir>/slivar`.",
-          "fa_icon": "fas fa-folder-open"
-        },
         "gnomad_popmax_af_rare": {
           "type": "number",
           "default": 0.01,
@@ -642,7 +636,23 @@
           "description": "Max gnomAD homozygous-alt count allowed when tagging compound-het candidate sides.",
           "help_text": "Only applied when `slivar_gnomad_gnotate` is provided."
         }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "tools": { "pattern": "slivar" },
+              "step": { "not": { "const": "inheritance" } }
+            },
+            "required": ["tools"]
+          },
+          "then": {
+            "properties": {
+              "tools": { "pattern": "vep" }
+            }
+          }
+        }
+      ]
     }
   },
   "allOf": [

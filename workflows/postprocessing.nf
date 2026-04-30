@@ -25,6 +25,7 @@ include { CHANNEL_CREATE_CSV as CHANNEL_CREATE_CSV_EXOMISER } from '../subworkfl
 //functions
 include { isExomiserToolIncluded  } from '../subworkflows/local/utils_nfcore_postprocessing_pipeline/utils'
 include { isVepToolIncluded       } from '../subworkflows/local/utils_nfcore_postprocessing_pipeline/utils'
+include { isToolIncluded    } from '../subworkflows/local/utils_nfcore_postprocessing_pipeline/utils'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -274,10 +275,20 @@ workflow POSTPROCESSING {
         )
 
         CHANNEL_CREATE_CSV_VEP(ch_output_from_vep, "ensemblvep", params.outdir, params.vep_outdir ?: [])
+    
+    }
 
-        ch_slivar_input = ch_output_from_vep
+    if (isToolIncluded('slivar') || params.step == 'inheritance') {
+        if (params.step == 'inheritance') {
+            log.info("Step 'inheritance': assuming input VCF is already VEP-annotated")
+            ch_vcf_slivar = ch_samplesheet
+        } else {
+            ch_vcf_slivar = ch_output_from_vep
+        }
+
+        ch_slivar_input = ch_vcf_slivar
             .filter{ meta, _vcf, _tbi -> meta.familyPed }
-            .map{ meta, vcf, tbi -> [meta, vcf, tbi, file(meta.familyPed)] }
+            .map{ meta, vcf, tbi -> [meta, vcf, tbi, meta.familyPed] }
 
         SLIVAR_INHERITANCE(ch_slivar_input, slivarRegionsBed, slivarExcludeBed, slivarGnotateFiles, slivarJs)
     }

@@ -19,6 +19,7 @@ include { UTILS_NFCORE_PIPELINE     } from '../../nf-core/utils_nfcore_pipeline'
 include { workflowCitation          } from '../../nf-core/utils_nfcore_pipeline'
 include { isExomiserToolIncluded } from './utils'
 include { isVepToolIncluded } from './utils'
+include { isToolIncluded } from './utils'
 
 
 /*
@@ -98,6 +99,9 @@ workflow PIPELINE_INITIALISATION {
                 if(isExomiserToolIncluded()){
                     validatePhenopacketFiles(familyId, ch_items)
                 }
+                if(isToolIncluded('slivar') || params.step == 'inheritance'){
+                    validatePedFiles(familyId, ch_items)
+                }
                 [familyId, ch_items.size()]
             }
             .combine(ch_sample_simple,by:0)
@@ -118,9 +122,10 @@ workflow PIPELINE_INITIALISATION {
             log.info("Using intermediate input file: ${input_restart}")
             Channel.fromPath(input_restart,checkIfExists: true)
                 .splitCsv(header: true)
-                .map { row -> 
+                .map { row ->
                     def meta = row.subMap('id','familyId', 'sequencingType')
                     meta += ['familyPheno': row.familyPheno ?: [] ]
+                    meta += ['familyPed': row.familyPed ?: [] ]
                     def vcf = file(row.vcf, checkIfExists: true)
                     def tbi = row.tbi ? file(row.tbi, checkIfExists:true) : (file("${vcf}.tbi").exists() ? file("${vcf}.tbi") : [])
                     if (!tbi) {
@@ -228,6 +233,13 @@ def validatePhenopacketFiles(family_id, metafiles) {
     }
 }
 
+def validatePedFiles(family_id, metafiles) {
+    def ped_files = metafiles.collect{ entry -> entry[0].familyPed }.findAll{ ped -> ped }.unique(false)
+    if (ped_files.size() > 1) {
+        error("Samples in the same family must reference the same familyPed value in the input samplesheet. Found ${ped_files} in family ${family_id}.")
+    }
+}
+
 def findIntermediateInput(step, outdir, exomiser_start_from_vep) {
     def input_file = null
     def intermediate_file = null
@@ -244,6 +256,8 @@ def findIntermediateInput(step, outdir, exomiser_start_from_vep) {
         } else {
             intermediate_file = file(outdir + "/csv/normalized_genotypes.csv")
         }
+    } else if (step == "inheritance") {
+        intermediate_file = file(outdir + "/csv/ensemblvep.csv")
     } else {
         error("Unknown step: ${step}")
     }
@@ -294,7 +308,9 @@ def validateInputParameters() {
     if ( params.step in ['genotype','normalize'] && (params.tools.isBlank() && !params.save_genotyped ) ){
         log.warn "No tools provided. Publishing genotyped results by default."
     }
-    
+    if (params.step == 'inheritance' && !isToolIncluded('slivar')) {
+        log.warn "Step is inheritance but Slivar is not included in tools. Running Slivar by default."
+    }
     genomeExistsError()
 }
 

@@ -29,7 +29,8 @@ The pipeline can be started from different entry points depending on your needs:
   - For whole exome sequencing data: [Hard-Filtering](https://gatk.broadinstitute.org/hc/en-us/articles/360036733451-VariantFiltration)
 6. Normalize with bcftools
 7. Optionnally annotate variants with [Variant effect predictor (VEP)](https://useast.ensembl.org/info/docs/tools/vep/index.html) and download reference cache (if not provided)
-8. Optionnally integrate phenotype data to annotate, filter and prioritise variants likely to be disease-causing with [exomiser](https://www.sanger.ac.uk/tool/exomiser/)
+8. Optionnally tag variants by mode of inheritance and identify compound heterozygotes with [slivar](https://github.com/brentp/slivar) when VEP is run and a family PED file is provided
+9. Optionnally integrate phenotype data to annotate, filter and prioritise variants likely to be disease-causing with [exomiser](https://www.sanger.ac.uk/tool/exomiser/)
 
 
 
@@ -120,6 +121,8 @@ The documentation of the various tools used in this workflow are available here:
 - [HardFiltering](https://gatk.broadinstitute.org/hc/en-us/articles/360035531112--How-to-Filter-variants-either-with-VQSR-or-by-hard-filtering)
 
 [VEP](https://useast.ensembl.org/info/docs/tools/vep/script/vep_options.html)
+
+[slivar](https://github.com/brentp/slivar/wiki)
 
 [EXOMISER](https://exomiser.readthedocs.io/en/latest/)
 

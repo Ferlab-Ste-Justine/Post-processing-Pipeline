@@ -1,0 +1,206 @@
+nextflow_function {
+
+    name "Test Subworkflow UTILS_NFCORE_POSTPROCESSING_PIPELINE findIntermediateInput function"
+    script "subworkflows/local/utils_nfcore_postprocessing_pipeline/main.nf"
+    tag "local"
+
+    function "findIntermediateInput"
+
+    def fixtures_dir = "subworkflows/local/utils_nfcore_postprocessing_pipeline/tests/fixtures/intermediate"
+
+    test("Test Function findIntermediateInput returns false for normalize step") {
+        when {
+            function {
+                """
+                input[0] = "normalize"
+                input[1] = "any/output/dir"
+                input[2] = false
+                """
+            }
+            then {
+                assertAll(
+                    { assert function.success },
+                    { assert function.result == false }
+                )
+            }
+        }
+    }
+
+    test("Test Function findIntermediateInput fails for genotype step") {
+        when {
+            function {
+                """
+                input[0] = "genotype"
+                input[1] = "any/output/dir"
+                input[2] = false
+                """
+            }
+            then {
+                assertAll(
+                    { assert function.failed }
+                )
+            }
+        }
+    }
+
+    test("Test Function findIntermediateInput fails for unknown step") {
+        when {
+            function {
+                """
+                input[0] = "unknown_step"
+                input[1] = "any/output/dir"
+                input[2] = false
+                """
+            }
+            then {
+                assertAll(
+                    { assert function.failed }
+                )
+            }
+        }
+    }
+
+    test("Test Function findIntermediateInput returns null when annotation intermediate file does not exist") {
+        when {
+            function {
+                """
+                input[0] = "annotation"
+                input[1] = "non/existent/output/dir"
+                input[2] = false
+                """
+            }
+            then {
+                assertAll(
+                    { assert function.success },
+                    { assert function.result == null }
+                )
+            }
+        }
+    }
+
+    test("Test Function findIntermediateInput returns null when exomiser intermediate file does not exist (start from vep)") {
+        when {
+            function {
+                """
+                input[0] = "exomiser"
+                input[1] = "non/existent/output/dir"
+                input[2] = true
+                """
+            }
+            then {
+                assertAll(
+                    { assert function.success },
+                    { assert function.result == null }
+                )
+            }
+        }
+    }
+
+    test("Test Function findIntermediateInput returns null when exomiser intermediate file does not exist (start from normalized)") {
+        when {
+            function {
+                """
+                input[0] = "exomiser"
+                input[1] = "non/existent/output/dir"
+                input[2] = false
+                """
+            }
+            then {
+                assertAll(
+                    { assert function.success },
+                    { assert function.result == null }
+                )
+            }
+        }
+    }
+
+    test("Test Function findIntermediateInput returns null when inheritance intermediate file does not exist") {
+        when {
+            function {
+                """
+                input[0] = "inheritance"
+                input[1] = "non/existent/output/dir"
+                input[2] = false
+                """
+            }
+            then {
+                assertAll(
+                    { assert function.success },
+                    { assert function.result == null }
+                )
+            }
+        }
+    }
+
+    test("Test Function findIntermediateInput returns normalized_genotypes.csv when annotation intermediate file exists") {
+        when {
+            function {
+                """
+                input[0] = "annotation"
+                input[1] = "${moduleTestDir}/fixtures/intermediate"
+                input[2] = false
+                """
+            }
+            then {
+                assertAll(
+                    { assert function.success },
+                    { assert function.result.toString().endsWith("csv/normalized_genotypes.csv") }
+                )
+            }
+        }
+    }
+
+    test("Test Function findIntermediateInput returns ensemblvep.csv when exomiser starts from vep and file exists") {
+        when {
+            function {
+                """
+                input[0] = "exomiser"
+                input[1] = "${moduleTestDir}/fixtures/intermediate"
+                input[2] = true
+                """
+            }
+            then {
+                assertAll(
+                    { assert function.success },
+                    { assert function.result.endsWith("csv/ensemblvep.csv") }
+                )
+            }
+        }
+    }
+
+    test("Test Function findIntermediateInput returns normalized_genotypes.csv when exomiser does not start from vep and file exists") {
+        when {
+            function {
+                """
+                input[0] = "exomiser"
+                input[1] = "${moduleTestDir}/fixtures/intermediate"
+                input[2] = false
+                """
+            }
+            then {
+                assertAll(
+                    { assert function.success },
+                    { assert function.result.toString().endsWith("csv/normalized_genotypes.csv") }
+                )
+            }
+        }
+    }
+
+    test("Test Function findIntermediateInput returns ensemblvep.csv when inheritance intermediate file exists") {
+        when {
+            function {
+                """
+                input[0] = "inheritance"
+                input[1] = "${moduleTestDir}/fixtures/intermediate"
+                input[2] = false
+                """
+            }
+            then {
+                assertAll(
+                    { assert function.success },
+                    { assert function.result.toString().endsWith("csv/ensemblvep.csv") }
+                )
+            }
+        }
+    }
+}

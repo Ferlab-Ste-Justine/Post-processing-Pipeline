@@ -16,13 +16,13 @@ nextflow_function {
                 input[0] = "toolB"
                 """
             }
-            then {
-                assertAll(
-                    { assert function.success },
-                    { assert function.result == true }
-                )
-            } 
         }
+        then {
+            assertAll(
+                { assert function.success },
+                { assert function.result == true }
+            )
+        } 
     }
 
     test("Test Function isToolIncluded - with multiple tools specified - tool absent") {
@@ -35,13 +35,13 @@ nextflow_function {
                 input[0] = "toolC"
                 """
             }
-            then {
-                assertAll(
-                    { assert function.success },
-                    { assert function.result == false }
-                )
-            } 
         }
+        then {
+            assertAll(
+                { assert function.success },
+                { assert function.result == false }
+            )
+        } 
     }
 
     test("Test Function isToolIncluded - with single tool - tool absent") {
@@ -54,13 +54,13 @@ nextflow_function {
                 input[0] = "toolC"
                 """
             }
-            then {
-                assertAll(
-                    { assert function.success },
-                    { assert function.result == false }
-                )
-            } 
         }
+        then {
+            assertAll(
+                { assert function.success },
+                { assert function.result == false }
+            )
+        } 
     }
 
     test("Test Function isToolIncluded - empty tools") {
@@ -74,13 +74,13 @@ nextflow_function {
                 input[0] = "toolA"
                 """
             }
-            then {
-                assertAll(
-                    { assert function.success },
-                    { assert function.result == false }
-                )
-            } 
         }
+        then {
+            assertAll(
+                { assert function.success },
+                { assert function.result == false }
+            )
+        } 
     }
 
     test("Test Function isToolIncluded - null tools") {
@@ -92,14 +92,14 @@ nextflow_function {
                 """
                 input[0] = "toolA"
                 """
-            }
-            then {
-                assertAll(
-                    { assert function.success },
-                    { assert function.result == false }
-                )
-            } 
         }
+            }
+        then {
+            assertAll(
+                { assert function.success },
+                { assert function.result == false }
+            )
+        } 
     }
 
 }

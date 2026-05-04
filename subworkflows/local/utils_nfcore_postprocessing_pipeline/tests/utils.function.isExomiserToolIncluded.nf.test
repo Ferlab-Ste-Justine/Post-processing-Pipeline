@@ -51,13 +51,13 @@ nextflow_function {
                 """
                 """
             }
-            then {
-                assertAll(
-                    { assert function.success },
-                    { assert function.result == false }
-                )
-            } 
         }
+        then {
+            assertAll(
+                { assert function.success },
+                { assert function.result == false }
+            )
+        } 
     }
 
     test("Test Function isExomiserToolIncluded - no tools") {
@@ -69,12 +69,12 @@ nextflow_function {
                 """
                 """
             }
-            then {
-                assertAll(
-                    { assert function.success },
-                    { assert function.result == false }
-                )
-            } 
         }
+        then {
+            assertAll(
+                { assert function.success },
+                { assert function.result == false }
+            )
+        } 
     }
 }

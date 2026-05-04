@@ -1,0 +1,2 @@
+id,familyId,sequencingType,vcf,tbi
+test,test,WES,test.vcf.gz,test.vcf.gz.tbi

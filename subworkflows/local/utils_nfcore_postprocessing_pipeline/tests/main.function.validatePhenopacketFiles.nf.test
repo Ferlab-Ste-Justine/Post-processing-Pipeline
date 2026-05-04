@@ -19,12 +19,12 @@ nextflow_function {
                 ]
                 """
             }
-            then {
-                assertAll(
-                    { assert function.success }
-                )
-            } 
         }
+        then {
+            assertAll(
+                { assert function.success }
+            )
+        } 
     }
 
     test("Test Function validatePhenopacketFiles with familyPheno meta empty for all family members") {
@@ -40,12 +40,12 @@ nextflow_function {
                 ]
                 """
             }
-            then {
-                assertAll(
-                    { assert function.success }
-                )
-            } 
         }
+        then {
+            assertAll(
+                { assert function.success }
+            )
+        } 
     }
 
     test("Test Function validatePhenopacketFiles with familyPheno meta specified and identical for all family members") {
@@ -61,12 +61,12 @@ nextflow_function {
                 ]
                 """
             }
-            then {
-                assertAll(
-                    { assert function.success }
-                )
-            } 
         }
+        then {
+            assertAll(
+                { assert function.success }
+            )
+        } 
     }
 
     test("Test Function validatePhenopacketFiles with familyPheno meta not always specified") {
@@ -82,12 +82,12 @@ nextflow_function {
                 ]
                 """
             }
-            then {
-                assertAll(
-                    { assert function.failed }
-                )
-            } 
         }
+        then {
+            assertAll(
+                { assert function.failed }
+            )
+        } 
     }
 
     test("Test Function validatePhenopacketFiles with familyPheno meta specified but different") {
@@ -103,11 +103,11 @@ nextflow_function {
                 ]
                 """
             }
-            then {
-                assertAll(
-                    { assert function.failed }
-                )
-            } 
         }
+        then {
+            assertAll(
+                { assert function.failed }
+            )
+        } 
     }
 }

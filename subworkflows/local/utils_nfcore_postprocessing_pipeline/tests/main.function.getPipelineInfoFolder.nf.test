@@ -13,13 +13,13 @@ nextflow_function {
                 input[0] = "path/to/output/directory"
                 """
             }
-            then {
-                assertAll(
-                    { assert function.success },
-                    { assert function.result == "path/to/output/directory/pipeline_info" }
-                )
-            } 
         }
+        then {
+            assertAll(
+                { assert function.success },
+                { assert function.result == "path/to/output/directory/pipeline_info" }
+            )
+        } 
     }
 
     test("Test Function getPipelineInfoFolder with null input") {
@@ -29,11 +29,11 @@ nextflow_function {
                 input[0] = null
                 """
             }
-            then {
-                assertAll(
-                    { assert function.failed }
-                )
-            } 
         }
+        then {
+            assertAll(
+                { assert function.failed }
+            )
+        } 
     }
 }

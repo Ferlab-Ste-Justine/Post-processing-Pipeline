@@ -244,7 +244,7 @@ workflow POSTPROCESSING {
         //normalize variants
         ch_output_from_splitMultiAllelics = splitMultiAllelics(vcf_for_norm, referenceGenome)
 
-        if (params.save_genotyped || params.tools.isBlank()) {
+        if (params.save_genotyped || !params.tools) {
             //create a csv file with the sample information
             CHANNEL_CREATE_CSV_GENOTYPE(ch_output_from_splitMultiAllelics, "normalized_genotypes", params.outdir, [])
         }

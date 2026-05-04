@@ -19,11 +19,11 @@ nextflow_function {
                 ]
                 """
             }
-            then {
-                assertAll(
-                    { assert function.success }
-                )
-            }
+        }
+        then {
+            assertAll(
+                { assert function.success }
+            )
         }
     }
 
@@ -40,11 +40,11 @@ nextflow_function {
                 ]
                 """
             }
-            then {
-                assertAll(
-                    { assert function.success }
-                )
-            }
+        }
+        then {
+            assertAll(
+                { assert function.success }
+            )
         }
     }
 
@@ -61,11 +61,11 @@ nextflow_function {
                 ]
                 """
             }
-            then {
-                assertAll(
-                    { assert function.success }
-                )
-            }
+        }
+        then {
+            assertAll(
+                { assert function.success }
+            )
         }
     }
 
@@ -83,11 +83,11 @@ nextflow_function {
                 ]
                 """
             }
-            then {
-                assertAll(
-                    { assert function.success }
-                )
-            }
+        }
+        then {
+            assertAll(
+                { assert function.success }
+            )
         }
     }
 
@@ -104,11 +104,11 @@ nextflow_function {
                 ]
                 """
             }
-            then {
-                assertAll(
-                    { assert function.failed }
-                )
-            }
+        }
+        then {
+            assertAll(
+                { assert function.failed }
+            )
         }
     }
 }

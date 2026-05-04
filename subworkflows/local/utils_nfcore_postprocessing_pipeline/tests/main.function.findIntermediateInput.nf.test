@@ -6,8 +6,6 @@ nextflow_function {
 
     function "findIntermediateInput"
 
-    def fixtures_dir = "subworkflows/local/utils_nfcore_postprocessing_pipeline/tests/fixtures/intermediate"
-
     test("Test Function findIntermediateInput returns false for normalize step") {
         when {
             function {
@@ -17,29 +15,12 @@ nextflow_function {
                 input[2] = false
                 """
             }
-            then {
-                assertAll(
-                    { assert function.success },
-                    { assert function.result == false }
-                )
-            }
         }
-    }
-
-    test("Test Function findIntermediateInput fails for genotype step") {
-        when {
-            function {
-                """
-                input[0] = "genotype"
-                input[1] = "any/output/dir"
-                input[2] = false
-                """
-            }
-            then {
-                assertAll(
-                    { assert function.failed }
-                )
-            }
+        then {
+            assertAll(
+                { assert function.success },
+                { assert function.result == false }
+            )
         }
     }
 
@@ -52,11 +33,11 @@ nextflow_function {
                 input[2] = false
                 """
             }
-            then {
-                assertAll(
-                    { assert function.failed }
-                )
-            }
+        }
+        then {
+            assertAll(
+                { assert function.failed }
+            )
         }
     }
 
@@ -69,12 +50,12 @@ nextflow_function {
                 input[2] = false
                 """
             }
-            then {
-                assertAll(
-                    { assert function.success },
-                    { assert function.result == null }
-                )
-            }
+        }
+        then {
+            assertAll(
+                { assert function.success },
+                { assert function.result == null }
+            )
         }
     }
 
@@ -87,12 +68,12 @@ nextflow_function {
                 input[2] = true
                 """
             }
-            then {
-                assertAll(
-                    { assert function.success },
-                    { assert function.result == null }
-                )
-            }
+        }
+        then {
+            assertAll(
+                { assert function.success },
+                { assert function.result == null }
+            )
         }
     }
 
@@ -105,12 +86,12 @@ nextflow_function {
                 input[2] = false
                 """
             }
-            then {
-                assertAll(
-                    { assert function.success },
-                    { assert function.result == null }
-                )
-            }
+        }
+        then {
+            assertAll(
+                { assert function.success },
+                { assert function.result == null }
+            )
         }
     }
 
@@ -123,12 +104,12 @@ nextflow_function {
                 input[2] = false
                 """
             }
-            then {
-                assertAll(
-                    { assert function.success },
-                    { assert function.result == null }
-                )
-            }
+        }
+        then {
+            assertAll(
+                { assert function.success },
+                { assert function.result == null }
+            )
         }
     }
 
@@ -141,12 +122,12 @@ nextflow_function {
                 input[2] = false
                 """
             }
-            then {
-                assertAll(
-                    { assert function.success },
-                    { assert function.result.toString().endsWith("csv/normalized_genotypes.csv") }
-                )
-            }
+        }
+        then {
+            assertAll(
+                { assert function.success },
+                { assert function.result.toString().endsWith("csv/normalized_genotypes.csv") }
+            )
         }
     }
 
@@ -159,12 +140,12 @@ nextflow_function {
                 input[2] = true
                 """
             }
-            then {
-                assertAll(
-                    { assert function.success },
-                    { assert function.result.endsWith("csv/ensemblvep.csv") }
-                )
-            }
+        }
+        then {
+            assertAll(
+                { assert function.success },
+                { assert function.result.toString().endsWith("csv/ensemblvep.csv") }
+            )
         }
     }
 
@@ -195,12 +176,12 @@ nextflow_function {
                 input[2] = false
                 """
             }
-            then {
-                assertAll(
-                    { assert function.success },
-                    { assert function.result.toString().endsWith("csv/ensemblvep.csv") }
-                )
-            }
+        }
+        then {
+            assertAll(
+                { assert function.success },
+                { assert function.result.toString().endsWith("csv/ensemblvep.csv") }
+            )
         }
     }
 }

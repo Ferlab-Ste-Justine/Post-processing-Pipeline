@@ -305,7 +305,7 @@ def validateInputParameters() {
     if (params.step == 'annotation' && !isVepToolIncluded()) {
         log.warn "Step is annotation but Ensembl VEP is not included in tools. Running VEP for annotation by default."
     }
-    if ( params.step in ['genotype','normalize'] && (params.tools.isBlank() && !params.save_genotyped ) ){
+    if ( params.step in ['genotype','normalize'] && (!params.tools && !params.save_genotyped ) ){
         log.warn "No tools provided. Publishing genotyped results by default."
     }
     if (params.step == 'inheritance' && !isToolIncluded('slivar')) {

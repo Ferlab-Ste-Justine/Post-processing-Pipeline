@@ -326,17 +326,30 @@
           "format": "directory-path"
         },
         "vqsr_snp_resources": {
-          "type": "string",
-          "description": "Specifies reference datasets for VQSR to build a model for filtering SNPs.",
-          "help_text": "Specifies reference datasets for VQSR to build a model for filtering SNPs. Specifies reference datasets for VQSR to filter SNPs. Do not set this parameter yet; it will be automatically configured by the pipeline."
+          "type": "array",
+          "description": "Reference datasets for VQSR to build a model for filtering SNPs.",
+          "help_text": "List of `{labels, vcf, index}` maps. `labels` is the GATK `--resource:` label string (e.g. `hapmap,known=false,training=true,truth=true,prior=15`); `vcf` and `index` are paths to the training VCF and its index. Relative paths are resolved against `params.broad`; absolute paths are used as-is. Required when running VQSR on WGS data."
         },
         "vqsr_snp_tranches": {
           "type": "array",
-          "description": "Specifies the tranches to use for VQSR SNP filtering."
+          "description": "Truth-sensitivity tranches passed to VariantRecalibrator for SNPs."
         },
         "vqsr_snp_annotations": {
           "type": "array",
-          "description": "Specifies the annotations to use for VQSR SNP filtering."
+          "description": "Annotations (`-an`) used by VariantRecalibrator to build the SNP model."
+        },
+        "vqsr_indel_resources": {
+          "type": "array",
+          "description": "Reference datasets for VQSR to build a model for filtering INDELs.",
+          "help_text": "List of `{labels, vcf, index}` maps. Same shape as vqsr_snp_resources; see that param for details."
+        },
+        "vqsr_indel_tranches": {
+          "type": "array",
+          "description": "Truth-sensitivity tranches passed to VariantRecalibrator for INDELs."
+        },
+        "vqsr_indel_annotations": {
+          "type": "array",
+          "description": "Annotations (`-an`) used by VariantRecalibrator to build the INDEL model."
         }
       }
     },

@@ -1,0 +1,77 @@
+name: split_multiallelics
+description: |
+  Decompose multi-allelic records into bi-allelic ones and prune monomorphic rows. Strips
+  the DRAGEN-specific FORMAT/PRI tag, left-normalizes variants against the reference, splits
+  multi-allelic sites (`bcftools norm -m -any`), and drops rows with AC=0 introduced by the
+  split (`bcftools view --min-ac 1`).
+keywords:
+  - bcftools
+  - multiallelic
+  - normalize
+  - vcf
+  - split
+tools:
+  - bcftools:
+      description: |
+        BCFtools is a set of utilities that manipulate variant calls in the Variant Call Format
+        (VCF) and its binary counterpart BCF.
+      homepage: http://samtools.github.io/bcftools/
+      documentation: http://samtools.github.io/bcftools/bcftools.html
+      doi: 10.1093/gigascience/giab008
+      identifier: "biotools:bcftools"
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information
+          e.g. [ id:'test' ]
+    - vcf:
+        type: file
+        description: input VCF containing variants to split / normalize
+        pattern: "*.vcf.gz"
+    - tbi:
+        type: file
+        description: tabix index for the input VCF
+        pattern: "*.vcf.gz.tbi"
+  - - meta2:
+        type: map
+        description: |
+          Groovy Map containing reference information
+          e.g. [ id:'genome' ]
+    - fasta:
+        type: file
+        description: Reference fasta used for left-normalization
+        pattern: "*.{fa,fasta}"
+output:
+  - vcf:
+      - meta:
+          type: file
+          description: Split + normalized + AC>=1 filtered VCF
+          pattern: "*.vcf.gz"
+      - "*.vcf.gz":
+          type: file
+          description: Split + normalized + AC>=1 filtered VCF
+          pattern: "*.vcf.gz"
+  - tbi:
+      - meta:
+          type: file
+          description: Tabix index for the output VCF
+          pattern: "*.vcf.gz.tbi"
+      - "*.vcf.gz.tbi":
+          type: file
+          description: Tabix index for the output VCF
+          pattern: "*.vcf.gz.tbi"
+  - versions:
+      - versions.yml:
+          type: file
+          description: File containing software versions
+          pattern: "versions.yml"
+authors:
+  - "@FelixAntoineLeSieur"
+  - "@dmorais"
+  - "@LysianeBouchard"
+  - "@DamienGnst"
+  - "@georgette-femerling"
+maintainers:
+  - "@LysianeBouchard"
+  - "@georgette-femerling"

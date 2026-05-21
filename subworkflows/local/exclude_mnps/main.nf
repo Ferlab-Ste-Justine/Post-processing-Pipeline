@@ -1,28 +1,25 @@
-include { BCFTOOLS_FILTER} from '../../../modules/nf-core/bcftools/filter/main'
-include { BCFTOOLS_NORM } from '../../../modules/nf-core/bcftools/norm/main'    
-/**
-Separates MNPs into several SNP that will be analyzed separately
+include { BCFTOOLS_FILTER } from '../../../modules/nf-core/bcftools/filter/main'
+include { BCFTOOLS_NORM   } from '../../../modules/nf-core/bcftools/norm/main'
 
-    Input: [meta, input.vcf.gz]
-    Output: [meta, [output.vcf.gz, output.vcf.gz.tbi]]
-*/
 workflow EXCLUDE_MNPS {
     take:
-        input // channel: [meta,  .gvcf.gz]
+        ch_input  // channel: (val(meta), path(vcf))
+        ch_fasta  // tuple:   (val(meta2), path(fasta))
+
     main:
-    versions = Channel.empty()
-    def reference_path = file("${params.referenceGenome}/${params.referenceGenomeFasta}")
-    BCFTOOLS_FILTER(input)
+        ch_versions = channel.empty()
 
-    def ch_bcftoolsfilter_for_bcftoolsnorm = BCFTOOLS_FILTER.out.vcf.join(BCFTOOLS_FILTER.out.tbi)
+        BCFTOOLS_FILTER(ch_input)
+        ch_versions = ch_versions.mix(BCFTOOLS_FILTER.out.versions)
 
-    BCFTOOLS_NORM(ch_bcftoolsfilter_for_bcftoolsnorm, [[:], reference_path])
-    ch_output_excludemnps = BCFTOOLS_NORM.out.vcf.join(BCFTOOLS_NORM.out.tbi)
-        .map{meta, vcf, tbi ->[meta,[vcf,tbi]]}
+        ch_norm_input = BCFTOOLS_FILTER.out.vcf.join(BCFTOOLS_FILTER.out.tbi)
 
-    versions = versions.mix(BCFTOOLS_FILTER.out.versions)
-    versions = versions.mix(BCFTOOLS_NORM.out.versions)
+        BCFTOOLS_NORM(ch_norm_input, ch_fasta)
+        ch_versions = ch_versions.mix(BCFTOOLS_NORM.out.versions)
+
+        ch_vcf_tbi = BCFTOOLS_NORM.out.vcf.join(BCFTOOLS_NORM.out.tbi)
+
     emit:
-        ch_output_excludemnps // channel: [meta,  [.vcf.gz, .vcf.gz.tbi]]
-        versions
+        vcf_tbi  = ch_vcf_tbi  // channel: (val(meta), vcf, tbi)
+        versions = ch_versions // channel: [ versions.yml ]
 }

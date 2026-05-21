@@ -1,0 +1,43 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "exclude_mnps"
+description: |
+  Drop multi-nucleotide polymorphisms (MNPs) from each input GVCF, then left-normalize the
+  remainder against the reference. BCFTOOLS_FILTER discards records where REF and ALT have
+  equal length greater than 1bp; BCFTOOLS_NORM then left-aligns and merges duplicates.
+keywords:
+  - vcf
+  - bcftools
+  - mnp
+  - filter
+  - normalize
+components:
+  - bcftools/filter
+  - bcftools/norm
+input:
+  - ch_input:
+      description: |
+        Per-sample GVCF with metadata
+        Structure: [ val(meta), path(vcf) ]
+  - ch_fasta:
+      description: |
+        Reference fasta tuple, matching nf-core/bcftools/norm input shape
+        Structure: [ val(meta2), path(fasta) ]
+output:
+  - vcf_tbi:
+      description: |
+        MNP-filtered, left-normalized VCF and its tabix index
+        Structure: [ val(meta), path(vcf), path(tbi) ]
+  - versions:
+      description: |
+        Aggregated software versions from the underlying processes
+        Structure: [ path(versions.yml) ]
+authors:
+  - "@FelixAntoineLeSieur"
+  - "@dmorais"
+  - "@LysianeBouchard"
+  - "@DamienGnst"
+  - "@georgette-femerling"
+maintainers:
+  - "@LysianeBouchard"
+  - "@georgette-femerling"
+  - "@s-kyy"

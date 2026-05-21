@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `Changed`
 - [#90](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/90) Update CI/CD test to datset V7 and limit nf version to <26.0.
 - [#94](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/94) Refactor syntax for VQSR modules and subworkflow.
+- [#96](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/96) Refactor syntax for split multi-allelics module.
 
 ## [v2.11.0 - 2026-03-18]
 

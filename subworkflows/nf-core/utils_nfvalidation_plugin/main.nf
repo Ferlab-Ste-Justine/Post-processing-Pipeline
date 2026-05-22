@@ -1,16 +1,16 @@
 //
-// Subworkflow that uses the nf-validation plugin to render help text and parameter summary
+// Subworkflow that uses the nf-schema plugin to render help text and parameter summary
 //
 
 /*
 ========================================================================================
-    IMPORT NF-VALIDATION PLUGIN
+    IMPORT NF-SCHEMA PLUGIN
 ========================================================================================
 */
 
-include { paramsHelp         } from 'plugin/nf-validation'
-include { paramsSummaryLog   } from 'plugin/nf-validation'
-include { validateParameters } from 'plugin/nf-validation'
+include { paramsHelp         } from 'plugin/nf-schema'
+include { paramsSummaryLog   } from 'plugin/nf-schema'
+include { validateParameters } from 'plugin/nf-schema'
 
 /*
 ========================================================================================
@@ -41,20 +41,20 @@ workflow UTILS_NFVALIDATION_PLUGIN {
     // Print help message if needed
     //
     if (print_help) {
-        log.info pre_help_text + paramsHelp(workflow_command, parameters_schema: schema_filename) + post_help_text
+        log.info pre_help_text + paramsHelp(workflow_command) + post_help_text
         System.exit(0)
     }
 
     //
     // Print parameter summary to stdout
     //
-    log.info pre_help_text + paramsSummaryLog(workflow, parameters_schema: schema_filename) + post_help_text
+    log.info pre_help_text + paramsSummaryLog(workflow) + post_help_text
 
     //
     // Validate parameters relative to the parameter JSON schema
     //
     if (validate_params){
-        validateParameters(parameters_schema: schema_filename)
+        validateParameters()
     }
 
     emit:

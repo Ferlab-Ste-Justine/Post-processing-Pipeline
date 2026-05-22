@@ -149,7 +149,7 @@ workflow POSTPROCESSING {
             family:  meta.sampleSize  > 1
                 return [meta, vcf, tbi]
         }
-        
+
         COMBINEGVCFS(ch_grouped_by_family.family, pathReferenceGenomeFasta, pathReferenceGenomeFai, pathReferenceDict, pathIntervalFile)
         ch_versions = ch_versions.mix(COMBINEGVCFS.out.versions)
         ch_output_from_combinegvcf = COMBINEGVCFS.out.combined_gvcf
@@ -287,7 +287,7 @@ workflow POSTPROCESSING {
 
         ch_slivar_input = ch_vcf_slivar
             .filter{ meta, _vcf, _tbi -> meta.familyPed }
-            .map{ meta, vcf, tbi -> [meta, vcf, tbi, meta.familyPed] }
+            .map{ meta, vcf, tbi -> [meta, vcf, tbi, file(meta.familyPed)] }
 
         SLIVAR_INHERITANCE(ch_slivar_input, slivarRegionsBed, slivarExcludeBed, slivarGnotateFiles, slivarJs)
     }
@@ -315,7 +315,7 @@ workflow POSTPROCESSING {
                 meta,
                 vcf,
                 tbi,
-                meta.familyPheno,
+                file(meta.familyPheno),
                 meta.sequencingType == "WES" ? file(params.exomiser_analysis_wes) : file(params.exomiser_analysis_wgs)
             ]}
 

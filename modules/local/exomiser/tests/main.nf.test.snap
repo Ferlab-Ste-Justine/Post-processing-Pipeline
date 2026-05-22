@@ -1,0 +1,28 @@
+{
+    "stub - family1 - no optional reference files": {
+        "content": [
+            "family1.exomiser.vcf.gz",
+            "family1.exomiser.vcf.gz.tbi"
+        ],
+        "meta": {
+            "nf-test": "0.9.3",
+            "nextflow": "24.10.5"
+        },
+        "timestamp": "2026-05-21T18:09:40.320925"
+    },
+    "stub - family1": {
+        "content": [
+            "family1.exomiser.vcf.gz",
+            "family1.exomiser.vcf.gz.tbi",
+            "family1.exomiser.html",
+            "family1.exomiser.json",
+            "family1.exomiser.genes.tsv",
+            "family1.exomiser.variants.tsv"
+        ],
+        "meta": {
+            "nf-test": "0.9.3",
+            "nextflow": "24.10.5"
+        },
+        "timestamp": "2026-05-21T18:09:37.299757"
+    }
+}

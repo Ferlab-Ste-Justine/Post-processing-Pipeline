@@ -70,12 +70,13 @@ Here we describe in more details the content of the `pipeline_info `subdirectory
 |_ pipeline_info
    |_ configs
       |_ nextflow.config
-          ... 
+          ...
    |_ execution_report_2024-12-09_12-03-20.html
    |_ execution_timeline_2024-12-09_12-03-20.html
    |_ execution_trace_2024-12-09_12-03-20.txt
    |_ params_2024-12-09_12-03-23.json
    |_ pipeline_dag_2024-12-09_12-03-20.html
+   |_ Post-Processing-Pipeline_software_mqc_versions.yml
    |_ metadata.txt
    |_ nextflow.log
 ```
@@ -89,6 +90,8 @@ Here we describe in more details the content of the `pipeline_info `subdirectory
   The file prefixed by `params` contains the parameters used by the pipeline.
 
   The file prefixed by `pipeline_dag` contains a diagram of the pipeline steps.
+
+  The `Post-Processing-Pipeline_software_mqc_versions.yml` file aggregates the software versions reported by every module/subworkflow that exposes a `versions` channel (bcftools, GATK4 sub-tools, VEP, exomiser, etc.) plus the pipeline and Nextflow versions. The format is MultiQC-friendly so it can be picked up by an external MultiQC step if/when one is wired in.
 
   The `metadata.txt` file contains various information relevant for reproducibility, such as the original command line, the name of the branch / revision used, the username associated to the command, a list of configuration files passed, the nextflow work directory, etc.
 

@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#94](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/94) Refactor syntax for VQSR modules and subworkflow.
 - [#96](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/96) Refactor syntax for split multi-allelics module.
 - [#97](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/97) Refactor syntax for exclude MNPs workflow.
+- [#98](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/98) Refactor syntax of main pipeline; helper functions that called processes have been inlined; software versions are now aggregated and written to `pipeline_info/Post-Processing-Pipeline_software_mqc_versions.yml`.
+- `exomiser_local_frequency_index_path` is now optional; when omitted, the index path is derived from `exomiser_local_frequency_path` by appending `.tbi`.
 
 ## [v2.11.0 - 2026-03-18]
 

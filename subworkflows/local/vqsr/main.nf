@@ -81,9 +81,8 @@ workflow VQSR {
 
         ch_output = GATK4_APPLYVQSR_INDEL.out.vcf
             .join(GATK4_APPLYVQSR_INDEL.out.tbi)
-            .map{ meta, vcf, tbi -> [meta, [vcf, tbi]] }
 
     emit:
-        output   = ch_output   // channel: (val(meta),  [.vcf.gz, .vcf.gz.tbi])
+        vcf_tbi   = ch_output   // channel: (val(meta), vcf, tbi)
         versions = ch_versions // channel: [ versions.yml ]
 }

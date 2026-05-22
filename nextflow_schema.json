@@ -495,13 +495,13 @@
         },
         "exomiser_local_frequency_path": {
           "type": "string",
-          "description": "Path to the local frequency data file",
+          "description": "Path to the local frequency data file. The `.tbi` index is assumed to live alongside (`<path>.tbi`) unless `exomiser_local_frequency_index_path` is set explicitly.",
           "format": "file-path",
           "pattern": "^\\S+\\.tsv.gz$"
         },
         "exomiser_local_frequency_index_path": {
           "type": "string",
-          "description": "Path to the index of the local frequency data file",
+          "description": "Optional override for the tabix index of the local frequency data file. Defaults to `<exomiser_local_frequency_path>.tbi`.",
           "format": "file-path",
           "pattern": "^\\S+\\.tbi$"
         },
@@ -561,14 +561,6 @@
               "exomiser_data_dir",
               "exomiser_data_version"
             ]
-          }
-        },
-        {
-          "if": {
-            "required": ["exomiser_local_frequency_path"]
-          },
-          "then": {
-            "required": ["exomiser_local_frequency_index_path"]
           }
         }
       ]

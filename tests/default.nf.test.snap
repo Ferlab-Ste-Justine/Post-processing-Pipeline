@@ -3,16 +3,6 @@
         "content": [
             58,
             [
-                "applyvqsrindel",
-                "applyvqsrindel/family1.snpindel.vqsr_99.vcf.gz",
-                "applyvqsrindel/family1.snpindel.vqsr_99.vcf.gz.tbi",
-                "applyvqsrindel/family4.snpindel.vqsr_99.vcf.gz",
-                "applyvqsrindel/family4.snpindel.vqsr_99.vcf.gz.tbi",
-                "applyvqsrsnp",
-                "applyvqsrsnp/family1.snp.vqsr_99.vcf.gz",
-                "applyvqsrsnp/family1.snp.vqsr_99.vcf.gz.tbi",
-                "applyvqsrsnp/family4.snp.vqsr_99.vcf.gz",
-                "applyvqsrsnp/family4.snp.vqsr_99.vcf.gz.tbi",
                 "bcftools",
                 "bcftools/family1.NA19238.filtered.vcf.gz",
                 "bcftools/family1.NA19238.filtered.vcf.gz.tbi",
@@ -89,9 +79,16 @@
                 "gatk4",
                 "gatk4/family1.genotyped.vcf.gz",
                 "gatk4/family1.genotyped.vcf.gz.tbi",
+                "gatk4/family1.indel.vqsr.recal",
+                "gatk4/family1.indel.vqsr.recal.idx",
+                "gatk4/family1.indel.vqsr.tranches",
                 "gatk4/family1.snp.vqsr.recal",
                 "gatk4/family1.snp.vqsr.recal.idx",
                 "gatk4/family1.snp.vqsr.tranches",
+                "gatk4/family1.snp.vqsr_99.vcf.gz",
+                "gatk4/family1.snp.vqsr_99.vcf.gz.tbi",
+                "gatk4/family1.snpindel.vqsr_99.vcf.gz",
+                "gatk4/family1.snpindel.vqsr_99.vcf.gz.tbi",
                 "gatk4/family2.genotyped.vcf.gz",
                 "gatk4/family2.genotyped.vcf.gz.tbi",
                 "gatk4/family2.hardfiltered.vcf.gz",
@@ -102,10 +99,18 @@
                 "gatk4/family3.hardfiltered.vcf.gz.tbi",
                 "gatk4/family4.genotyped.vcf.gz",
                 "gatk4/family4.genotyped.vcf.gz.tbi",
+                "gatk4/family4.indel.vqsr.recal",
+                "gatk4/family4.indel.vqsr.recal.idx",
+                "gatk4/family4.indel.vqsr.tranches",
                 "gatk4/family4.snp.vqsr.recal",
                 "gatk4/family4.snp.vqsr.recal.idx",
                 "gatk4/family4.snp.vqsr.tranches",
+                "gatk4/family4.snp.vqsr_99.vcf.gz",
+                "gatk4/family4.snp.vqsr_99.vcf.gz.tbi",
+                "gatk4/family4.snpindel.vqsr_99.vcf.gz",
+                "gatk4/family4.snpindel.vqsr_99.vcf.gz.tbi",
                 "pipeline_info",
+                "pipeline_info/Post-Processing-Pipeline_software_mqc_versions.yml",
                 "pipeline_info/configs",
                 "pipeline_info/configs/nextflow.config",
                 "pipeline_info/nextflow.log",
@@ -117,20 +122,13 @@
                 "slivar/variants.family1.snv.vep.slivar.vcf.gz",
                 "slivar/variants.family1.snv.vep.slivar.vcf.gz.tbi",
                 "slivar/variants.family2.snv.vep.slivar.vcf.gz",
-                "slivar/variants.family2.snv.vep.slivar.vcf.gz.tbi",
-                "variantrecalibratorindel",
-                "variantrecalibratorindel/family1.recal",
-                "variantrecalibratorindel/family1.recal.idx",
-                "variantrecalibratorindel/family1.tranches",
-                "variantrecalibratorindel/family4.recal",
-                "variantrecalibratorindel/family4.recal.idx",
-                "variantrecalibratorindel/family4.tranches"
+                "slivar/variants.family2.snv.vep.slivar.vcf.gz.tbi"
             ]
         ],
         "meta": {
             "nf-test": "0.9.3",
             "nextflow": "24.10.5"
         },
-        "timestamp": "2026-05-20T18:09:11.320794"
+        "timestamp": "2026-05-22T09:24:02.371381"
     }
 }

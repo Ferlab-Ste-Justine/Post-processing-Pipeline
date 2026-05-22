@@ -1,73 +1,102 @@
 nextflow_process {
 
     name "Test Process EXOMISER"
-    script "modules/local/exomiser/main.nf"
+    script "../main.nf"
     process "EXOMISER"
 
-    // Using stub mode until we can download a test dataset and write a more elaborated test
+    // Using stub mode until we can wire up a real exomiser data-directory of manageable size.
     options "-stub"
 
     tag "local"
     tag "modules"
     tag "exomiser"
 
-    test("Test Process EXOMISER") {
-        
+    test("stub - family1") {
+
         when {
             process {
                 """
-                input[0] = [ [familyId: "family1"],
-                file("https://github.com/nf-core/test-datasets/raw/modules/data/genomics/homo_sapiens/illumina/gvcf/test.genome.vcf.gz"), 
-                file("https://github.com/nf-core/test-datasets/raw/modules/data/genomics/homo_sapiens/illumina/gvcf/test.genome.vcf.gz.tbi"), 
-                file("assets/exomiser/pheno/family1.yml"),
-                file("assets/exomiser/default_exomiser_WGS_analysis.yml")]
-                input[1] = file("data-test/reference/exomiser")
+                input[0] = [
+                    [familyId: "family1"],
+                    file(params.modules_testdata_base_path + 'genomics/homo_sapiens/illumina/gvcf/test.genome.vcf.gz', checkIfExists: true),
+                    file(params.modules_testdata_base_path + 'genomics/homo_sapiens/illumina/gvcf/test.genome.vcf.gz.tbi', checkIfExists: true),
+                    file("\${projectDir}/assets/exomiser/pheno/family1.yml", checkIfExists: true),
+                    file("\${projectDir}/assets/exomiser/default_exomiser_WGS_analysis.yml", checkIfExists: true)
+                ]
+                // Placeholder data-directory: stub doesn't read it, but Nextflow still stages the path.
+                input[1] = file("\${projectDir}/assets/exomiser", checkIfExists: true)
                 input[2] = "hg38"
                 input[3] = "2402"
-                input[4] = [ file("assets/exomiser/local/local_frequency_test_hg38.tsv.gz"), file("assets/exomiser/local/local_frequency_test_hg38.tsv.gz.tbi")]
+                input[4] = [
+                    file("\${projectDir}/assets/exomiser/local/local_frequency_test_hg38.tsv.gz",     checkIfExists: true),
+                    file("\${projectDir}/assets/exomiser/local/local_frequency_test_hg38.tsv.gz.tbi", checkIfExists: true)
+                ]
                 input[5] = ["1.7", "ReMM.v0.3.1.post1.hg38.tsv.gz"]
                 input[6] = ["1.3.1", "whole_genome_SNVs.tsv.gz", "gnomad.genomes.r4.0.indel.tsv.gz"]
                 """
             }
         }
-        
-        then{
 
+        then {
             def expected_meta = [familyId: "family1"]
-            with(process.out) {
-                // vcf channel
-                assert vcf.size() == 1
-                assert vcf.get(0)[0] == expected_meta
-                assert file(vcf.get(0)[1]).name == "family1.exomiser.vcf.gz"
+            assertAll(
+                { assert process.success },
+                // Verify the meta map flows through unchanged on each emit
+                { assert process.out.vcf.collect{ it[0] }         == [expected_meta] },
+                { assert process.out.tbi.collect{ it[0] }         == [expected_meta] },
+                { assert process.out.html.collect{ it[0] }        == [expected_meta] },
+                { assert process.out.json.collect{ it[0] }        == [expected_meta] },
+                { assert process.out.genetsv.collect{ it[0] }     == [expected_meta] },
+                { assert process.out.variantstsv.collect{ it[0] } == [expected_meta] },
+                // Verify the output filenames; snapshot them so any rename is loud.
+                { assert snapshot(
+                    file(process.out.vcf[0][1]).name,
+                    file(process.out.tbi[0][1]).name,
+                    file(process.out.html[0][1]).name,
+                    file(process.out.json[0][1]).name,
+                    file(process.out.genetsv[0][1]).name,
+                    file(process.out.variantstsv[0][1]).name
+                ).match() }
+                // Versions intentionally not snapshotted: the stub's `cat /EXOMISER_VERSION.txt`
+                // depends on whatever the container has baked in, which is mutable across image rebuilds.
+            )
+        }
+    }
 
-                // tbi channel
-                assert tbi.size() == 1
-                assert tbi.get(0)[0] == expected_meta
-                assert file(tbi.get(0)[1]).name == "family1.exomiser.vcf.gz.tbi"
+    test("stub - family1 - no optional reference files") {
 
-                // html channel
-                assert html.size() == 1
-                assert html.get(0)[0] == expected_meta
-                assert file(html.get(0)[1]).name == "family1.exomiser.html"
-
-                // json channel
-                assert json.size() == 1
-                assert json.get(0)[0] == expected_meta
-                assert file(json.get(0)[1]).name == "family1.exomiser.json"
-
-                // genetsv channel
-                assert genetsv.size() == 1
-                assert genetsv.get(0)[0] == expected_meta
-                assert file(genetsv.get(0)[1]).name == "family1.exomiser.genes.tsv"
-
-                // variantstsv channel
-                assert variantstsv.size() == 1
-                assert variantstsv.get(0)[0] == expected_meta
-                assert file(variantstsv.get(0)[1]).name == "family1.exomiser.variants.tsv"
-
-                // versions channel
-                // assert snapshot(versions).match()
+        when {
+            process {
+                """
+                input[0] = [
+                    [familyId: "family1"],
+                    file(params.modules_testdata_base_path + 'genomics/homo_sapiens/illumina/gvcf/test.genome.vcf.gz', checkIfExists: true),
+                    file(params.modules_testdata_base_path + 'genomics/homo_sapiens/illumina/gvcf/test.genome.vcf.gz.tbi', checkIfExists: true),
+                    file("\${projectDir}/assets/exomiser/pheno/family1.yml", checkIfExists: true),
+                    file("\${projectDir}/assets/exomiser/default_exomiser_WGS_analysis.yml", checkIfExists: true)
+                ]
+                input[1] = file("\${projectDir}/assets/exomiser", checkIfExists: true)
+                input[2] = "hg38"
+                input[3] = "2402"
+                // Disable local frequency, REMM, and CADD via the documented empty-placeholder forms.
+                input[4] = [[], []]
+                input[5] = ["", ""]
+                input[6] = ["", "", ""]
+                """
             }
+        }
+
+        then {
+            def expected_meta = [familyId: "family1"]
+            assertAll(
+                { assert process.success },
+                { assert process.out.vcf.collect{ it[0] } == [expected_meta] },
+                { assert process.out.tbi.collect{ it[0] } == [expected_meta] },
+                { assert snapshot(
+                    file(process.out.vcf[0][1]).name,
+                    file(process.out.tbi[0][1]).name
+                ).match() }
+            )
         }
     }
 }

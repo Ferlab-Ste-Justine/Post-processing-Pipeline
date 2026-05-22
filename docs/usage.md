@@ -315,6 +315,8 @@ Parameters summary
 | `dbsnpFile` | _Optional_ | Path to dbsnp file. If specified, will be used to add ids in the ID column of output vcf files. |
 | `dbsnpFileIndex` | _Optional_ | Path to dbsnp file index. Must be specified if the dbsnpFile parameter is specified. |
 | `broad` | _Optional_ | Path to the directory containing Broad reference data (for VQSR) |
+| `vqsr_snp_resources` | _Optional_ | List of `{labels, vcf, index}` maps describing the SNP VQSR training resources. Relative vcf/index paths are joined with `params.broad`. |
+| `vqsr_indel_resources` | _Optional_ | Same shape as `vqsr_snp_resources`, used for the INDEL VQSR model. |
 | `intervalsFile` | _Optional_ | Path to the file containg the genome intervals list on which to operate |
 | `tools` | _Optional_ | Additional tools to run separated by commas. Supported tools are `vep`, `exomiser`, and `slivar`. `slivar` requires `vep` to also be included. |
 | `step` | _Optional_ | Step from which to restart the pipeline. Options: `genotype`(default),`normalize`,`annotation`,`exomiser`,`inheritance` |

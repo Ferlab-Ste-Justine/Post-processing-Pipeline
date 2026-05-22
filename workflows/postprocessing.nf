@@ -105,6 +105,12 @@ workflow POSTPROCESSING {
 
     writemeta()
 
+ /*
+  ================================================================================
+       STAGE 1 — Joint genotyping (gVCFs → multi-sample VCF + artifact tagging)
+  ================================================================================
+ */
+
     if (params.step == 'genotype') {
 
         //Standardize input VCFs: locate tbi if present, run BCFTOOLS_VIEW to normalize format/extension
@@ -211,6 +217,12 @@ workflow POSTPROCESSING {
         ch_output_from_tagArtifacts = VQSR.out.vcf_tbi.mix(ch_variantfiltration_output)
     }
 
+ /*
+  ================================================================================
+       STAGE 2 — Normalization (VCF → split multi-allelics VCF)
+  ================================================================================
+ */
+
     if (params.step in ['genotype', 'normalize']) {
         vcf_for_norm = params.step == 'genotype'
             ? ch_output_from_tagArtifacts
@@ -225,6 +237,12 @@ workflow POSTPROCESSING {
             CHANNEL_CREATE_CSV_GENOTYPE(ch_output_from_splitMultiAllelics, "normalized_genotypes", params.outdir, [])
         }
     }
+
+ /*
+  ================================================================================
+       STAGE 3 — Variant annotation and prioritization (VEP, Slivar, Exomiser)
+  ================================================================================
+ */
 
     if ((params.step in ['genotype', 'normalize'] && isVepToolIncluded()) || params.step == 'annotation') {
 

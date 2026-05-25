@@ -1,35 +1,89 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/meta-schema.json
-# # TODO nf-core: Add a description of the module and list keywords
 name: "slivar_expr"
-description: filter/annotate variants in VCF/BCF format with simple expressions.
+description: Filter and/or annotate variants in VCF/BCF format using slivar JavaScript expressions, optionally with a pedigree, regions, exclusion intervals and gnotate annotation files.
 keywords:
-- sort
-- example
-- genomics
+  - slivar
+  - vcf
+  - filter
+  - annotate
+  - variant
+  - genomics
+  - pedigree
+  - expression
 tools:
-## TODO nf-core: Add a description and other details for the software below
-- "slivar":
-    description: "filter/annotate variants in VCF/BCF format with simple expressions."
-    homepage: "https://github.com/brentp/slivar/blob/v0.3.3/README.md"
-    documentation: "https://github.com/brentp/slivar/blob/v0.3.3/README.md"
-    tool_dev_url: "https://github.com/brentp/slivar"
-    doi: ""
-    licence: ['MIT']
-    identifier: biotools:slivar
+  - "slivar":
+      description: "filter/annotate variants in VCF/BCF format with simple expressions."
+      homepage: "https://github.com/brentp/slivar"
+      documentation: "https://github.com/brentp/slivar/wiki"
+      tool_dev_url: "https://github.com/brentp/slivar"
+      doi: "10.1038/s41525-021-00227-3"
+      licence: ["MIT"]
+      identifier: biotools:slivar
 
 input:
-# TODO nf-core: Update the information obtained from bio.tools and make sure that it is correct
-  []
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing family information
+        e.g. [ id:'family1', sequencingType:'WES' ]
+
+  - vcf:
+      type: file
+      description: VCF file to filter/annotate
+      pattern: "*.{vcf,vcf.gz}"
+
+  - tbi:
+      type: file
+      description: Tabix index for the VCF file
+      pattern: "*.{vcf.gz.tbi}"
+
+  - ped:
+      type: file
+      description: Optional pedigree file describing the family
+      pattern: "*.{ped}"
+
+  - regions_bed:
+      type: file
+      description: Optional BED file restricting evaluation to specific regions
+      pattern: "*.{bed,bed.gz}"
+
+  - exclude_bed:
+      type: file
+      description: Optional BED file of regions to exclude from evaluation
+      pattern: "*.{bed,bed.gz}"
+
+  - gnotate_files:
+      type: list
+      description: Optional list of slivar gnotate (zip) files used to annotate variants with population frequencies or other annotations
+      pattern: "*.{zip}"
+
+  - js:
+      type: file
+      description: Optional JavaScript file containing slivar helper functions used by the expressions
+      pattern: "*.{js}"
+
 output:
-# TODO nf-core: Update the information obtained from bio.tools and make sure that it is correct
-  versions: -
-    versions.yml:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing family information
+        e.g. [ id:'family1', sequencingType:'WES' ]
+
+  - vcf:
+      type: file
+      description: Filtered/annotated bgzipped VCF produced by slivar expr
+      pattern: "*.{vcf.gz}"
+
+  - summary:
+      type: file
+      description: slivar summary file reporting the number of variants passing each expression
+      pattern: "*.slivar.summary.txt"
+
+  - versions:
       type: file
       description: File containing software versions
-      pattern: versions.yml
-      ontologies:
-      - edam: http://edamontology.org/format_3750  # YAML
+      pattern: "versions.yml"
+
 authors:
-- "@georgette-femerling"
+  - "@georgette-femerling"
 maintainers:
-- "@georgette-femerling"
+  - "@georgette-femerling"

@@ -1,5 +1,5 @@
 name: Feature request
-description: Suggest an idea for the ferlab/postprocessing pipeline
+description: Suggest an idea for the Ferlab-Ste-Justine/Post-Processing-Pipeline pipeline
 labels: enhancement
 body:
   - type: textarea

@@ -3,7 +3,7 @@ nextflow_function {
     name "Test Subworkflow UTILS_NFCORE_POSTPROCESSING_PIPELINE isExomiserToolIncluded function"
     script "subworkflows/local/utils_nfcore_postprocessing_pipeline/utils.nf"
     tag "local"
-    
+
     function "isExomiserToolIncluded"
 
     test("Test Function isExomiserToolIncluded - both vep and exomiser") {
@@ -20,7 +20,7 @@ nextflow_function {
                     { assert function.success },
                     { assert function.result == true }
                 )
-            } 
+            }
         }
     }
 
@@ -38,7 +38,7 @@ nextflow_function {
                     { assert function.success },
                     { assert function.result == true }
                 )
-            } 
+            }
         }
     }
 
@@ -57,7 +57,7 @@ nextflow_function {
                 { assert function.success },
                 { assert function.result == false }
             )
-        } 
+        }
     }
 
     test("Test Function isExomiserToolIncluded - no tools") {
@@ -75,6 +75,6 @@ nextflow_function {
                 { assert function.success },
                 { assert function.result == false }
             )
-        } 
+        }
     }
 }

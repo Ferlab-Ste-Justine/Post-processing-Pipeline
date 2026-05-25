@@ -27,11 +27,15 @@ lint:
     - params.max_cpus
     - params.max_memory
     - params.max_time
+    - validation.help.beforeText
+    - validation.help.afterText
+    - validation.summary.beforeText
+    - validation.summary.afterText
     - config_defaults:
         - params.exomiser_analysis_wes
         - params.exomiser_analysis_wgs
         - params.slivar_js
-nf_core_version: 2.14.1
+nf_core_version: 3.2.0
 repository_type: pipeline
 template:
   org: Ferlab-Ste-Justine

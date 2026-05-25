@@ -22,5 +22,5 @@ metaData:
       url: http://purl.obolibrary.org/obo/hp.owl
       version: hp/releases/2019-11-08
       namespacePrefix: HP
-      iriPrefix: 'http://purl.obolibrary.org/obo/HP_'
+      iriPrefix: "http://purl.obolibrary.org/obo/HP_"
   phenopacketSchemaVersion: 2.0

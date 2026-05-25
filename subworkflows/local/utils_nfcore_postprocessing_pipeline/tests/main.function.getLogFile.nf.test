@@ -21,7 +21,7 @@ nextflow_function {
                 { assert function.success },
                 { assert function.result == ".nextflow.log" }
             )
-        } 
+        }
     }
 
     test("Test Function getLogFile with log option in command line") {
@@ -37,7 +37,7 @@ nextflow_function {
                 { assert function.success },
                 { assert function.result == "test.log" }
             )
-        } 
+        }
     }
 
     test("Test Function getLogFile with null command line") {
@@ -52,6 +52,6 @@ nextflow_function {
             assertAll(
                 { assert function.failed }
             )
-        } 
+        }
     }
 }

@@ -1,7 +1,7 @@
 {
     "-profile test": {
         "content": [
-            58,
+            61,
             [
                 "bcftools",
                 "bcftools/family1.NA19238.filtered.vcf.gz",
@@ -119,16 +119,20 @@
                 "slivar/family1.expr.slivar.summary.txt",
                 "slivar/family2.ch.slivar.summary.txt",
                 "slivar/family2.expr.slivar.summary.txt",
+                "slivar/family3.ch.slivar.summary.txt",
+                "slivar/family3.expr.slivar.summary.txt",
                 "slivar/variants.family1.snv.vep.slivar.vcf.gz",
                 "slivar/variants.family1.snv.vep.slivar.vcf.gz.tbi",
                 "slivar/variants.family2.snv.vep.slivar.vcf.gz",
-                "slivar/variants.family2.snv.vep.slivar.vcf.gz.tbi"
+                "slivar/variants.family2.snv.vep.slivar.vcf.gz.tbi",
+                "slivar/variants.family3.snv.vep.slivar.vcf.gz",
+                "slivar/variants.family3.snv.vep.slivar.vcf.gz.tbi"
             ]
         ],
         "meta": {
             "nf-test": "0.9.3",
             "nextflow": "24.10.5"
         },
-        "timestamp": "2026-05-22T09:24:02.371381"
+        "timestamp": "2026-05-25T17:59:52.218861"
     }
 }

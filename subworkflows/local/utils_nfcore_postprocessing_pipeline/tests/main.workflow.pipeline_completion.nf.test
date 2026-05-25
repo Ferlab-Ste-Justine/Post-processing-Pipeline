@@ -5,7 +5,7 @@ nextflow_workflow {
 
     workflow "PIPELINE_COMPLETION "
     tag 'local'
- 
+
     test("Should write log file to outdir") {
 
         when {
@@ -27,7 +27,7 @@ nextflow_workflow {
         then {
             assertAll(
                 { assert workflow.success },
-                { assert file("${outputDir}/pipeline_info/nextflow.log").exists() } 
+                { assert file("${outputDir}/pipeline_info/nextflow.log").exists() }
             )
         }
     }

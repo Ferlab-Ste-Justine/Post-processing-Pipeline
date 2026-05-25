@@ -11,7 +11,7 @@ nextflow_process {
     tag "slivar/expr"
 
     test("expr_vcf") {
-        when {            
+        when {
             params {
                 args_modules = "--info 'variant.FILTER == \"PASS\" && variant.ALT[0] != \"*\"'"
             }

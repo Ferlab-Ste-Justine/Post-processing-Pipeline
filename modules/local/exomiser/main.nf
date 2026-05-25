@@ -1,7 +1,7 @@
 process EXOMISER {
 
     label 'process_medium'
- 
+
     input:
     tuple val(meta), path(vcfFile), path(indexFile), path(phenoFile), path(analysisFile)
     path datadir
@@ -15,7 +15,7 @@ process EXOMISER {
     // If remm/cadd version is specified, remm/cadd reference file(s) path(s) will be inferred from the given filename(s)
     // and passed to the exomiser cli. Each remm/cadd reference file should have a corresponding .tbi index file.
     // Note that, if nextflow adds support for optional paths, one might prefer to pass the full paths explicitly.
-    tuple val(remmVersion), val(remmFileName) 
+    tuple val(remmVersion), val(remmFileName)
     tuple val(caddVersion), val(caddSnvFileName),val(caddIndelFileName)
 
 
@@ -35,7 +35,7 @@ process EXOMISER {
     def args = task.ext.args ?: ''
     def applicationPropertiesArgs = task.ext.application_properties_args ?: ''
 
-    def localFrequencyFileArgs = "" 
+    def localFrequencyFileArgs = ""
     if (localFrequencyPath) {
         log.info("Using LOCAL frequency file {}", localFrequencyPath)
         localFrequencyFileArgs = "--exomiser.${exomiserGenome}.local-frequency-path=/`pwd`/${localFrequencyPath}"

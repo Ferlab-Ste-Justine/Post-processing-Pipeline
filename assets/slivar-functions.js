@@ -44,7 +44,7 @@ function recessive(kid, mom, dad) {
   return kid.hom_alt && mom.het && dad.het && hq(kid, mom, dad)
 }
 
-function x_recessive(kid, mom, dad) { 
+function x_recessive(kid, mom, dad) {
   return (mom.het && kid.AB > 0.75 && dad.hom_ref && kid.alts >= 1 && hq(kid, mom, dad, true)
               && kid.sex == 'male' && mom.AB > config.min_AB && mom.AB < (1 - config.min_AB))
 }
@@ -86,7 +86,7 @@ function segregating_dominant_x(s) {
   if(s.sex != "female"){return false; }
   // this block enforces inherited dominant, but not find de novos
   if(("mom" in s) || ("dad" in s)) {
-    if(!((("mom" in s) && s.mom.affected && s.mom.het) || 
+    if(!((("mom" in s) && s.mom.affected && s.mom.het) ||
         (("dad" in s) && s.dad.affected && s.dad.het))) { return false;}
     if(("dad" in s) && !hq1(s.dad, true)){ return false; }
     if(("mom" in s) && !hq1(s.mom, true)){ return false; }
@@ -157,7 +157,7 @@ function segregating_denovo_x(s) {
 }
 
 function affected_het_leaf(s) {
-    // check if sample that is het has a parent who 
+    // check if sample that is het has a parent who
     // is also het without a parent
     if("mom" in s && !affected_het_leaf(s.mom)) { return false; }
     if("dad" in s && !affected_het_leaf(s.dad)) { return false; }

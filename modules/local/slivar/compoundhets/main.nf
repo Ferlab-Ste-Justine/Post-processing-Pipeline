@@ -32,7 +32,7 @@ process SLIVAR_COMPOUNDHETS {
     | bcftools view -Oz -o ${prefix}.vcf.gz
 
     bcftools index -t ${prefix}.vcf.gz
-    
+
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         slivar: \$(slivar 2>&1 | head -n1 | sed 's/^.*version: //; s/ .*\$//')

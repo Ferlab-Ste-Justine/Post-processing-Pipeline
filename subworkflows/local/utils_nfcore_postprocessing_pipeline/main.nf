@@ -8,7 +8,7 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { UTILS_NFVALIDATION_PLUGIN } from '../../nf-core/utils_nfvalidation_plugin'
+include { UTILS_NFSCHEMA_PLUGIN } from '../../nf-core/utils_nfschema_plugin/main'
 include { paramsSummaryMap          } from 'plugin/nf-schema'
 include { samplesheetToList         } from 'plugin/nf-schema'
 include { UTILS_NEXTFLOW_PIPELINE   } from '../../nf-core/utils_nextflow_pipeline'
@@ -59,13 +59,17 @@ workflow PIPELINE_INITIALISATION {
     pre_help_text = nfCoreLogo(monochrome_logs)
     post_help_text = '\n' + workflowCitation() + '\n' + dashedLine(monochrome_logs)
     def String workflow_command = "nextflow run ${workflow.manifest.name} -profile <docker/singularity/.../institute> --input samplesheet.csv --outdir <OUTDIR>"
-    UTILS_NFVALIDATION_PLUGIN (
+    UTILS_NFSCHEMA_PLUGIN (
+        workflow,
+        validate_params,
+        null,
         help,
-        workflow_command,
+        false,
+        false,
         pre_help_text,
         post_help_text,
-        validate_params,
-        "nextflow_schema.json"
+        workflow_command,
+        null
     )
 
     //

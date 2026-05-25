@@ -1,46 +1,41 @@
 lint:
   actions_ci: false
   files_exist:
-  - CODE_OF_CONDUCT.md
-  - assets/nf-core-postprocessing_logo_light.png
-  - docs/images/nf-core-postprocessing_logo_light.png
-  - docs/images/nf-core-postprocessing_logo_dark.png
-  - .github/ISSUE_TEMPLATE/config.yml
-  - .github/workflows/branch.yml
-  - .github/workflows/awstest.yml
-  - .github/workflows/awsfulltest.yml
-  - .github/workflows/linting_comment.yml
-  - .github/.dockstore.yml
-  - .editorconfig
-  - .prettierignore
-  - .prettierrc.yml
-  - LICENSE
-  - CITATIONS.md
-  - assets/email_template.html
-  - assets/email_template.txt
-  - assets/sendmail_template.txt
-  files_unchanged:
-  - CODE_OF_CONDUCT.md
-  - assets/nf-core-postprocessing_logo_light.png
-  - docs/images/nf-core-postprocessing_logo_light.png
-  - docs/images/nf-core-postprocessing_logo_dark.png
-  - docs/README.md
-  - .github/ISSUE_TEMPLATE/bug_report.yml
-  - .github/CONTRIBUTING.md
-  - .github/PULL_REQUEST_TEMPLATE.md
-  - .github/workflows/linting_comment.yml
-  - .github/workflows/linting.yml
-  - LICENSE
+    - CODE_OF_CONDUCT.md
+    - assets/nf-core-Post-Processing-Pipeline_logo_light.png
+    - docs/images/nf-core-Post-Processing-Pipeline_logo_light.png
+    - docs/images/nf-core-Post-Processing-Pipeline_logo_dark.png
+    - .github/ISSUE_TEMPLATE/config.yml
+    - .github/workflows/branch.yml
+    - .github/workflows/awstest.yml
+    - .github/workflows/awsfulltest.yml
+    - .github/workflows/linting_comment.yml
+    - .github/.dockstore.yml
+    - .editorconfig
+    - .prettierignore
+    - .prettierrc.yml
+    - LICENSE
+    - CITATIONS.md
+    - assets/email_template.html
+    - assets/email_template.txt
+    - assets/sendmail_template.txt
+  files_unchanged: false
   multiqc_config: false
   nextflow_config:
-  - manifest.name
-  - manifest.homePage
-  - config_defaults:
-    - params.exomiser_analysis_wes
-    - params.exomiser_analysis_wgs
+    - manifest.name
+    - manifest.homePage
+    - params.max_cpus
+    - params.max_memory
+    - params.max_time
+    - config_defaults:
+        - params.exomiser_analysis_wes
+        - params.exomiser_analysis_wgs
+        - params.slivar_js
 nf_core_version: 2.14.1
 repository_type: pipeline
 template:
-  prefix: ferlab
+  org: Ferlab-Ste-Justine
+  name: Post-Processing-Pipeline
   skip: []
-  version: '2.11.0'
+  version: 2.11.0
+  is_nfcore: false

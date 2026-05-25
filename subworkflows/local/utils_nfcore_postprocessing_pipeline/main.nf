@@ -1,5 +1,5 @@
 //
-// Subworkflow with functionality specific to the ferlab/postprocessing pipeline
+// Subworkflow with functionality specific to the Ferlab-Ste-Justine/Post-Processing-Pipeline pipeline
 //
 
 /*
@@ -9,8 +9,8 @@
 */
 
 include { UTILS_NFVALIDATION_PLUGIN } from '../../nf-core/utils_nfvalidation_plugin'
-include { paramsSummaryMap          } from 'plugin/nf-validation'
-include { fromSamplesheet           } from 'plugin/nf-validation'
+include { paramsSummaryMap          } from 'plugin/nf-schema'
+include { samplesheetToList         } from 'plugin/nf-schema'
 include { UTILS_NEXTFLOW_PIPELINE   } from '../../nf-core/utils_nextflow_pipeline'
 include { completionSummary         } from '../../nf-core/utils_nfcore_pipeline'
 include { dashedLine                } from '../../nf-core/utils_nfcore_pipeline'
@@ -86,8 +86,8 @@ workflow PIPELINE_INITIALISATION {
     //
     if (params.step == 'genotype' && input) {
         log.info("Reading input samplesheet")
-        Channel
-            .fromSamplesheet("input")
+        channel
+            .fromList(samplesheetToList(params.input, "${projectDir}/assets/schema_input.json"))
             .map {
                 meta, gvcf, _vcf, _tbi ->
                 [meta.familyId, [meta, gvcf]]
@@ -113,14 +113,14 @@ workflow PIPELINE_INITIALISATION {
                         metasfile[1]                       //file
                     ]
             }.set {ch_samplesheet}
-    } 
+    }
     else {
         // check if there is an intermediate file already available in the output directory
         input_restart = findIntermediateInput(params.step, outdir, params.exomiser_start_from_vep)
 
         if (input_restart && params.allow_intermediate_input) {
             log.info("Using intermediate input file: ${input_restart}")
-            Channel.fromPath(input_restart,checkIfExists: true)
+            channel.fromPath(input_restart,checkIfExists: true)
                 .splitCsv(header: true)
                 .map { row ->
                     def meta = row.subMap('id','familyId', 'sequencingType')
@@ -135,8 +135,8 @@ workflow PIPELINE_INITIALISATION {
                 }
                 .set { ch_samplesheet }
         } else {
-            Channel
-                .fromSamplesheet("input")
+            channel
+                .fromList(samplesheetToList(params.input, "${projectDir}/assets/schema_input.json"))
                 .map {
                     meta, _gvcf, vcf, tbi ->
                     [ [ id:meta.familyId ] + meta, vcf, tbi]
@@ -165,7 +165,7 @@ workflow PIPELINE_COMPLETION {
 
     main:
 
-    summary_params = paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")
+    summary_params = paramsSummaryMap(workflow)
 
     //
     // Completion summary
@@ -275,7 +275,7 @@ def validateVepCacheVersion() {
     def vep_container = workflow.container.find{ it -> it.key.contains('ENSEMBLVEP_VEP') }
     def cache_version = params.vep_cache_version
     def version_ok = vep_container.value.contains(cache_version)
-    if (params.download_cache) {  
+    if (params.download_cache) {
         def vep_download_container = workflow.container.find{ it -> it.key.contains('ENSEMBLVEP_DOWNLOAD') }
         version_ok = version_ok && vep_download_container.value.contains(cache_version)
         vep_container = [ vep_container ]  + [ vep_download_container ]
@@ -292,7 +292,7 @@ def validateInputParameters() {
     if ((isVepToolIncluded() || (params.step == 'annotation')) || params.download_cache) {
         validateVepCacheVersion()
     }
-    
+
     if (params.allow_old_gatk_data) {
         log.warn "The 'allow_old_gatk_data' parameter is set to true, allowing the pipeline to run with older GATK data in GATK4_GENOTYPEGVCFS. Not recommended for production."
     }

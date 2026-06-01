@@ -227,13 +227,13 @@
                 },
                 "TSfilterSNP": {
                     "type": "string",
-                    "default": "99",
+                    "default": 99,
                     "description": "Truth-sensitivity filter level for SNPs",
                     "help_text": "Truth-sensitivity filter level for SNPs. This value is required by the VQSR step"
                 },
                 "TSfilterINDEL": {
                     "type": "string",
-                    "default": "99",
+                    "default": 99,
                     "help_text": "This value is required by the VQSR step",
                     "description": "Truth-sensitivity filter level for Indels"
                 },
@@ -280,8 +280,7 @@
                 "save_genotyped": {
                     "type": "boolean",
                     "description": "If true, publish the genotyped and normalized vcf files to the output directory.",
-                    "help_text": "If true, save the normalized genotyped vcf files to the output directory. If false, only the final vcf files will be saved. Default when no tools are specified",
-                    "default": false
+                    "help_text": "If true, save the normalized genotyped vcf files to the output directory. If false, only the final vcf files will be saved. Default when no tools are specified"
                 }
             }
         },
@@ -607,14 +606,22 @@
                 {
                     "if": {
                         "properties": {
-                            "tools": { "pattern": "slivar" },
-                            "step": { "not": { "const": "inheritance" } }
+                            "tools": {
+                                "pattern": "slivar"
+                            },
+                            "step": {
+                                "not": {
+                                    "const": "inheritance"
+                                }
+                            }
                         },
                         "required": ["tools"]
                     },
                     "then": {
                         "properties": {
-                            "tools": { "pattern": "vep" }
+                            "tools": {
+                                "pattern": "vep"
+                            }
                         }
                     }
                 }

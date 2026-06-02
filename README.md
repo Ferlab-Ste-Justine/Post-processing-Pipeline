@@ -18,6 +18,7 @@ The pipeline can be started from different entry points depending on your needs:
 - **From normalization**: Start with already filtered VCF files
 - **From annotation**: Start with normalized VCF files
 - **From exomiser**: Start with annotated VCF files
+- **From inheritance**: Start with VEP-annotated VCF files and tag variants by mode of inheritance with slivar
 
 ### Summary:
 
@@ -38,7 +39,7 @@ The pipeline can be started from different entry points depending on your needs:
 ### Workflow subway schema
 
 The full Ferlab workflow is shown in the image below, including the steps applicable prior to this pipeline. The steps relevant to the Ferlab-Ste-Justine/Post-processing-Pipeline correspond to the post-processing block.
-![PostProcessingDiagram](docs/images/ferlab_workflow.png)
+![PostProcessingDiagram](docs/images/ferlab_workflow.svg)
 
 This schema was done using [inkscape](https://inkscape.org/) with the good pratices recommended by the nf-core community. See [nf-core Graphic Design](https://nf-co.re/docs/guidelines/graphic_design).
 
@@ -47,7 +48,7 @@ This schema was done using [inkscape](https://inkscape.org/) with the good prati
 Here is an example nextflow command to run the pipeline:
 
 ```bash
-nextflow run -c cluster.config Ferlab-Ste-Justine/Post-processing-Pipeline -r "v2.11.0" \
+nextflow run -c cluster.config Ferlab-Ste-Justine/Post-processing-Pipeline -r "v3.0.0" \
     -params-file params.json  \
    --input samplesheet.csv \
    --outdir results/dir \
@@ -58,7 +59,7 @@ To start from a specific step, use the `--step` parameter:
 
 ```bash
 # Start from normalization step
-nextflow run -c cluster.config Ferlab-Ste-Justine/Post-processing-Pipeline -r "v2.11.0" \
+nextflow run -c cluster.config Ferlab-Ste-Justine/Post-processing-Pipeline -r "v3.0.0" \
     --step normalize \
     --input samplesheet.csv \
     --outdir results/dir \

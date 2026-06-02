@@ -41,5 +41,5 @@ template:
   org: Ferlab-Ste-Justine
   name: Post-Processing-Pipeline
   skip: []
-  version: 2.11.0
+  version: 3.0.0
   is_nfcore: false

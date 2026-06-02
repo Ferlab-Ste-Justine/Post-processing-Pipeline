@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#88](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/88) Add local slivar `expr` and `compound-hets` modules with nf-tests and `slivar_inheritance` workflow.
 - [#89](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/89) Add slivar to main pipeline and its parameters.
 - [#95](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/95) Update nf-test configuration.
+- [#102](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/102) Added MOI rules to slivar.
 
 ### `Changed`
 

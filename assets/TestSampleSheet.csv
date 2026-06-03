@@ -1,5 +1,8 @@
-familyId,sample,sequencingType,gvcf,familyPheno
-Family1,Test1,WES,https://github.com/nf-core/test-datasets/raw/modules/data/genomics/homo_sapiens/illumina/gvcf/test.genome.vcf.gz,assets/exomiser/pheno/family1.yml
-Family1,Test2,WES,https://github.com/nf-core/test-datasets/raw/modules/data/genomics/homo_sapiens/illumina/gvcf/test2.genome.vcf.gz,assets/exomiser/pheno/family1.yml
-Family2,Test1,WGS,https://github.com/nf-core/test-datasets/raw/modules/data/genomics/homo_sapiens/illumina/gvcf/test.genome.vcf.gz,assets/exomiser/pheno/family2.yml
-Family3,Test1,WES,https://github.com/nf-core/test-datasets/raw/modules/data/genomics/homo_sapiens/illumina/gvcf/test.genome.vcf.gz,
+familyId,sample,sequencingType,gvcf,familyPheno,familyPed
+family1,NA19240,WGS,data-test/gvcf/NA19240.chr22_50000000-51000000.gvcf.gz,data-test/pheno/family1.yml,data-test/ped/family1.ped
+family1,NA19238,WGS,data-test/gvcf/NA19238.chr22_50000000-51000000.gvcf.gz,data-test/pheno/family1.yml,data-test/ped/family1.ped
+family1,NA19239,WGS,data-test/gvcf/NA19239.chr22_50000000-51000000.gvcf.gz,data-test/pheno/family1.yml,data-test/ped/family1.ped
+family2,NA19240,WES,data-test/gvcf/NA19240.chr22_50000000-51000000.gvcf.gz,,data-test/ped/family2.ped
+family3,NA19238,WES,data-test/gvcf/NA19238.chr22_50000000-51000000.gvcf.gz,data-test/pheno/family3.yml,data-test/ped/family3.ped
+family3,NA19240,WES,data-test/gvcf/NA19240.chr22_50000000-51000000.gvcf.gz,data-test/pheno/family3.yml,data-test/ped/family3.ped
+family4,NA21118,WGS,data-test/gvcf/NA21118.chr22_50000000-51000000.gvcf.gz

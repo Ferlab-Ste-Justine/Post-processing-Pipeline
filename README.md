@@ -81,7 +81,8 @@ The `-stub` (or `-stub-run`) option can be added to run the "stub" block of proc
 
 To test your setup in stub mode, simply run `nextflow run Ferlab-Ste-Justine/Post-processing-Pipeline -profile test,docker -stub`.
 
-For tests with real data, see documentation in the [test configuration profile](conf/test.config)
+For tests with real data, see documentation in the [test configuration profile](conf/test.config).
+The test data is expected to be accessible locally under the launch directory. Before testing the pipeline, verify that the test-data directory exists.
 
 ## Pipeline Output
 

@@ -226,13 +226,13 @@
                     "hidden": true
                 },
                 "TSfilterSNP": {
-                    "type": "string",
+                    "type": "integer",
                     "default": 99,
                     "description": "Truth-sensitivity filter level for SNPs",
                     "help_text": "Truth-sensitivity filter level for SNPs. This value is required by the VQSR step"
                 },
                 "TSfilterINDEL": {
-                    "type": "string",
+                    "type": "integer",
                     "default": 99,
                     "help_text": "This value is required by the VQSR step",
                     "description": "Truth-sensitivity filter level for Indels"
@@ -337,7 +337,7 @@
                     "help_text": "Path to the vepCache directory, which is usually installed by vep by default. It should contain at least the homo_sapien/111_GRCh38/ directory."
                 },
                 "vep_cache_version": {
-                    "type": "string",
+                    "type": "integer",
                     "description": "Which version of the vep cache to annotate with",
                     "help text": "We recommend using the same version as vep, i.e. the vep version that matches the container."
                 },

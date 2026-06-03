@@ -277,7 +277,7 @@ def findIntermediateInput(step, outdir, exomiser_start_from_vep) {
 //
 def validateVepCacheVersion() {
     def vep_container = workflow.container.find{ it -> it.key.contains('ENSEMBLVEP_VEP') }
-    def cache_version = params.vep_cache_version
+    def cache_version = params.vep_cache_version.toString()
     def version_ok = vep_container.value.contains(cache_version)
     if (params.download_cache) {
         def vep_download_container = workflow.container.find{ it -> it.key.contains('ENSEMBLVEP_DOWNLOAD') }

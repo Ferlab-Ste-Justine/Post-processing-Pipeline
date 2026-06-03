@@ -1,0 +1,29 @@
+{
+    "human - gvcf list": {
+        "content": [
+            "test.combined.g.vcf.gz.tbi",
+            [
+                "versions.yml:md5,5123021765ad3b21832b97a34552c141"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.3",
+            "nextflow": "24.10.5"
+        },
+        "timestamp": "2026-06-02T15:02:14.242366"
+    },
+    "human - gvcf list - stub": {
+        "content": [
+            "test.combined.g.vcf.gz",
+            "test.combined.g.vcf.gz.tbi",
+            [
+                "versions.yml:md5,5123021765ad3b21832b97a34552c141"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.3",
+            "nextflow": "24.10.5"
+        },
+        "timestamp": "2026-06-02T15:02:20.281254"
+    }
+}

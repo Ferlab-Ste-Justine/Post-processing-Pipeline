@@ -286,7 +286,12 @@ workflow POSTPROCESSING {
         }
 
         ch_slivar_input = ch_vcf_slivar
-            .filter{ meta, _vcf, _tbi -> meta.familyPed }
+            .filter{ meta, _vcf, _tbi ->
+                if (!meta.familyPed) {
+                    log.warn("Skipping slivar inheritance for family '${meta.familyId}': no familyPed (PED file) provided in the samplesheet.")
+                }
+                meta.familyPed
+            }
             .map{ meta, vcf, tbi -> [meta, vcf, tbi, file(meta.familyPed)] }
 
         SLIVAR_INHERITANCE(ch_slivar_input, slivarRegionsBed, slivarExcludeBed, slivarGnotateFiles, slivarJs)
@@ -310,7 +315,12 @@ workflow POSTPROCESSING {
 
         // Keep only families that supplied a phenopacket; attach the right analysis YAML per sequencing type.
         ch_input_for_exomiser = ch_exomiser_input
-            .filter{ meta, _vcf, _tbi -> meta.familyPheno }
+            .filter{ meta, _vcf, _tbi ->
+                if (!meta.familyPheno) {
+                    log.warn("Skipping exomiser for family '${meta.familyId}': no familyPheno (phenopacket) provided in the samplesheet.")
+                }
+                meta.familyPheno
+            }
             .map{ meta, vcf, tbi -> [
                 meta,
                 vcf,

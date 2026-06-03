@@ -204,7 +204,7 @@ analysis file should contain only the `analysis` section.
 | `vqsr_snp_resources`                  | _Optional_ | List of `{labels, vcf, index}` maps describing the SNP VQSR training resources. Relative vcf/index paths are resolved against `params.broad`. |
 | `vqsr_indel_resources`                | _Optional_ | Same shape as `vqsr_snp_resources`, used for the INDEL VQSR model.                                                                            |
 | `intervalsFile`                       | _Optional_ | Path to the file containg the genome intervals list on which to operate                                                                       |
-| `vepCache`                            | _Optional_ | Path to the vep cache data directory                                                                                                          |
+| `vep_cache`                           | _Optional_ | Path to the vep cache data directory                                                                                                          |
 | `slivar_gnomad_gnotate`               | _Optional_ | Path to the gnomAD slivar gnotate (`.zip`) file. Required to apply gnomAD-based population-frequency guards in the inheritance expressions.   |
 | `slivar_topmed_gnotate`               | _Optional_ | Path to the TOPMed slivar gnotate (`.zip`) file. Required to apply the TOPMed-based population-frequency guard.                               |
 | `slivar_regions_bed`                  | _Optional_ | BED file restricting slivar analysis to the specified regions.                                                                                |

@@ -5,23 +5,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v3.0.0 - 2026-06-02]
+
 ### `Added`
 
 - [#88](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/88) Add local slivar `expr` and `compound-hets` modules with nf-tests and `slivar_inheritance` workflow.
-- [#89](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/89) Add slivar to main pipeline and its parameters.
+- [#89](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/89) Add slivar to main pipeline and its parameters, including the new `inheritance` step and the `slivar` option for `--tools`.
+- [#92](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/92) Add missing nf-tests for the pipeline utility functions.
 - [#95](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/95) Update nf-test configuration.
-- [#102](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/102) Added MOI rules to slivar.
+- [#102](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/102) Added MOI (mode-of-inheritance) rules to slivar.
+- [#103](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/103) Add nf-test for the `COMBINEGVCFS` local module.
 
 ### `Changed`
 
-- [#90](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/90) Update CI/CD test to datset V7 and limit nf version to <26.0.
+- [#90](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/90) Update CI/CD test to dataset V7 and limit nf version to <26.0.
+- [#91](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/91) Update documentation.
 - [#94](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/94) Refactor syntax for VQSR modules and subworkflow.
 - [#96](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/96) Refactor syntax for split multi-allelics module.
 - [#97](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/97) Refactor syntax for exclude MNPs workflow.
-- [#98](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/98) Refactor syntax of main pipeline; helper functions that called processes have been inlined; software versions are now aggregated and written to `pipeline_info/Post-Processing-Pipeline_software_mqc_versions.yml`.
-- `exomiser_local_frequency_index_path` is now optional; when omitted, the index path is derived from `exomiser_local_frequency_path` by appending `.tbi`.
+- [#98](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/98) Refactor syntax of main pipeline; helper functions that called processes have been inlined; software versions are now aggregated and written to `pipeline_info/Post-Processing-Pipeline_software_mqc_versions.yml`.`exomiser_local_frequency_index_path` is now optional; when omitted, the index path is derived from `exomiser_local_frequency_path` by appending `.tbi`.
 - [#100](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/100) Update nf-validation to nf-schema.
-- [#101](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/101) Full pipeline lint
+- [#101](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/101) Full pipeline lint.
+- [#103](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/103) Update documentation and refresh the pipeline workflow diagram for the v3.0.0 release.
+
+### `Fixed`
+
+- [#93](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/93) Stop calling `isBlank` on `params.tools` when it can be null.
 
 ## [v2.11.0 - 2026-03-18]
 

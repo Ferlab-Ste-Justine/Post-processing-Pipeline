@@ -1,0 +1,83 @@
+name: combine_gvcfs
+description: |
+  Combine per-sample GVCFs of a family into a single multi-sample GVCF with GATK CombineGVCFs,
+  ready for joint genotyping. Optionally restricts the operation to a set of intervals.
+keywords:
+  - gatk4
+  - combinegvcfs
+  - gvcf
+  - joint-genotyping
+  - variant-calling
+tools:
+  - gatk4:
+      description: |
+        Developed in the Data Sciences Platform at the Broad Institute, the toolkit offers a wide
+        variety of tools with a primary focus on variant discovery and genotyping.
+      homepage: https://gatk.broadinstitute.org/hc/en-us
+      documentation: https://gatk.broadinstitute.org/hc/en-us/articles/360037593911-CombineGVCFs
+      doi: 10.1158/1538-7445.AM2017-3590
+      licence: ["Apache-2.0"]
+      identifier: "biotools:gatk4"
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing family information
+          e.g. [ id:'family1' ]
+    - vcf:
+        type: file
+        description: One or more per-sample GVCFs belonging to the same family
+        pattern: "*.{g.vcf,g.vcf.gz}"
+    - vcf_idx:
+        type: file
+        description: Tabix indices for the input GVCFs
+        pattern: "*.tbi"
+  - - fasta:
+        type: file
+        description: Reference genome FASTA
+        pattern: "*.{fa,fasta}"
+  - - fai:
+        type: file
+        description: Reference genome FASTA index
+        pattern: "*.fai"
+  - - dict:
+        type: file
+        description: Reference genome sequence dictionary
+        pattern: "*.dict"
+  - - interval:
+        type: file
+        description: Optional intervals list restricting the operation
+        pattern: "*.{interval_list,list,bed}"
+output:
+  - combined_gvcf:
+      - meta:
+          type: file
+          description: Combined multi-sample GVCF for the family
+          pattern: "*.combined.g.vcf.gz"
+      - "*.combined.g.vcf.gz":
+          type: file
+          description: Combined multi-sample GVCF for the family
+          pattern: "*.combined.g.vcf.gz"
+  - tbi:
+      - meta:
+          type: file
+          description: Tabix index for the combined GVCF
+          pattern: "*.tbi"
+      - "*.tbi":
+          type: file
+          description: Tabix index for the combined GVCF
+          pattern: "*.tbi"
+  - versions:
+      - versions.yml:
+          type: file
+          description: File containing software versions
+          pattern: "versions.yml"
+authors:
+  - "@FelixAntoineLeSieur"
+  - "@dmorais"
+  - "@LysianeBouchard"
+  - "@DamienGnst"
+  - "@georgette-femerling"
+maintainers:
+  - "@LysianeBouchard"
+  - "@georgette-femerling"

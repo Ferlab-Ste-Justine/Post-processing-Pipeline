@@ -107,13 +107,19 @@ function segregating_dominant(s) {
 
 // --- X-linked predicates (delegated to from the autosomal ones) ---
 function hom_ref(s)        { return s && s.hom_ref && hq1(s); }
-function hom_ref_parent(s) { return ("dad" in s) && s.dad.hom_ref && ("mom" in s) && s.mom.hom_ref; }
 
+// MODIFIED from upstream slivar (https://github.com/brentp/slivar/blob/master/js/slivar-functions.js):
+//   * Added hq1(s, true) gate at the top -- moi_x_recessive calls this function
+//     directly without running hq1, so low-quality / unknown samples would otherwise slip through.
+//     Passing isX=true so male-X-relaxed GQ/DP thresholds apply.
+//   * Affected male tightened from `s.het || s.hom_alt` to `s.hom_alt` only.
+//   * Unaffected male tightened from implicit `!(s.het || s.hom_alt)` to explicit `s.hom_ref`.
 function segregating_recessive_x(s) {
+  if (!hq1(s, true)) return false;
   if (s.sex == "female") return s.affected == s.hom_alt;
   if (s.sex == "male") {
-    if (s.affected && s.het && hom_ref_parent(s)) return false;  // ambiguous hemizygous
-    return s.affected == (s.het || s.hom_alt);
+    if (s.affected) return s.hom_alt;
+    return s.hom_ref;
   }
   return false;
 }
@@ -136,12 +142,17 @@ function segregating_denovo_x(s) {
   return false;
 }
 
+// MODIFIED from upstream slivar (https://github.com/brentp/slivar/blob/master/js/slivar-functions.js):
+//   * Kids check in the affected-male branch now only requires DAUGHTERS to be affected
+//     (was: "all kids of affected dad must be affected").
 function segregating_dominant_x(s) {
   if (!s.affected) return hq1(s, true) && s.hom_ref;
 
   if (s.sex == "male") {
     for (var i=0; i < s.kids.length; i++) {
-      if (!s.kids[i].affected) return false;       // kids of affected dad must be affected
+      var kid = s.kids[i];
+      // Only daughters of an affected dad are required to be affected.
+      if (kid.sex == "female" && !kid.affected) return false;
     }
     if (("mom" in s) && !(s.mom.affected == s.mom.het)) return false;
     if (("mom" in s) && !hq1(s.mom, true)) return false;
@@ -212,14 +223,18 @@ function proband_has_both_parents(fam) {
   return false;
 }
 
-// True iff this is a solo: the only family member is the affected proband.
-// Single-variant MoI tags (recessive, x_recessive) are suppressed for solos
-// because a solo provides zero segregation evidence -- the variant being in
-// the proband's VCF is the only signal. Compound-het detection is still
-// allowed (via moi_het_side) since paired hets in the same gene give some
-// per-pair information.
-function is_solo(fam) {
-  return fam.length === 1 && fam[0].affected;
+// True iff no family member has children in the family (i.e. no parents are
+// in the PED). Covers both:
+//   * literal solos (fam.length === 1)
+//   * sibships (multiple sibs, no parents)
+// Both configurations provide zero segregation evidence for single-variant
+// MoIs (recessive, x_recessive)
+function no_parents_in_fam(fam) {
+  for (var i=0; i<fam.length; i++) {
+    var s = fam[i];
+    if (s.kids && s.kids.length > 0) return false;
+  }
+  return true;
 }
 
 
@@ -232,10 +247,10 @@ function is_solo(fam) {
 // because it depends on Nextflow params.
 
 function moi_denovo(fam)      { return is_autosomal() && fam.every(segregating_denovo); }
-function moi_recessive(fam)   { return is_autosomal() && !is_solo(fam) && fam.every(segregating_recessive); }
+function moi_recessive(fam)   { return is_autosomal() && !no_parents_in_fam(fam) && fam.every(segregating_recessive); }
 function moi_dominant(fam)    { return is_autosomal() && has_aff_parent(fam) && fam.every(segregating_dominant); }
 function moi_x_denovo(fam)    { return is_x_linked()  && fam.every(segregating_denovo_x); }
-function moi_x_recessive(fam) { return is_x_linked()  && !is_solo(fam) && fam.every(segregating_recessive_x); }
+function moi_x_recessive(fam) { return is_x_linked()  && !no_parents_in_fam(fam) && fam.every(segregating_recessive_x); }
 function moi_x_dominant(fam)  { return is_x_linked()  && has_aff_parent(fam) && fam.every(segregating_dominant_x); }
 
 // Uniparental disomy: an affected proband is hom_alt and exactly ONE parent is
@@ -290,13 +305,21 @@ function x_recessive_provable(fam) {
 //   * dominant / x_dominant only fire via the has_aff_parent gate, which
 //     itself supplies the segregation evidence
 //
-// Only recessive (needs both parents to verify both are carriers),
-// x_recessive (needs both parents OR male proband with mom), and the
-// compound-het pathway (no trans evidence without both parents) can fire
+// Only recessive (needs both parents to verify both are carriers) and
+// x_recessive (needs both parents OR male proband with mom) can fire here
 // without sufficient structural proof.
+//
+// NOTE: the comphet pathway is intentionally NOT included here. The previous
+// `moi_het_side(fam)` clause fired BEFORE slivar compound-hets had paired
+// anything, setting `candidate` on every hq het in an affected non-trio
+// member (~thousands per duo). Most never paired into a comphet, leaving
+// orphan candidate tags with no MoI partner in the published VCF. Restoring
+// condition (c) of the doc (candidate co-labels non-trio slivar_comphets)
+// requires a post-compoundhets step -- either a second slivar expr pass
+// over INFO/slivar_comphet, or bcftools post-processing with a per-family
+// is_non_trio flag. Tracked as a follow-up.
 function moi_candidate(fam) {
   if (moi_recessive(fam)   && !proband_has_both_parents(fam)) return true;
   if (moi_x_recessive(fam) && !x_recessive_provable(fam))    return true;
-  if (moi_het_side(fam))                                      return true;
   return false;
 }

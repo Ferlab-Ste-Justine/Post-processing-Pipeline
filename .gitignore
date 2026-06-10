@@ -6,6 +6,7 @@ results/
 testing/
 testing*
 *.pyc
+null/
 localTest/
 data-test/
 .nf-test.log

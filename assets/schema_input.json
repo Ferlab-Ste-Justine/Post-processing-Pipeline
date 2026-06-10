@@ -1,7 +1,7 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema",
-    "$id": "https://raw.githubusercontent.com/nf-core/sarek/master/assets/schema_input.json",
-    "title": "ferlab/Post-processingPipeline - params.input schema",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/Ferlab-Ste-Justine/Post-Processing-Pipeline/master/assets/schema_input.json",
+    "title": "Ferlab-Ste-Justine/Post-Processing-Pipeline - params.input schema",
     "description": "Schema for the file provided with params.input",
     "type": "array",
     "items": {
@@ -61,10 +61,10 @@
                 "pattern": "^\\S+\\.vcf(\\.gz)?.tbi$",
                 "exists": true
             }
-            },
+        },
         "oneOf": [
-            {"required": ["familyId", "sample", "sequencingType", "gvcf"]},
-            {"required": ["familyId", "sequencingType", "vcf"]}
+            { "required": ["familyId", "sample", "sequencingType", "gvcf"] },
+            { "required": ["familyId", "sequencingType", "vcf"] }
         ]
     }
 }

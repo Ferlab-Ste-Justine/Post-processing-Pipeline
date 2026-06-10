@@ -1,5 +1,4 @@
 [![nf-test](https://img.shields.io/badge/unit_tests-nf--test-337ab7.svg)](https://www.nf-test.com)
-
 [![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A523.10.1%20%26%20%3C26.0.0-23aa62.svg)](https://www.nextflow.io/)
 [![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed?labelColor=000000&logo=docker)](https://www.docker.com/)
 [![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)
@@ -10,34 +9,37 @@
 
 ## Introduction
 
-**Ferlab-Ste-Justine/Post-processing-Pipeline** is a bioinformatics pipeline designed for family-based analysis of GVCFs from multiple samples. 
+**Ferlab-Ste-Justine/Post-processing-Pipeline** is a bioinformatics pipeline designed for family-based analysis of GVCFs from multiple samples.
 It performs joint genotyping, tags low-quality variants, and optionally annotates the final vcf data using vep and/or prioritize variant using exomiser.
 
 The pipeline can be started from different entry points depending on your needs:
+
 - **From joint genotyping** (default): Start with GVCF files
-- **From normalization**: Start with already filtered VCF files  
+- **From normalization**: Start with already filtered VCF files
 - **From annotation**: Start with normalized VCF files
 - **From exomiser**: Start with annotated VCF files
+- **From inheritance**: Start with VEP-annotated VCF files and tag variants by mode of inheritance with slivar
 
-###  Summary:
+### Summary:
+
 1. Standardize input vcf files using bcftools view
 2. Remove fake MNPs and duplicated positions using bcftools (optional)
 3. Combine .gvcf
 4. [Joint-genotyping](https://gatk.broadinstitute.org/hc/en-us/articles/360037057852-GenotypeGVCFs)
 5. Tag false positive variants with either:
-  - For whole genome sequencing data: [Variant quality score recalibration (VQSR)](https://gatk.broadinstitute.org/hc/en-us/articles/360036510892-VariantRecalibrator)
-  - For whole exome sequencing data: [Hard-Filtering](https://gatk.broadinstitute.org/hc/en-us/articles/360036733451-VariantFiltration)
+
+- For whole genome sequencing data: [Variant quality score recalibration (VQSR)](https://gatk.broadinstitute.org/hc/en-us/articles/360036510892-VariantRecalibrator)
+- For whole exome sequencing data: [Hard-Filtering](https://gatk.broadinstitute.org/hc/en-us/articles/360036733451-VariantFiltration)
+
 6. Normalize with bcftools
 7. Optionnally annotate variants with [Variant effect predictor (VEP)](https://useast.ensembl.org/info/docs/tools/vep/index.html) and download reference cache (if not provided)
 8. Optionnally tag variants by mode of inheritance and identify compound heterozygotes with [slivar](https://github.com/brentp/slivar) when VEP is run and a family PED file is provided
 9. Optionnally integrate phenotype data to annotate, filter and prioritise variants likely to be disease-causing with [exomiser](https://www.sanger.ac.uk/tool/exomiser/)
 
-
-
 ### Workflow subway schema
 
 The full Ferlab workflow is shown in the image below, including the steps applicable prior to this pipeline. The steps relevant to the Ferlab-Ste-Justine/Post-processing-Pipeline correspond to the post-processing block.
-![PostProcessingDiagram](docs/images/ferlab_workflow.png)
+![PostProcessingDiagram](docs/images/ferlab_workflow.svg)
 
 This schema was done using [inkscape](https://inkscape.org/) with the good pratices recommended by the nf-core community. See [nf-core Graphic Design](https://nf-co.re/docs/guidelines/graphic_design).
 
@@ -46,7 +48,7 @@ This schema was done using [inkscape](https://inkscape.org/) with the good prati
 Here is an example nextflow command to run the pipeline:
 
 ```bash
-nextflow run -c cluster.config Ferlab-Ste-Justine/Post-processing-Pipeline -r "v2.11.0" \
+nextflow run -c cluster.config Ferlab-Ste-Justine/Post-processing-Pipeline -r "v3.0.0" \
     -params-file params.json  \
    --input samplesheet.csv \
    --outdir results/dir \
@@ -57,7 +59,7 @@ To start from a specific step, use the `--step` parameter:
 
 ```bash
 # Start from normalization step
-nextflow run -c cluster.config Ferlab-Ste-Justine/Post-processing-Pipeline -r "v2.11.0" \
+nextflow run -c cluster.config Ferlab-Ste-Justine/Post-processing-Pipeline -r "v3.0.0" \
     --step normalize \
     --input samplesheet.csv \
     --outdir results/dir \
@@ -71,40 +73,35 @@ nextflow run -c cluster.config Ferlab-Ste-Justine/Post-processing-Pipeline -r "v
 > Please provide pipeline parameters via the CLI or nextflow `-params-file` option. Custom config files including those provided by the `-c` nextflow option can be used to provide any configuration _**except for parameters**_;
 > see [docs](https://nf-co.re/usage/configuration#custom-configuration-files).
 
-
 For more details, see [docs/usage.md](docs/usage.md) and [docs/reference_data.md](docs/reference_data.md).
-
 
 ### Stub mode and quick tests
 
 The `-stub` (or `-stub-run`) option can be added to run the "stub" block of processes instead of the "script" block. This can be helpful for testing.
 
+To test your setup in stub mode, simply run `nextflow run Ferlab-Ste-Justine/Post-processing-Pipeline -profile test,docker -stub`.
 
-To test your setup in stub mode, simply run `nextflow run Ferlab-Ste-Justine/Post-processing-Pipeline -profile test,docker -stub`. 
+For tests with real data, see documentation in the [test configuration profile](conf/test.config).
+The test data is expected to be accessible locally under the launch directory. Before testing the pipeline, verify that the test-data directory exists.
 
-For tests with real data, see documentation in the [test configuration profile](conf/test.config)
+## Pipeline Output
 
-
-Pipeline Output
------
 Path to output directory must be specified via the `outdir` parameter.
 
 By default, all pipeline outputs are written to this directory. However, you can specify separate output directories for vep and exomiser results using the `vep_outdir` and `exomiser_outdir` parameters, respectively.
 
 See [docs/output.md](docs/output.md) for more details about pipeline outputs.
 
-
 ## Credits
 
 Ferlab-Ste-Justine/Post-processing-Pipeline was originally written by Damien Geneste, David Morais, Felix-Antoine Le Sieur, Jeremy Costanza, Lysiane Bouchard, Georgette Femerling.
-
 
 ## Contributions and Support
 
 If you would like to contribute to this pipeline, please see the [contributing guidelines](.github/CONTRIBUTING.md).
 
-Resources
------
+## Resources
+
 The documentation of the various tools used in this workflow are available here:
 
 [Nextflow](https://www.nextflow.io/docs/latest/index.html)
@@ -114,6 +111,7 @@ The documentation of the various tools used in this workflow are available here:
 [igenomes](https://support.illumina.com/sequencing/sequencing_software/igenome.html)
 
 **GATK**:
+
 - [CombineGVCFs](https://gatk.broadinstitute.org/hc/en-us/articles/360037593911-CombineGVCFs)
 - [GenotypeGVCFs](https://gatk.broadinstitute.org/hc/en-us/articles/360037057852-GenotypeGVCFs)
 - [VariantRecalibrator](https://gatk.broadinstitute.org/hc/en-us/articles/360035531612-Variant-Quality-Score-Recalibration-VQSR)
@@ -125,7 +123,6 @@ The documentation of the various tools used in this workflow are available here:
 [slivar](https://github.com/brentp/slivar/wiki)
 
 [EXOMISER](https://exomiser.readthedocs.io/en/latest/)
-
 
 ## Citations
 

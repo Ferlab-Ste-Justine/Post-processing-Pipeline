@@ -1,6 +1,6 @@
 # Ferlab-Ste-Justine/Post-processing-Pipeline: Usage
 
->  _Parameters documentation is available in the [pipeline schema](../nextflow_schema.json)._
+> _Parameters documentation is available in the [pipeline schema](../nextflow_schema.json)._
 > _You can use the command `nf-core schema docs` to output parameters documentation._
 > _To avoid duplication of information, we minimize parameters details in markdown files._
 > _Currently, we only add context for the reference data parameters and provide parameter summaries for convenience._
@@ -9,23 +9,24 @@
 
 The Ferlab-Ste-Justine/Post-processing-Pipeline is a bioinformatics pipeline designed for family-based analysis of GVCFs from multiple samples. It performs joint genotyping, tags low-quality variants, and optionally annotates the final VCF using VEP and/or Exomiser. This document provides instructions on how to prepare input files, run the pipeline, and understand the output.
 
-
 ## Samplesheet input
 
 You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use the `--input` parameter to specify its location. The samplesheet has to be a comma separated file (`.csv`).
 
-The samplesheet must contains the following columns at the minimum: 
-- *familyId*: The identifier used for the sample family
-- *sample*: The identifier used for the sample
-- *sequencingType*: Must be either WES (Whole Exome Sequencing) or WGS (Whole Genome Sequencing)
-- *gvcf*: Path to the sample `.gvcf.gz` file
-- *vcf*: Path to the joint-genotyped/filtered `vcf.gz` file. **_If starting from normalization, vep or exomiser_**
+The samplesheet must contains the following columns at the minimum:
 
-Additionally, there is an optional *familyPheno* column that can contain a `.yml/.json` file providing phenotype information on the family in phenopacket format. This column is only necessary if using the exomiser tool. If exomiser is enabled, it must consistently contain either an empty string or the same phenopacket file for all members of the family. For more details, refer to the exomiser tool section below.
+- _familyId_: The identifier used for the sample family
+- _sample_: The identifier used for the sample
+- _sequencingType_: Must be either WES (Whole Exome Sequencing) or WGS (Whole Genome Sequencing)
+- _gvcf_: Path to the sample `.gvcf.gz` file
+- _vcf_: Path to the joint-genotyped/filtered `vcf.gz` file. **_If starting from normalization, vep or exomiser_**
 
-There is also an optional *familyPed* column that can point to a `.ped` pedigree file for the family. This column is required to run the [slivar inheritance step](#slivar-inheritance-step), which tags variants by mode of inheritance and identifies compound heterozygotes from a VEP-annotated VCF. As with `familyPheno`, the value must be identical for all members of the same family.
+Additionally, there is an optional _familyPheno_ column that can contain a `.yml/.json` file providing phenotype information on the family in phenopacket format. This column is only necessary if using the exomiser tool. If exomiser is enabled, it must consistently contain either an empty string or the same phenopacket file for all members of the family. For more details, refer to the exomiser tool section below.
+
+There is also an optional _familyPed_ column that can point to a `.ped` pedigree file for the family. This column is required to run the [slivar inheritance step](#slivar-inheritance-step), which tags variants by mode of inheritance and identifies compound heterozygotes from a VEP-annotated VCF. As with `familyPheno`, the value must be identical for all members of the same family.
 
 **sample.csv**
+
 ```csv
 **familyId**,**sample**,**sequencingType**,**gvcf**,**familyPheno**,**familyPed**
 CONGE-XXX,01,WES,CONGE-XXX-01.hard-filtered.gvcf.gz,CONGE-XXX.pheno.yml,CONGE-XXX.ped
@@ -44,23 +45,21 @@ CONGE-YYY,03,WGS,CONGE-YYY-03.hard-filtered.gvcf.gz,CONGE-YYY.pheno.yml,CONGE-YY
 
 ## Reference Data
 
-Reference files are essential at various stages of the workflow, including joint-genotyping, VQSR, the Variant Effect Predictor (VEP), and exomiser. 
+Reference files are essential at various stages of the workflow, including joint-genotyping, VQSR, the Variant Effect Predictor (VEP), and exomiser.
 
 These files must be correctly downloaded and specified through pipeline parameters. For more details about how to do this, see [reference_data.md](reference_data.md).
-
 
 ## Running the pipeline
 
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run -c fusion.config Ferlab-Ste-Justine/Post-processing-Pipeline -r "v2.11.0" \
+nextflow run -c fusion.config Ferlab-Ste-Justine/Post-processing-Pipeline -r "v3.0.0" \
     -params-file params.json  \
    --input samplesheet.csv \
    --outdir results/dir \
    --tools vep,exomiser
 ```
-
 
 Note that the pipeline will create the following files in your working directory:
 
@@ -79,9 +78,11 @@ If you wish to repeatedly use the same parameters for multiple runs, rather than
 ### Starting from intermediate steps
 
 #### Starting with normalization (`--step 'normalize'`)
+
 To start from the normalization step, the csv samplesheet must contain the columns `familyId`, `sample`, `sequencingType`, and `vcf`, with the optional `tbi`. This allows you to skip the joint genotyping and VQSR/hard filtering steps and start directly from the normalization of already processed VCF files.
 
 **sample.csv**
+
 ```csv
 **familyId**,**sample**,**sequencingType**,**vcf**,**tbi**
 CONGE-XXX,01,WES,CONGE-XXX.filtered.vcf.gz,CONGE-XXX.filtered.vcf.gz.tbi
@@ -90,9 +91,11 @@ CONGE-XXX,03,WES,CONGE-XXX.filtered.vcf.gz,CONGE-XXX.filtered.vcf.gz.tbi
 ```
 
 #### Starting with vep annotation (`--step 'annotation'`) or Exomiser (`--step 'exomiser'`)
+
 To start from either the annotation step or from exomiser, the csv samplesheet must contain the columns `familyId`, `sequencingType`, and `vcf`, with the optional `tbi`. To start from exomiser, the column `familyPheno` is required.
 
 **sample.csv**
+
 ```csv
 **familyId**,**sequencingType**,**vcf**,**tbi**,**familyPheno**
 CONGE-XXX,WES,CONGE-XXX.snv.vep.vcf.gz,CONGE-XXX.snv.vep.vcf.gz.tbi,CONGE-XXX.pheno.yml
@@ -100,9 +103,11 @@ CONGE-YYY,WES,CONGE-YYY.normalized.vcf.gz,CONGE-YYY.normalized.vcf.gz.tbi,CONGE-
 ```
 
 #### Starting with the slivar inheritance step (`--step 'inheritance'`)
+
 To start from the slivar inheritance step, the input VCF is assumed to be already VEP-annotated. The csv samplesheet must contain the columns `familyId`, `sequencingType`, `vcf`, and `familyPed`, with the optional `tbi`.
 
 **sample.csv**
+
 ```csv
 **familyId**,**sequencingType**,**vcf**,**tbi**,**familyPed**
 CONGE-XXX,WES,CONGE-XXX.snv.vep.vcf.gz,CONGE-XXX.snv.vep.vcf.gz.tbi,CONGE-XXX.ped
@@ -112,7 +117,9 @@ CONGE-YYY,WES,CONGE-YYY.snv.vep.vcf.gz,CONGE-YYY.snv.vep.vcf.gz.tbi,CONGE-YYY.pe
 When `--step inheritance` is set, slivar is run by default even if not listed in `tools`. Families without a `familyPed` value are silently skipped.
 
 #### **This feature supports using results from a previous run as input.**
+
 The normalize, annotation, exomiser, and inheritance steps can be started from previously generated results:
+
 - Normalize step can start from previously generated joint-genotyped and filtered VCFs
 - Annotation step can start from previously generated normalized VCFs
 - Exomiser step can start from previously generated joint-genotyped VCFs or from previous results of ensemblvep
@@ -121,7 +128,6 @@ The normalize, annotation, exomiser, and inheritance steps can be started from p
 If in a previous run `save_genotyped = true` and/or vep was run, the CSV files will be stored under `$outdir/csv/normalized_genotypes.csv` and `$outdir/csv/ensemblvep.csv`.
 
 If the required CSV is found in the same output directory, it will automatically be used as an input when specifying the parameter `allow_intermediate_input = true`. This option depends on the [output directory structure](output.md#directory-structure) being respected as it looks at the `csv` directory to retrieve the paths to the data. If output directory is different, the csv will need to be passed manually.
-
 
 See [tools](#tools) for details on required input for each step.
 
@@ -136,21 +142,20 @@ Slivar output is always written to the `slivar` subfolder of `--outdir`.
 
 For more details on the pipeline outputs, see [output.md](output.md)
 
-
 ### Enable or Disable GVCF Cleaning with `exclude_mnps`
 
 At the start of the workflow, by default, we run steps to filter out lines in the input gVCF files that could cause compatibility issues with the joint genotyping procedure.
 
 The following lines are removed:
+
 - **Fake MNPs**: SNPs with incorrectly trimmed reference and alternate alleles that can be mistaken for MNPs by GATK's `CombineGVCF` step.
 - **Duplicated Positions**: Lines with duplicate positions, which can also cause issues with `CombineGVCF`.
 
-You can optionally skip this filtering logic if you have no reason to suspect that the underlying data problems will occur.   To do so, set the  `exclude_mnps` parameter to `false` (default is `true`).
+You can optionally skip this filtering logic if you have no reason to suspect that the underlying data problems will occur. To do so, set the `exclude_mnps` parameter to `false` (default is `true`).
 
 Note that, despite the name, no true MNPs will be removed when the `exclude_mnps` parameter is set to true. The name originates from its original purpose of addressing fake MNPs.
 
 By default, the gvcf cleaning feature is enabled to maintain previous behaviour in CQDG. However, use this feature with caution. We may improve the pipeline to handle these issues differently in the future.
-
 
 ### Tools
 
@@ -167,7 +172,7 @@ Slivar runs an inheritance subworkflow that tags variants by mode of inheritance
 
 ### Exomiser tool
 
-To run exomiser, activate it via the `tools` parameter (see section above). 
+To run exomiser, activate it via the `tools` parameter (see section above).
 
 Additionally, provide the exomiser phenopacket file in the samplesheet for each family member in the familyPheno column. If the phenopacket file is not specified for a family, exomiser will be skipped for that family.
 `
@@ -200,6 +205,7 @@ The pipeline can run a [slivar](https://github.com/brentp/slivar)-based inherita
 3. Merges the compound-het annotations back into the expression-tagged VCF using `bcftools annotate`.
 
 This step runs per family when either:
+
 - `slivar` is included in the `tools` parameter. In this case `vep` must also be in `tools` so that slivar can consume the VEP-annotated VCF (the schema enforces this dependency).
 - `--step inheritance` is set, in which case the input VCF is assumed to be already VEP-annotated and slivar is run by default.
 
@@ -215,6 +221,7 @@ To apply the population-frequency filters embedded in the inheritance expression
 If a gnotate file is omitted, the corresponding population-frequency guards are dropped from the expressions automatically — the inheritance segregation logic still runs, but is no longer rarity-filtered against that population.
 
 You can additionally provide:
+
 - `slivar_regions_bed`: restrict analysis to regions in this BED file (`slivar expr --regions`).
 - `slivar_exclude_bed`: skip variants overlapping regions in this BED file (`slivar expr --exclude`).
 - `slivar_js`: custom JavaScript helper functions. Defaults to the bundled `assets/slivar-functions.js`; override only if you have customized segregation/quality functions.
@@ -223,13 +230,13 @@ You can additionally provide:
 
 The default population-frequency thresholds applied in the inheritance expressions can be tuned via parameters:
 
-| Parameter | Default | Used in |
-| --- | --- | --- |
-| `gnomad_popmax_af_rare` | `0.01` | General `--info` rare-variant filter |
-| `topmed_af_rare` | `0.05` | General `--info` rare-variant filter |
-| `gnomad_popmax_af_dominant` | `0.001` | `denovo`, `dominant`, `x_denovo`, `x_dominant` family expressions |
-| `gnomad_popmax_af_recessive` | `0.01` | `recessive`, `x_recessive` family expressions |
-| `gnomad_nhomalt` | `10` | `comphet_side` and `het_side` filters |
+| Parameter                    | Default | Used in                                                           |
+| ---------------------------- | ------- | ----------------------------------------------------------------- |
+| `gnomad_popmax_af_rare`      | `0.01`  | General `--info` rare-variant filter                              |
+| `topmed_af_rare`             | `0.05`  | General `--info` rare-variant filter                              |
+| `gnomad_popmax_af_dominant`  | `0.001` | `denovo`, `dominant`, `x_denovo`, `x_dominant` family expressions |
+| `gnomad_popmax_af_recessive` | `0.01`  | `recessive`, `x_recessive` family expressions                     |
+| `gnomad_nhomalt`             | `10`    | `comphet_side` and `het_side` filters                             |
 
 Each threshold is only applied when the corresponding gnotate file is provided.
 
@@ -244,13 +251,11 @@ ENSEMBLVEP_VEP process. See [conf/modules.config](../conf/modules.config).
 
 The slivar expressions and the bcftools annotate command can also be tuned via the `SLIVAR_EXPR`, `SLIVAR_COMPOUNDHETS`, and `BCFTOOLS_ANNOTATE` `withName` blocks in [conf/modules.config](../conf/modules.config).
 
-
 ### Stub mode and quick tests
 
 The `-stub` (or `-stub-run`) option can be added to run the "stub" block of processes instead of the "script" block. This can be helpful for testing.
 
-
-To test your setup in stub mode, simply run `nextflow run Ferlab-Ste-Justine/Post-processing-Pipeline -profile test,docker -stub`. 
+To test your setup in stub mode, simply run `nextflow run Ferlab-Ste-Justine/Post-processing-Pipeline -profile test,docker -stub`.
 
 For tests with real data, see documentation in the [test configuration profile](conf/test.config)
 
@@ -266,24 +271,22 @@ nextflow pull Ferlab-Ste-Justine/Post-processing-Pipeline
 
 It is a good idea to specify a pipeline version when running the pipeline on your data. This ensures that a specific version of the pipeline code and software are used when you run your pipeline. If you keep using the same tag, you'll be running the same version of the pipeline, even if there have been changes to the code since.
 
-First, go to the [Ferlab-Ste-Justine/Post-processing-Pipeline releases page](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/tags) and find the latest pipeline version - numeric only (eg. `v2.11.0`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r v2.11.0`. Of course, you can switch to another version by changing the number after the `-r` flag.
+First, go to the [Ferlab-Ste-Justine/Post-processing-Pipeline releases page](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/tags) and find the latest pipeline version - numeric only (eg. `v3.0.0`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r v3.0.0`. Of course, you can switch to another version by changing the number after the `-r` flag.
 
 This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future. For example, at the bottom of the MultiQC reports.
 
 To further assist in reproducibility, you can use share and re-use [parameter files](#running-the-pipeline) to repeat pipeline runs with the same settings without having to write out a command with every single parameter.
 
 > <b>TIP</b>:  
-If you wish to share such profile (such as upload as supplementary material for academic publications), make sure to NOT include cluster specific paths to files, nor institutional specific profiles.
-
-
+> If you wish to share such profile (such as upload as supplementary material for academic publications), make sure to NOT include cluster specific paths to files, nor institutional specific profiles.
 
 ### Core Nextflow arguments
+
 - Use the `-profile` parameter to choose a configuration profile. Profiles can give configuration presets for different compute environments (e.g., docker, singularity, conda). Multiple profiles can be loaded in sequence, e.g., `-profile test,docker`.
 - Use the `-resume` parameter to restart a pipeline from where it left off. This can save time by using cached results from previous runs.
 - You can specify a custom configuration file using the `-c` parameter. This is useful to set configuration specific to your execution environment and change requested resources for a process.
 
 For more detailed information, please refer to the [official Nextflow documentation](https://www.nextflow.io/docs/latest/index.html).
-
 
 ### Running in the background
 
@@ -303,49 +306,54 @@ To limit this, you can use the `NXF_OPTS` environment variable:
 NXF_OPTS='-Xms1g -Xmx4g'
 ```
 
-Parameters summary
------
+## Parameters summary
 
-| Parameter name | Required? | Description |
-| --- | --- | --- |
-| `input` | _Required_ | Path to the input file |
-| `outdir` | _Required_ | Path to the output directoy |
-| `referenceGenome` |  _Required_ | Path to the directory containing the reference genome data |
-| `referenceGenomeFasta` | _Required_ | Filename of the reference genome .fasta file, within the specified `referenceGenome` directory |
-| `dbsnpFile` | _Optional_ | Path to dbsnp file. If specified, will be used to add ids in the ID column of output vcf files. |
-| `dbsnpFileIndex` | _Optional_ | Path to dbsnp file index. Must be specified if the dbsnpFile parameter is specified. |
-| `broad` | _Optional_ | Path to the directory containing Broad reference data (for VQSR) |
-| `intervalsFile` | _Optional_ | Path to the file containg the genome intervals list on which to operate |
-| `tools` | _Optional_ | Additional tools to run separated by commas. Supported tools are `vep`, `exomiser`, and `slivar`. `slivar` requires `vep` to also be included. |
-| `step` | _Optional_ | Step from which to restart the pipeline. Options: `genotype`(default),`normalize`,`annotation`,`exomiser`,`inheritance` |
-| `allow_intermediate_input` | _Optional_ | When starting from subsequent steps, use intermediate csv as input samplesheet if found. (default `true`) |
-| `save_genotyped` | _Optional_ | If true, save joint-genotyping results |
-| `vep_cache` | _Optional_ | Path to the vep cache data directory |
-| `vep_cache_version` | _Optional_ | Version of the vep cache. e.g. `111` |
-| `vep_genome` | _Optional_ | Genome assembly version of the vep cache  |
-| `download_cache` | _Optional_ | Download vep cache (default: false) |
-| `outdir_cache` | _Optional_ |  Path to write the cache to. If not declared, cache will be written to `<outputdir>/cache/` |
-| `vep_outdir` | _Optional_ | If specified, publish vep output files to this location |
-| `exclude_mnps` | _Optional_ | Remove lines from input gvcf files that cause compatibility issues with specific pipeline steps (default: true). |
-| `exomiser_data_dir` | _Optional_ | Path to the exomiser reference data directory |
-| `exomiser_genome` | _Optional_ | Genome assembly version to be used by exomiser(`hg19` or `hg38`) |
-| `exomiser_data_version` | _Optional_ | Exomiser data version (e.g., `2402`)|
-| `exomiser_cadd_version` | _Optional_ | Version of the CADD data to be used by exomiser (e.g., `1.7`) |
-| `exomiser_cadd_indel_filename`|	_Optional_ | Filename of the exomiser CADD indel data file (e.g., `gnomad.genomes.r4.0.indel.tsv.gz`) |
-| `exomiser_cadd_snv_filename`|	_Optional_ | Filename of the exomiser CADD snv data file (e.g., `whole_genome_SNVs.tsv.gz`) |
-| `exomiser_remm_version` | _Optional_ | Version of the REMM data to be used by exomiser (e.g., `0.3.1.post1`)|
-| `exomiser_remm_filename` | _Optional_	| Filename of the exomiser REMM data file (e.g., `ReMM.v0.3.1.post1.hg38.tsv.gz`) |
-| `exomiser_analysis_wes` | _Optional_ | Path to the exomiser analysis file for WES data, if different from the default |
-| `exomiser_analysis_wgs` | _Optional_ | Path to the exomiser analysis file for WGS data, if different from the default |
-| `exomiser_start_from_vep` | _Optional_ | If `true` (default `false`), run the exomiser analysis on the VEP annotated VCF file. Ignored if vep is not activated via `tools` parameter. |
-| `exomiser_outdir` | _Optional_ | If specified, publish exomiser output files to this location |
-| `slivar_gnomad_gnotate` | _Optional_ | Path to the gnomAD slivar gnotate (`.zip`) file. Required to apply gnomAD-based population-frequency guards in the inheritance expressions. |
-| `slivar_topmed_gnotate` | _Optional_ | Path to the TOPMed slivar gnotate (`.zip`) file. Required to apply the TOPMed-based population-frequency guard. |
-| `slivar_regions_bed` | _Optional_ | BED file restricting slivar analysis to the specified regions. |
-| `slivar_exclude_bed` | _Optional_ | BED file of regions to exclude from slivar analysis. |
-| `slivar_js` | _Optional_ | JavaScript file defining helper functions used in the slivar expressions. Defaults to `assets/slivar-functions.js`. |
-| `gnomad_popmax_af_rare` | _Optional_ | Max gnomAD popmax AF for the general `--info` rare-variant filter (default `0.01`). |
-| `topmed_af_rare` | _Optional_ | Max TOPMed AF for the general `--info` rare-variant filter (default `0.05`). |
-| `gnomad_popmax_af_dominant` | _Optional_ | Max gnomAD popmax AF for dominant and de novo inheritance expressions (default `0.001`). |
-| `gnomad_popmax_af_recessive` | _Optional_ | Max gnomAD popmax AF for recessive inheritance expressions (default `0.01`). |
-| `gnomad_nhomalt` | _Optional_ | Max gnomAD homozygous-alt count allowed when tagging compound-het candidate sides (default `10`). |
+| Parameter name                        | Required?  | Description                                                                                                                                    |
+| ------------------------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `input`                               | _Required_ | Path to the input file                                                                                                                         |
+| `outdir`                              | _Required_ | Path to the output directoy                                                                                                                    |
+| `referenceGenome`                     | _Required_ | Path to the directory containing the reference genome data                                                                                     |
+| `referenceGenomeFasta`                | _Required_ | Filename of the reference genome .fasta file, within the specified `referenceGenome` directory                                                 |
+| `dbsnpFile`                           | _Optional_ | Path to dbsnp file. If specified, will be used to add ids in the ID column of output vcf files.                                                |
+| `dbsnpFileIndex`                      | _Optional_ | Path to dbsnp file index. Must be specified if the dbsnpFile parameter is specified.                                                           |
+| `broad`                               | _Optional_ | Path to the directory containing Broad reference data (for VQSR)                                                                               |
+| `vqsr_snp_resources`                  | _Optional_ | List of `{labels, vcf, index}` maps describing the SNP VQSR training resources. Relative vcf/index paths are joined with `params.broad`.       |
+| `vqsr_indel_resources`                | _Optional_ | Same shape as `vqsr_snp_resources`, used for the INDEL VQSR model.                                                                             |
+| `intervalsFile`                       | _Optional_ | Path to the file containg the genome intervals list on which to operate                                                                        |
+| `tools`                               | _Optional_ | Additional tools to run separated by commas. Supported tools are `vep`, `exomiser`, and `slivar`. `slivar` requires `vep` to also be included. |
+| `step`                                | _Optional_ | Step from which to restart the pipeline. Options: `genotype`(default),`normalize`,`annotation`,`exomiser`,`inheritance`                        |
+| `allow_intermediate_input`            | _Optional_ | When starting from subsequent steps, use intermediate csv as input samplesheet if found. (default `true`)                                      |
+| `save_genotyped`                      | _Optional_ | If true, save joint-genotyping results                                                                                                         |
+| `publish_all`                         | _Optional_ | If true, publish the outputs of every pipeline step. Not recommended in production (default `false`).                                          |
+| `vep_cache`                           | _Optional_ | Path to the vep cache data directory                                                                                                           |
+| `vep_cache_version`                   | _Optional_ | Version of the vep cache. e.g. `111`                                                                                                           |
+| `vep_genome`                          | _Optional_ | Genome assembly version of the vep cache                                                                                                       |
+| `download_cache`                      | _Optional_ | Download vep cache (default: false)                                                                                                            |
+| `download_cache_species`              | _Optional_ | Species of the vep cache to download (default: `homo_sapiens`)                                                                                 |
+| `outdir_cache`                        | _Optional_ | Path to write the cache to. If not declared, cache will be written to `<outputdir>/cache/`                                                     |
+| `vep_outdir`                          | _Optional_ | If specified, publish vep output files to this location                                                                                        |
+| `exclude_mnps`                        | _Optional_ | Remove lines from input gvcf files that cause compatibility issues with specific pipeline steps (default: true).                               |
+| `exomiser_data_dir`                   | _Optional_ | Path to the exomiser reference data directory                                                                                                  |
+| `exomiser_genome`                     | _Optional_ | Genome assembly version to be used by exomiser(`hg19` or `hg38`)                                                                               |
+| `exomiser_data_version`               | _Optional_ | Exomiser data version (e.g., `2402`)                                                                                                           |
+| `exomiser_cadd_version`               | _Optional_ | Version of the CADD data to be used by exomiser (e.g., `1.7`)                                                                                  |
+| `exomiser_cadd_indel_filename`        | _Optional_ | Filename of the exomiser CADD indel data file (e.g., `gnomad.genomes.r4.0.indel.tsv.gz`)                                                       |
+| `exomiser_cadd_snv_filename`          | _Optional_ | Filename of the exomiser CADD snv data file (e.g., `whole_genome_SNVs.tsv.gz`)                                                                 |
+| `exomiser_remm_version`               | _Optional_ | Version of the REMM data to be used by exomiser (e.g., `0.3.1.post1`)                                                                          |
+| `exomiser_remm_filename`              | _Optional_ | Filename of the exomiser REMM data file (e.g., `ReMM.v0.3.1.post1.hg38.tsv.gz`)                                                                |
+| `exomiser_local_frequency_path`       | _Optional_ | Path to a custom local frequency source file for exomiser                                                                                      |
+| `exomiser_local_frequency_index_path` | _Optional_ | Path to the tabix index of the local frequency file. Defaults to `<exomiser_local_frequency_path>.tbi` when omitted.                           |
+| `exomiser_analysis_wes`               | _Optional_ | Path to the exomiser analysis file for WES data, if different from the default                                                                 |
+| `exomiser_analysis_wgs`               | _Optional_ | Path to the exomiser analysis file for WGS data, if different from the default                                                                 |
+| `exomiser_start_from_vep`             | _Optional_ | If `true` (default `false`), run the exomiser analysis on the VEP annotated VCF file. Ignored if vep is not activated via `tools` parameter.   |
+| `exomiser_outdir`                     | _Optional_ | If specified, publish exomiser output files to this location                                                                                   |
+| `slivar_gnomad_gnotate`               | _Optional_ | Path to the gnomAD slivar gnotate (`.zip`) file. Required to apply gnomAD-based population-frequency guards in the inheritance expressions.    |
+| `slivar_topmed_gnotate`               | _Optional_ | Path to the TOPMed slivar gnotate (`.zip`) file. Required to apply the TOPMed-based population-frequency guard.                                |
+| `slivar_regions_bed`                  | _Optional_ | BED file restricting slivar analysis to the specified regions.                                                                                 |
+| `slivar_exclude_bed`                  | _Optional_ | BED file of regions to exclude from slivar analysis.                                                                                           |
+| `slivar_js`                           | _Optional_ | JavaScript file defining helper functions used in the slivar expressions. Defaults to `assets/slivar-functions.js`.                            |
+| `gnomad_popmax_af_rare`               | _Optional_ | Max gnomAD popmax AF for the general `--info` rare-variant filter (default `0.01`).                                                            |
+| `topmed_af_rare`                      | _Optional_ | Max TOPMed AF for the general `--info` rare-variant filter (default `0.05`).                                                                   |
+| `gnomad_popmax_af_dominant`           | _Optional_ | Max gnomAD popmax AF for dominant and de novo inheritance expressions (default `0.001`).                                                       |
+| `gnomad_popmax_af_recessive`          | _Optional_ | Max gnomAD popmax AF for recessive inheritance expressions (default `0.01`).                                                                   |
+| `gnomad_nhomalt`                      | _Optional_ | Max gnomAD homozygous-alt count allowed when tagging compound-het candidate sides (default `10`).                                              |

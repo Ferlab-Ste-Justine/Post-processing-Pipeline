@@ -1,0 +1,73 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "vqsr"
+description: |
+  Filter out probable artifacts from a joint-genotyped callset using the GATK Variant Quality
+  Score Recalibration (VQSR) procedure. Builds a SNP recalibration model, applies it, then
+  builds and applies an INDEL recalibration model on top of the SNP-recalibrated callset.
+keywords:
+  - vcf
+  - vqsr
+  - gatk4
+  - variantrecalibrator
+  - applyvqsr
+  - variant-filtering
+components:
+  - gatk4/variantrecalibrator
+  - gatk4/applyvqsr
+input:
+  - input:
+      description: |
+        Joint-genotyped VCF and its tabix index
+        Structure: [ val(meta), [ path(vcf), path(tbi) ] ]
+  - ch_snp_resource_vcfs:
+      type: file
+      description: Training VCFs for the SNP recalibration model (hapmap, omni, 1000G, dbsnp, ...)
+  - ch_snp_resource_tbis:
+      type: file
+      description: Tabix indexes matching ch_snp_resource_vcfs (same order)
+  - ch_snp_resource_labels:
+      type: string
+      description: |
+        GATK `--resource:label,known=...,training=...,truth=...,prior=N <basename>` CLI fragments,
+        one per entry in ch_snp_resource_vcfs (same order). Basenames must match the staged files.
+  - ch_indel_resource_vcfs:
+      type: file
+      description: Training VCFs for the INDEL recalibration model (mills, axiomPoly, dbsnp, ...)
+  - ch_indel_resource_tbis:
+      type: file
+      description: Tabix indexes matching ch_indel_resource_vcfs (same order)
+  - ch_indel_resource_labels:
+      type: string
+      description: |
+        GATK `--resource:label,...` CLI fragments for the INDEL resources, one per entry in
+        ch_indel_resource_vcfs (same order).
+  - ch_fasta:
+      type: file
+      description: Reference fasta
+      pattern: "*.{fa,fasta}"
+  - ch_fai:
+      type: file
+      description: Reference fasta index
+      pattern: "*.fai"
+  - ch_dict:
+      type: file
+      description: GATK sequence dictionary
+      pattern: "*.dict"
+output:
+  - output:
+      description: |
+        Filter-tagged VCF after SNP and INDEL VQSR with its tabix index
+        Structure: [ val(meta), [ path(vcf), path(tbi) ] ]
+  - versions:
+      description: |
+        Aggregated software versions from the underlying processes
+        Structure: [ path(versions.yml) ]
+authors:
+  - "@FelixAntoineLeSieur"
+  - "@dmorais"
+  - "@LysianeBouchard"
+  - "@DamienGnst"
+  - "@georgette-femerling"
+maintainers:
+  - "@LysianeBouchard"
+  - "@georgette-femerling"

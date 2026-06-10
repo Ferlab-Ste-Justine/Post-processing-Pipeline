@@ -1,35 +1,69 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/meta-schema.json
-# # TODO nf-core: Add a description of the module and list keywords
 name: "slivar_compoundhets"
-description: filter/annotate variants in VCF/BCF format with simple expressions.
+description: Identify and tag compound heterozygous variants in a trio/family VCF using slivar compound-hets and a pedigree.
 keywords:
-- sort
-- example
-- genomics
+  - slivar
+  - vcf
+  - compound-hets
+  - inheritance
+  - trio
+  - pedigree
+  - genomics
+  - variant
 tools:
-## TODO nf-core: Add a description and other details for the software below
-- "slivar":
-    description: "filter/annotate variants in VCF/BCF format with simple expressions."
-    homepage: "https://github.com/brentp/slivar/blob/v0.3.3/README.md"
-    documentation: "https://github.com/brentp/slivar/blob/v0.3.3/README.md"
-    tool_dev_url: "https://github.com/brentp/slivar"
-    doi: ""
-    licence: ['MIT']
-    identifier: biotools:slivar
+  - "slivar":
+      description: "filter/annotate variants in VCF/BCF format with simple expressions."
+      homepage: "https://github.com/brentp/slivar"
+      documentation: "https://github.com/brentp/slivar/wiki"
+      tool_dev_url: "https://github.com/brentp/slivar"
+      doi: "10.1038/s41525-021-00227-3"
+      licence: ["MIT"]
+      identifier: biotools:slivar
 
 input:
-# TODO nf-core: Update the information obtained from bio.tools and make sure that it is correct
-  []
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing family information
+        e.g. [ id:'family1', sequencingType:'WES' ]
+
+  - vcf:
+      type: file
+      description: VCF file (typically already filtered/annotated by slivar expr) in which to call compound heterozygotes
+      pattern: "*.{vcf,vcf.gz}"
+
+  - ped:
+      type: file
+      description: Pedigree file describing the family relationships used to identify compound hets
+      pattern: "*.{ped}"
+
 output:
-# TODO nf-core: Update the information obtained from bio.tools and make sure that it is correct
-  versions: -
-    versions.yml:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing family information
+        e.g. [ id:'family1', sequencingType:'WES' ]
+
+  - vcf:
+      type: file
+      description: Bgzipped VCF with compound heterozygous variants annotated by slivar
+      pattern: "*.{vcf.gz}"
+
+  - tbi:
+      type: file
+      description: Tabix index for the output VCF
+      pattern: "*.{vcf.gz.tbi}"
+
+  - summary:
+      type: file
+      description: slivar summary file reporting compound-het statistics
+      pattern: "*.slivar.summary.txt"
+
+  - versions:
       type: file
       description: File containing software versions
-      pattern: versions.yml
-      ontologies:
-      - edam: http://edamontology.org/format_3750  # YAML
+      pattern: "versions.yml"
+
 authors:
-- "@georgette-femerling"
+  - "@georgette-femerling"
 maintainers:
-- "@georgette-femerling"
+  - "@georgette-femerling"

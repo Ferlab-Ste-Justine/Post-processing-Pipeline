@@ -1,13 +1,14 @@
-# ferlab/postprocessing: Contributing Guidelines
+# Ferlab-Ste-Justine/Post-Processing-Pipeline: Contributing Guidelines
 
 Hi there!
-Many thanks for taking an interest in improving ferlab/postprocessing.
+Many thanks for taking an interest in improving Ferlab-Ste-Justine/Post-Processing-Pipeline.
 
 If you haven't already, we recommend creating a GitHub issue to describe your task. Please use the pre-filled template to save time.
 
 Please do your best to follow the guidelines defined here. If you are unsure about the current standards or need support, feel free to ask for help in the [#bioinfo](https://cr-ste-justine.slack.com/archives/C074VMACUD9slack) Slack channel.
 
 We also hold a few notion pages as documentation:
+
 - [Nf-core guidelines](https://www.notion.so/ferlab/Nf-core-guidelines-43b08da49e8f49b2968f17a34adc783a)
 - [Help with samplesheet and schemas](https://www.notion.so/ferlab/Nf-core-schema-input-and-parsing-Samplesheet-files-29603f232c7f4f018fc337f2d1d16a4c)
 - [Notes for module/subworkflow building](https://www.notion.so/ferlab/Notes-for-nf-core-modules-subworkflows-1cb401615ea149278b87c12e9284745d)
@@ -37,7 +38,6 @@ It is currently deactivated, but we highly recommend to run it locally. Ensure t
 
 At Ferlab, we don't enforce all linting rules. If a test should be ignored, it should be added to .nf-core.yml.
 
-
 ### Pipeline tests
 
 This test runs the pipeline with a minimal set of test data. It only checks that the pipeline can run successfully. Since our test setup is not fully ready yet, it runs in stub mode at the moment.
@@ -47,20 +47,17 @@ These tests are run both with the latest available version of `Nextflow` and als
 You are encouraged to test in non-stub mode locally and in integration environments. Reach out to the Ferlab bioinformatics team if you need help with this. You can find example commands in the test.config
 configuration file.
 
-
 ### nf-test tests
 
 This test runs unit tests with nf-test. For now, for performance reasons, it only runs tests applicable to the submitted changes and tests tagged with the keyword "local".
 
 The tests are only run with the Nextflow version expected in production, also for performance reasons.
 
-
 ## Pipeline contribution conventions
 
-To make the ferlab/postprocessing code and processing logic more understandable for new contributors and to ensure quality, we try to follow nf-core standards as much as possible.
+To make the Ferlab-Ste-Justine/Post-Processing-Pipeline code and processing logic more understandable for new contributors and to ensure quality, we try to follow nf-core standards as much as possible.
 
 They are described below. Try to follow them as much as possible. If you are unsure, feel free to reach out to the bioinformatics team.
-
 
 ### Adding a new step
 

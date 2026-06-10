@@ -1,73 +1,88 @@
-include { GATK4_VARIANTRECALIBRATOR as GATK4_VARIANTRECALIBRATOR_SNP} from '../../../modules/nf-core/gatk4/variantrecalibrator/main'
-include { variantRecalibratorIndel; applyVQSRIndel; applyVQSRSNP} from '../../../modules/local/vqsr'
-include { attachMultiqcReport } from '../../nf-core/utils_nfcore_pipeline/main.nf'
-
-def getResourceLabels(resources) {
-    return resources.collect{it -> "--resource:" + it.labels + " ${file(it.vcf).getFileName()}"}
-}
+include { GATK4_VARIANTRECALIBRATOR as GATK4_VARIANTRECALIBRATOR_SNP   } from '../../../modules/nf-core/gatk4/variantrecalibrator/main'
+include { GATK4_VARIANTRECALIBRATOR as GATK4_VARIANTRECALIBRATOR_INDEL } from '../../../modules/nf-core/gatk4/variantrecalibrator/main'
+include { GATK4_APPLYVQSR           as GATK4_APPLYVQSR_SNP             } from '../../../modules/local/gatk4/applyvqsr/main'
+include { GATK4_APPLYVQSR           as GATK4_APPLYVQSR_INDEL           } from '../../../modules/local/gatk4/applyvqsr/main'
 
 /**
-Filter out probable artifacts from the callset using the Variant Quality Score Recalibration (VQSR) procedure
+Filter out probable artifacts from the callset using the Variant Quality Score Recalibration (VQSR) procedure.
 
-The input and output formats are the same:
-    Input: ([meta],  [some.file.vcf.gz, some.file.vcf.gz.tbi])
-
-All output files will be prefixed with the given prefixId.
+ApplyVQSR is run sequentially: SNP recalibration is applied first, then INDEL recalibration
+on top of the SNP-recalibrated callset.
 */
 workflow VQSR {
     take:
-        input // channel: (val(meta), [.vcf.gz, .vcf.gz.tbi])
-        referenceGenomeFasta
-        referenceGenomeFai
-        referenceGenomeDict
+        ch_input                       // channel: (val(meta), vcf, tbi)
+        ch_snp_resource_vcfs        // channel: value list of path
+        ch_snp_resource_tbis        // channel: value list of path
+        ch_snp_resource_labels      // channel: value list of '--resource:label,... <basename>' strings
+        ch_indel_resource_vcfs      // channel: value list of path
+        ch_indel_resource_tbis      // channel: value list of path
+        ch_indel_resource_labels    // channel: value list of '--resource:label,... <basename>' strings
+        ch_fasta                    // path: reference fasta
+        ch_fai                      // path: reference fasta index
+        ch_dict                     // path: reference dict
 
     main:
+        ch_versions = channel.empty()
 
-        // We need to keep this until we standardize passing reference genome files in all VQSR processes.
-        // We should use referenceGenomeFasta, referenceGenomeFai, and referenceGenomeDict workflow inputs instead.
-        def referenceGenome = file(params.referenceGenome)
-        
-        // Check if the broad resource is provided because it can be omitted if only whole exome data is used.
-        def broad = params.broad? file(params.broad): ""
- 
-        // Temporarily initializing vqsr_snp_resources to maintain previous behavior that hard-coded these settings. 
-        // We couldn't specify these defaults in the config because the broad parameter is null by default.    
-        def vqsrSnpResources = params.vqsr_snp_resources ?:  [
-            [labels: "hapmap,known=false,training=true,truth=true,prior=15", vcf: "${params.broad}/hapmap_3.3.hg38.vcf.gz", index: "${params.broad}/hapmap_3.3.hg38.vcf.gz.tbi"],
-            [labels: "omni,known=false,training=true,truth=false,prior=12", vcf: "${params.broad}/1000G_omni2.5.hg38.vcf.gz", index: "${params.broad}/1000G_omni2.5.hg38.vcf.gz.tbi"],
-            [labels: "1000G,known=false,training=true,truth=false,prior=10", vcf: "${params.broad}/1000G_phase1.snps.high_confidence.hg38.vcf.gz", index: "${params.broad}/1000G_phase1.snps.high_confidence.hg38.vcf.gz.tbi"],
-            [labels: "dbsnp,known=true,training=false,truth=false,prior=7", vcf: "${params.broad}/Homo_sapiens_assembly38.dbsnp138.vcf", index: "${params.broad}/Homo_sapiens_assembly38.dbsnp138.vcf.idx"]
-        ]
-
-        def ch_versions = Channel.empty()
-        def ch_input = input.map{meta, files -> [meta, files[0], files[1]]}
-
-        // Build the VQSR model for SNP
-        GATK4_VARIANTRECALIBRATOR_SNP( 
+        // Build the VQSR model for SNPs
+        GATK4_VARIANTRECALIBRATOR_SNP(
             ch_input,
-            vqsrSnpResources.collect{file(it.vcf)},
-            vqsrSnpResources.collect{file(it.index)},
-            getResourceLabels(vqsrSnpResources),
-            referenceGenomeFasta,
-            referenceGenomeFai,
-            referenceGenomeDict
+            ch_snp_resource_vcfs,
+            ch_snp_resource_tbis,
+            ch_snp_resource_labels,
+            ch_fasta,
+            ch_fai,
+            ch_dict
         )
-        def outputFromRecalibratorSNP = GATK4_VARIANTRECALIBRATOR_SNP.out.recal
-            .join(GATK4_VARIANTRECALIBRATOR_SNP.out.idx)
-            .map{meta, recal, recalIdx -> [meta, [recal, recalIdx]]}
-            .join(GATK4_VARIANTRECALIBRATOR_SNP.out.tranches)
         ch_versions = ch_versions.mix(GATK4_VARIANTRECALIBRATOR_SNP.out.versions)
 
-        // Apply the VQSR model for SNP
-        def outputSNP = outputFromRecalibratorSNP.join(input)
-            | applyVQSRSNP
+        // Apply the SNP VQSR model
+        ch_snp_apply_input = ch_input
+            .join(GATK4_VARIANTRECALIBRATOR_SNP.out.recal)
+            .join(GATK4_VARIANTRECALIBRATOR_SNP.out.idx)
+            .join(GATK4_VARIANTRECALIBRATOR_SNP.out.tranches)
 
-        // Build and apply VQSR model on INDEL
-        def ch_output = variantRecalibratorIndel(input, referenceGenome, broad)
-            | join(outputSNP)
-            | applyVQSRIndel
+        GATK4_APPLYVQSR_SNP(
+            ch_snp_apply_input,
+            ch_fasta,
+            ch_fai,
+            ch_dict
+        )
+        ch_versions = ch_versions.mix(GATK4_APPLYVQSR_SNP.out.versions)
+
+        // Build the VQSR model for INDELs (on the SNP-recalibrated VCF)
+        ch_indel_recal_input = GATK4_APPLYVQSR_SNP.out.vcf.join(GATK4_APPLYVQSR_SNP.out.tbi)
+
+        GATK4_VARIANTRECALIBRATOR_INDEL(
+            ch_indel_recal_input,
+            ch_indel_resource_vcfs,
+            ch_indel_resource_tbis,
+            ch_indel_resource_labels,
+            ch_fasta,
+            ch_fai,
+            ch_dict
+        )
+        ch_versions = ch_versions.mix(GATK4_VARIANTRECALIBRATOR_INDEL.out.versions)
+
+        // Apply the INDEL VQSR model
+        ch_indel_apply_input = ch_indel_recal_input
+            .join(GATK4_VARIANTRECALIBRATOR_INDEL.out.recal)
+            .join(GATK4_VARIANTRECALIBRATOR_INDEL.out.idx)
+            .join(GATK4_VARIANTRECALIBRATOR_INDEL.out.tranches)
+
+        GATK4_APPLYVQSR_INDEL(
+            ch_indel_apply_input,
+            ch_fasta,
+            ch_fai,
+            ch_dict
+        )
+        ch_versions = ch_versions.mix(GATK4_APPLYVQSR_INDEL.out.versions)
+
+        ch_output = GATK4_APPLYVQSR_INDEL.out.vcf
+            .join(GATK4_APPLYVQSR_INDEL.out.tbi)
 
     emit:
-        output = ch_output // channel: (val(meta),  [.vcf.gz, .vcf.gz.tbi])
+        vcf_tbi   = ch_output   // channel: (val(meta), vcf, tbi)
         versions = ch_versions // channel: [ versions.yml ]
 }

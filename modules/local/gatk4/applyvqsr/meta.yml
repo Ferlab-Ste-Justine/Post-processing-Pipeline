@@ -1,0 +1,91 @@
+name: gatk4_applyvqsr
+description: |
+  Apply a score cutoff to filter variants based on a recalibration table produced by
+  GATK4 VariantRecalibrator. Runs sequentially per mode (SNP or INDEL) — set `-mode` and
+  `--truth-sensitivity-filter-level` via `ext.args` in the calling config.
+keywords:
+  - gatk4
+  - applyvqsr
+  - vqsr
+  - recalibration
+tools:
+  - gatk4:
+      description: |
+        Developed in the Data Sciences Platform at the Broad Institute, the toolkit offers a wide variety of tools
+        with a primary focus on variant discovery and genotyping. Its powerful processing engine
+        and high-performance computing features make it capable of taking on projects of any size.
+      homepage: https://gatk.broadinstitute.org/hc/en-us
+      documentation: https://gatk.broadinstitute.org/hc/en-us/categories/360002369672
+      doi: 10.1158/1538-7445.AM2017-3590
+      identifier: ""
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information
+          e.g. [ id:'test' ]
+    - vcf:
+        type: file
+        description: input vcf file containing the variants to be recalibrated
+        pattern: "*.vcf.gz"
+    - tbi:
+        type: file
+        description: tbi file matching with -vcf
+        pattern: "*.vcf.gz.tbi"
+    - recal:
+        type: file
+        description: recal file produced by GATK4 VariantRecalibrator
+        pattern: "*.recal"
+    - recal_index:
+        type: file
+        description: index file for the recal file
+        pattern: "*.recal.idx"
+    - tranches:
+        type: file
+        description: tranches file produced by GATK4 VariantRecalibrator
+        pattern: "*.tranches"
+  - - fasta:
+        type: file
+        description: The reference fasta file
+        pattern: "*.fasta"
+  - - fai:
+        type: file
+        description: Index of reference fasta file
+        pattern: "*.fasta.fai"
+  - - dict:
+        type: file
+        description: GATK sequence dictionary
+        pattern: "*.dict"
+output:
+  - vcf:
+      - meta:
+          type: file
+          description: Recalibrated, filter-tagged output VCF
+          pattern: "*.vcf.gz"
+      - "*.vcf.gz":
+          type: file
+          description: Recalibrated, filter-tagged output VCF
+          pattern: "*.vcf.gz"
+  - tbi:
+      - meta:
+          type: file
+          description: Index for the recalibrated output VCF
+          pattern: "*.vcf.gz.tbi"
+      - "*.vcf.gz.tbi":
+          type: file
+          description: Index for the recalibrated output VCF
+          pattern: "*.vcf.gz.tbi"
+  - versions:
+      - versions.yml:
+          type: file
+          description: File containing software versions
+          pattern: "versions.yml"
+authors:
+  - "@FelixAntoineLeSieur"
+  - "@dmorais"
+  - "@LysianeBouchard"
+  - "@DamienGnst"
+  - "@georgette-femerling"
+maintainers:
+  - "@LysianeBouchard"
+  - "@georgette-femerling"

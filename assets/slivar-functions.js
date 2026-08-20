@@ -323,3 +323,247 @@ function moi_candidate(fam) {
   if (moi_x_recessive(fam) && !x_recessive_provable(fam))    return true;
   return false;
 }
+
+/*
+
+##########################################
+             PARENTAL ORIGIN
+##########################################
+
+*/
+// Reproduces radiant/tasks/vcf/snv/germline/occurrence.py::parental_origin()
+// (AUTOSOMAL_ORIGINS_LOOKUP / X_ORIGINS_LOOKUP / Y_ORIGINS_LOOKUP) as a
+// custom function file for slivar (--js).
+//
+// FIDELITY NOTE
+// -------------
+// slivar's sample objects only expose genotype *dosage* via `.alts`:
+//   -1 = unknown, 0 = hom-ref, 1 = het, 2 = hom-alt
+//   In other words:
+//     what fraction of this person's copies at this site are alt?"
+//     0 = 0% alt (all copies ref)
+//     1 = 50% alt (exactly possible only with 2 copies: one ref, one alt — heterozygous) 
+//     2 = 100% alt (every copy present is alt)
+// They never expose raw genotype ploidy (a true haploid "1" GT vs a diploid
+// "1/1" GT). The Python implementation leans on that raw ploidy, in a few
+// X/Y lookup entries, purely as a proxy for whether the site sits in the
+// pseudoautosomal region (PAR) -- where X and Y both carry the same,
+// fully-diploid, autosomally-recombining sequence -- or in true non-PAR X/Y,
+// where males are genuinely hemizygous.
+//
+// Rather than guess ploidy from a caller-dependent GT representation, this
+// port checks PAR membership directly from genomic coordinates (ground
+// truth, independent of how the caller encoded the genotype) via
+// isPseudoautosomal() below, using GRCh38/hg38 PAR1/PAR2 boundaries (this
+// repo targets hg38 -- see design/SJRA-1751-somatic-snv-tumor-only-ingestion.md).
+// That removes the ambiguity entirely instead of merely approximating it:
+//   - In PAR: everyone is diploid and inheritance is plain autosomal, so
+//     AUTOSOMAL_ORIGINS is used regardless of chromosome or sex.
+//   - Outside PAR: males are unambiguously hemizygous, so the son/Y tables
+//     are exact, not approximations.
+//
+// Update the PAR_REGIONS table below if this is ever run against GRCh37/hg19
+// data (different boundaries, and PAR2 differs between chrX and chrY).
+
+var DENOVO = "DENOVO";
+var MOTHER = "MOTHER";
+var FATHER = "FATHER";
+var BOTH = "BOTH";
+var AMBIGUOUS = "AMBIGUOUS";
+var POSSIBLE_DENOVO = "POSSIBLE_DENOVO";
+var POSSIBLE_MOTHER = "POSSIBLE_MOTHER";
+var POSSIBLE_FATHER = "POSSIBLE_FATHER";
+var UNKNOWN = "UNKNOWN";
+
+// Autosomal: keyed "kid_dad_mom" dosage. Exact port of AUTOSOMAL_ORIGINS_LOOKUP.
+/*
+break down the key format: "kid_dad_mom", where each number is that sample's dosage — 
+how many copies of the alt allele they carry at this position (matching Slivar's own 
+.alts convention: -1 unknown, 0 hom-ref, 1 het, 2 hom-alt).
+A person is diploid — two copies of each autosome, one from each parent. So dosage 2 
+doesn't mean "two alt alleles that arrived together," it means the genotype call is 
+1/1: both of that person's copies at this position are the alt allele. Dosage 0 = 0/0
+ (both copies ref), 1 = 0/1 (one ref, one alt — heterozygous).
+      Example:
+      "2_0_0": DENOVO — kid is 1/1 (has alt on both copies), dad is 0/0, mom is 0/0. 
+      Neither parent has a single alt allele between them, yet the kid has two. 
+      That's not really explainable by a single ordinary transmission event — normally 
+      you'd need an alt allele from at least one parent to end up with even one copy 
+      in the kid. This bucket is really "unexplained by the observed parental genotypes" 
+      — it's labeled DENOVO as the best-fit bucket, but with two alt copies and zero alt 
+      alleles in either parent, this combination in real data is more often a 
+      genotyping/Mendelian-inconsistency flag than a literal two-mutation event.
+*/
+// REVIEW CANDIDATE: "2_1_-1" / "2_2_-1" (dad known-alt, mom unknown) and their   <-------
+// mirror "2_-1_1" / "2_-1_2" (mom known-alt, dad unknown). Kid is hom-alt (2),
+// which is only reachable if BOTH parents' donated copies were alt -- so the
+// *unknown* parent is just as mathematically forced to have contributed alt
+// as the known one is. Yet the label names only the known parent (FATHER /
+// MOTHER) instead of BOTH, even though "2_1_1"/"2_1_2"/"2_2_1"/"2_2_2" (both
+// parents actually observed) correctly say BOTH for the identical situation.
+// Confirm whether "only assert what's directly observed" is deliberate
+// policy (never claim a parent we didn't see) or an oversight.
+var AUTOSOMAL_ORIGINS = { // i.e. non-sex chromosomes AND PAR regions
+  "1_0_0":  DENOVO,           "1_0_1":  MOTHER,           "1_0_2":   MOTHER,     "1_0_-1":  POSSIBLE_DENOVO,
+  "1_1_0":  FATHER,           "1_1_1":  AMBIGUOUS,        "1_1_2":   MOTHER,     "1_1_-1":  POSSIBLE_FATHER,
+  "1_2_0":  FATHER,           "1_2_1":  FATHER,           "1_2_2":   AMBIGUOUS,  "1_2_-1":  FATHER,
+  "1_-1_0": POSSIBLE_DENOVO,  "1_-1_1": POSSIBLE_MOTHER,  "1_-1_2":  MOTHER,     "1_-1_-1": UNKNOWN,
+  "2_0_0":  DENOVO,           "2_0_1":  MOTHER,           "2_0_2":   MOTHER,     "2_0_-1":  POSSIBLE_DENOVO,
+  "2_1_0":  FATHER,           "2_1_1":  BOTH,             "2_1_2":   BOTH,
+  "2_2_0":  FATHER,           "2_2_1":  BOTH,             "2_2_2":   BOTH,
+  "2_-1_0": POSSIBLE_DENOVO,  "2_-1_-1": UNKNOWN,
+  "2_1_-1": FATHER, // Since mom is unknown, should be UNKNOWN or AMBIGUOUS?
+  "2_2_-1": FATHER, // Since mom is unknown, should be UNKNOWN or AMBIGUOUS?
+  "2_-1_1": MOTHER, // Since dad is unknown, should be UNKNOWN or AMBIGUOUS?
+  "2_-1_2": MOTHER  // Since dad is unknown, should be UNKNOWN or AMBIGUOUS?
+};
+
+// X, kid.sex == "male", NON-PAR (i.e. Sex chromosomes) only (true hemizygous -- PAR calls are
+// routed to AUTOSOMAL_ORIGINS before this table is ever consulted, so there
+// is no more haploid-vs-diploid ambiguity to resolve here). keyed "dad_mom"
+// dosage. kid.alts is always 2 (a haploid call can't be "het"; dosage 0 is
+// a non-carrier and parental_origin is only ever evaluated for a carrier).
+// Outside PAR, dad's X is never transmitted to a son -- his genotype here
+// is diagnostic context only, never the true source of the son's allele.
+// dad_mom. Only 2 numbers (not 3) because kid dosage is always 2 (or more precisely 100% alt-allele. Remember that a row only exists because the kid carries something.)
+//
+// REVIEW CANDIDATE 1 "1_0" / "2_0"                                               <-------
+// (mom confirmed hom-ref) -> unhedged FATHER, but "1_-1" / "2_-1" (mom simply
+// UNKNOWN) -> hedged POSSIBLE_FATHER. That's backwards: a son's X can never
+// come from dad at all, so dad's signal is only ever a coincidence/anomaly
+// flag, never a real source -- and mom being *confirmed* ref is stronger
+// evidence against "really mom" than mom being merely unknown, so if
+// anything the confirmed-ref row should be hedged at least as much as the
+// unknown row, not less.
+//
+// REVIEW CANDIDATE 2: "1_1" -> AMBIGUOUS, even though mom alone (dosage 1,       <-------
+// het) is already sufficient to fully explain a son's alt allele regardless
+// of dad -- dad's genotype is never a real transmission path for a son's X.
+// Compare "0_1" -> MOTHER and "2_1" -> MOTHER: same mom value, different
+// (and biologically irrelevant) dad value, both confidently resolved. Only
+// the dad=1 row breaks that pattern into AMBIGUOUS, which suggests dad's
+// value is being allowed to override mom's sufficient signal when it
+// shouldn't be able to.
+var X_SON_ORIGINS = {
+  "0_0":  DENOVO,           "0_1":  MOTHER,           "0_2":  MOTHER,              "0_-1":  POSSIBLE_DENOVO,
+  "1_2":  MOTHER,           "1_-1": POSSIBLE_FATHER,
+  "2_1":  MOTHER,           "2_2":  MOTHER,           "2_-1": POSSIBLE_FATHER,
+  "-1_0": POSSIBLE_DENOVO,  "-1_1": MOTHER,           "-1_2": MOTHER,              "-1_-1": UNKNOWN,
+  "1_0":  FATHER,   // Should be POSSIBLE_FATHER?
+  "2_0":  FATHER,   // Should be POSSIBLE_FATHER?
+  "1_1":  AMBIGUOUS // Should me MOTHER?
+};
+
+// X, kid.sex == "female" (diploid). keyed "kid_dad_mom" dosage.
+//
+// REVIEW CANDIDATE 1: same "unknown parent's forced contribution isn't         <-------
+// reflected as BOTH" pattern as AUTOSOMAL_ORIGINS above -- "2_1_-1" /
+// "2_2_-1" (dad known-alt, mom unknown) and "2_-1_1" / "2_-1_2" (mom
+// known-alt, dad unknown) name only the known parent, even though kid being
+// hom-alt (2) mathematically forces the unobserved parent's donated copy to
+// be alt too.
+//
+// REVIEW CANDIDATE 2: "1_0_-1" -> POSSIBLE_DENOVO. Unlike a normal diploid     <-------
+// parent, dad here (dosage 0) is a *deterministic* ref-donor -- he has only
+// one X to give and it's ref, so he's not just "unlikely" to be the source,
+// he's provably excluded. With dad certain and mom unknown, the real
+// uncertainty is "mother or de novo," which arguably deserves a
+// MOTHER-flavored hedge rather than the DENOVO-flavored one it shares with
+// the mirrored "1_-1_0" (dad genuinely unknown, still a live candidate) --
+// a case where the uncertainty is not actually equivalent.
+var X_DAUGHTER_ORIGINS = {
+  "1_0_0":  DENOVO,            "1_0_1":  MOTHER,          "1_0_2":  MOTHER,      "1_0_-1":  POSSIBLE_DENOVO, // But could POSSIBLE_MOTHER as well?
+  "1_1_0":  FATHER,            "1_1_1":  AMBIGUOUS,       "1_1_2":  AMBIGUOUS,   "1_1_-1":  FATHER,
+  "1_2_0":  FATHER,            "1_2_1":  FATHER,          "1_2_2":  AMBIGUOUS,   "1_2_-1":  FATHER,
+  "1_-1_0": POSSIBLE_DENOVO,   "1_-1_1": POSSIBLE_MOTHER, "1_-1_2": MOTHER,      "1_-1_-1": UNKNOWN,
+  "2_0_0":  DENOVO,            "2_0_1":  MOTHER,          "2_0_2":  MOTHER,      "2_0_-1":  POSSIBLE_DENOVO,
+  "2_1_0":  FATHER,            "2_1_1":  BOTH,            "2_1_2":  BOTH,        "2_1_-1":  FATHER, //Should be POSSIBLE_FATHER?
+  "2_2_0":  FATHER,            "2_2_1":  BOTH,            "2_2_2":  BOTH,        "2_2_-1":  FATHER, //Should be POSSIBLE_FATHER?
+  "2_-1_0": POSSIBLE_DENOVO,   "2_-1_1": MOTHER,          "2_-1_2": MOTHER,      "2_-1_-1": UNKNOWN
+};
+
+// Y, NON-PAR only (all of Y outside PAR1/PAR2 -- routed here only after the
+// PAR check below). kid is always male/hemizygous, so kid.alts is always 2.
+// mom has no Y allele biologically outside PAR; a real dosage from her here
+// is a data anomaly (contamination, mapping artifact), not a transmission
+// signal, so it's flagged AMBIGUOUS rather than trusted.
+//
+// REVIEW CANDIDATE: "1_1" / "1_2" / "2_1" / "2_2" -> AMBIGUOUS whenever mom   <-------
+// shows any signal at all, even though mom biologically cannot contribute to
+// Y outside PAR. A coincidental/anomalous mom observation is allowed to
+// downgrade confidence in what is otherwise a fully legitimate, real
+// paternal transmission call. Arguably the origin call should stay FATHER
+// (the only real pathway) with the mom-anomaly surfaced as a separate QC
+// flag, rather than folded into (and diluting) the origin label itself.
+// This behavior is inherited directly from the original Python table, not
+// introduced by this port.
+var Y_ORIGINS = {
+  "0_-1": DENOVO,   "2_-1": FATHER,      "-1_-1": UNKNOWN,
+  "0_0":  DENOVO,   "0_1":  MOTHER,      "0_2":   MOTHER,
+  "1_0":  FATHER,   "1_1":  AMBIGUOUS,   "1_2":   AMBIGUOUS, // Here, why AMBIGUOUS when MOM cannot give her non-existent Y chromosome?
+  "2_0":  FATHER,   "2_1":  AMBIGUOUS,   "2_2":   AMBIGUOUS  // Here, why AMBIGUOUS when MOM cannot give her non-existent Y chromosome?
+};
+
+// GRCh38/hg38 pseudoautosomal region boundaries (1-based, inclusive; VCF
+// POS convention). PAR2 differs in length between chrX and chrY.
+var PAR_REGIONS = {
+  X: [[10001, 2781479], [155701383, 156030895]],
+  Y: [[10001, 2781479], [56887903, 57217415]],
+};
+
+function isPseudoautosomal(chrom, pos) {
+  var regions = PAR_REGIONS[chrom];
+  if (!regions) return false;
+  for (var i = 0; i < regions.length; i++) {
+    if (pos >= regions[i][0] && pos <= regions[i][1]) return true;
+  }
+  return false;
+}
+
+// chrom/pos: pass variant.CHROM, variant.POS. kid/dad/mom: slivar sample
+// objects (need .alts and, for kid, .sex -- "male" / "female").
+function parental_origin(chrom, pos, kid, dad, mom) {
+  var CHROM = ("" + chrom).replace(/^chr/i, "");
+
+  if ((CHROM == "X" || CHROM == "Y") && isPseudoautosomal(CHROM, pos)) {
+    // PAR: fully diploid, plain Mendelian (autosomal-equivalent) inheritance.
+    return AUTOSOMAL_ORIGINS[kid.alts + "_" + dad.alts + "_" + mom.alts] || UNKNOWN;
+  }
+
+  if (CHROM == "Y") {
+    if (kid.sex != "male") return UNKNOWN;
+    return Y_ORIGINS[dad.alts + "_" + mom.alts] || UNKNOWN;
+  }
+
+  if (CHROM == "X") {
+    if (kid.sex == "male") {
+      return X_SON_ORIGINS[dad.alts + "_" + mom.alts] || UNKNOWN;
+    }
+    if (kid.sex == "female") {
+      return X_DAUGHTER_ORIGINS[kid.alts + "_" + dad.alts + "_" + mom.alts] || UNKNOWN;
+    }
+    return UNKNOWN; // sex unknown: X transmission can't be resolved safely
+  }
+
+  return AUTOSOMAL_ORIGINS[kid.alts + "_" + dad.alts + "_" + mom.alts] || UNKNOWN;
+}
+
+// Example usage:
+//
+//   slivar expr --js slivar-parental-origin.js \
+//     --vcf annotated.vcf.gz --ped family.ped \
+//     --trio "po_denovo:parental_origin(variant.CHROM, variant.POS, kid, dad, mom) == 'DENOVO'" \
+//     --trio "po_mother:parental_origin(variant.CHROM, variant.POS, kid, dad, mom) == 'MOTHER'" \
+//     --trio "po_father:parental_origin(variant.CHROM, variant.POS, kid, dad, mom) == 'FATHER'" \
+//     --trio "po_both:parental_origin(variant.CHROM, variant.POS, kid, dad, mom) == 'BOTH'" \
+//     --trio "po_ambiguous:parental_origin(variant.CHROM, variant.POS, kid, dad, mom) == 'AMBIGUOUS'" \
+//     --trio "po_possible_denovo:parental_origin(variant.CHROM, variant.POS, kid, dad, mom) == 'POSSIBLE_DENOVO'" \
+//     --trio "po_possible_mother:parental_origin(variant.CHROM, variant.POS, kid, dad, mom) == 'POSSIBLE_MOTHER'" \
+//     --trio "po_possible_father:parental_origin(variant.CHROM, variant.POS, kid, dad, mom) == 'POSSIBLE_FATHER'" \
+//     --trio "po_unknown:parental_origin(variant.CHROM, variant.POS, kid, dad, mom) == 'UNKNOWN'" \
+//     -o out.vcf.gz
+//
+// The QLIN compound-het step ("Parental origin is Mother or Father") is
+// exactly this filter: keep the trio if parental_origin(...) is MOTHER or
+// FATHER (i.e. inheritance-resolved), then group survivors by gene and flag
+// hc_complement / is_possibly_hc downstream as described in the design doc.

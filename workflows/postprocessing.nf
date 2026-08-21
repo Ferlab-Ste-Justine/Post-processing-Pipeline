@@ -10,6 +10,7 @@ include { EXCLUDE_MNPS            } from "../subworkflows/local/exclude_mnps"
 include { VQSR                    } from "../subworkflows/local/vqsr"
 include { SLIVAR_INHERITANCE      } from '../subworkflows/local/slivar_inheritance'
 include { BCFTOOLS_VIEW           } from '../modules/nf-core/bcftools/view/main'
+include { BCFTOOLS_PLUGINFIXPLOIDY } from '../modules/nf-core/bcftools/pluginfixploidy/main'
 include { EXOMISER                } from '../modules/local/exomiser'
 include { SPLIT_MULTIALLELICS     } from '../modules/local/split_multiallelics/main'
 include { VCF_ANNOTATE_ENSEMBLVEP } from '../subworkflows/nf-core/vcf_annotate_ensemblvep/main'
@@ -232,6 +233,19 @@ workflow POSTPROCESSING {
         SPLIT_MULTIALLELICS(vcf_for_norm, [[id: 'reference'], pathReferenceGenomeFasta])
         ch_versions = ch_versions.mix(SPLIT_MULTIALLELICS.out.versions)
         ch_output_from_splitMultiAllelics = SPLIT_MULTIALLELICS.out.vcf.join(SPLIT_MULTIALLELICS.out.tbi)
+
+        // Force diploid GT notation: DRAGEN emits true haploid GTs (single allele,
+        // e.g. "1") for hemizygous male non-PAR X/Y calls, which slivar's dosage
+        // model cannot parse (collapses to alts==-1, unknown) -- see BIOINFO-217.
+        // GATK4 already emits diploid notation ("1/1") by default, so this is a
+        // no-op for that convention and only actually rewrites DRAGEN-style input.
+        // Placed here (post-genotyping, post-normalization, pre-VEP/exomiser fork)
+        // so it runs once per family rather than once per sample, avoids the
+        // PL/AD-array inconsistency risk of touching raw gVCFs, and covers both
+        // VEP (-> slivar) and exomiser's default (non-VEP) input in one step.
+        BCFTOOLS_PLUGINFIXPLOIDY(ch_output_from_splitMultiAllelics, [], [], [], [])
+        ch_versions = ch_versions.mix(BCFTOOLS_PLUGINFIXPLOIDY.out.versions) // JT: I had to add this so that it shows in Processing-Pipeline_software_mqc_versions.yml (like every other tool) 
+        ch_output_from_splitMultiAllelics = BCFTOOLS_PLUGINFIXPLOIDY.out.vcf.join(BCFTOOLS_PLUGINFIXPLOIDY.out.index)
 
         if (params.save_genotyped || !params.tools) {
             CHANNEL_CREATE_CSV_GENOTYPE(ch_output_from_splitMultiAllelics, "normalized_genotypes", params.outdir, [])

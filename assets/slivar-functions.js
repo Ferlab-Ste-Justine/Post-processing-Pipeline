@@ -520,32 +520,66 @@ function isPseudoautosomal(chrom, pos) {
   return false;
 }
 
+// Low-depth adjustment, ported from adjust_calls_and_zygosity():
+// het/hom with 0 < AD[alt] < 3  -> unknown
+// hom-ref with 0 < AD[ref] < 3  -> unknown
+// NOTE: faithful to the Python, the rule only fires when the AD value is > 0
+// (in Python an AD of 0 becomes None and short-circuits the check).
+function po_adj(s) {
+  var a = s.alts;
+  if (a === -1 || a === undefined) { return -1; }
+  if (typeof s.AD !== "undefined" && s.AD.length > 1) {
+    var ad_ref = s.AD[0];
+    var ad_alt = s.AD[1];
+    if ((a === 1 || a === 2) && ad_alt > 0 && ad_alt < 3) { return -1; }
+    if (a === 0 && ad_ref > 0 && ad_ref < 3) { return -1; }
+  }
+  return a;
+}
+
 // chrom/pos: pass variant.CHROM, variant.POS. kid/dad/mom: slivar sample
 // objects (need .alts and, for kid, .sex -- "male" / "female").
 function parental_origin(chrom, pos, kid, dad, mom) {
+  // Every lookup table below assumes the kid is a confirmed carrier (dosage
+  // 1 or 2) -- none of them has a "-1" entry on the kid side. po_adj() can
+  // downgrade a low-depth het/hom-alt kid call to -1, so that case is
+  // resolved to UNKNOWN immediately rather than falling through to an
+  // unpopulated table key.
+  var k = po_adj(kid);
+  if (k === -1) return UNKNOWN;
+
+  // dad/mom are passed through as-is (no early-return): AUTOSOMAL_ORIGINS,
+  // X_DAUGHTER_ORIGINS, and X_SON_ORIGINS already have full "-1" coverage on
+  // both parents, so po_adj-driven downgrades resolve to the same graduated
+  // labels a genuinely-missing genotype would. Y_ORIGINS is missing the
+  // dad=-1/mom-known entries specifically -- accepted as-is for now, falls
+  // through to the blanket UNKNOWN default in that gap.
+  var d = po_adj(dad);
+  var m = po_adj(mom);
+
   var CHROM = ("" + chrom).replace(/^chr/i, "");
 
   if ((CHROM == "X" || CHROM == "Y") && isPseudoautosomal(CHROM, pos)) {
     // PAR: fully diploid, plain Mendelian (autosomal-equivalent) inheritance.
-    return AUTOSOMAL_ORIGINS[kid.alts + "_" + dad.alts + "_" + mom.alts] || UNKNOWN;
+    return AUTOSOMAL_ORIGINS[k + "_" + d + "_" + m] || UNKNOWN;
   }
 
   if (CHROM == "Y") {
     if (kid.sex != "male") return UNKNOWN;
-    return Y_ORIGINS[dad.alts + "_" + mom.alts] || UNKNOWN;
+    return Y_ORIGINS[d + "_" + m] || UNKNOWN;
   }
 
   if (CHROM == "X") {
     if (kid.sex == "male") {
-      return X_SON_ORIGINS[dad.alts + "_" + mom.alts] || UNKNOWN;
+      return X_SON_ORIGINS[d + "_" + m] || UNKNOWN;
     }
     if (kid.sex == "female") {
-      return X_DAUGHTER_ORIGINS[kid.alts + "_" + dad.alts + "_" + mom.alts] || UNKNOWN;
+      return X_DAUGHTER_ORIGINS[k + "_" + d + "_" + m] || UNKNOWN;
     }
     return UNKNOWN; // sex unknown: X transmission can't be resolved safely
   }
 
-  return AUTOSOMAL_ORIGINS[kid.alts + "_" + dad.alts + "_" + mom.alts] || UNKNOWN;
+  return AUTOSOMAL_ORIGINS[k + "_" + d + "_" + m] || UNKNOWN;
 }
 
 // Example usage:

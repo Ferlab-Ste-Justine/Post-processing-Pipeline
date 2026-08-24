@@ -25,6 +25,8 @@ Additionally, there is an optional _familyPheno_ column that can contain a `.yml
 
 There is also an optional _familyPed_ column that can point to a `.ped` pedigree file for the family. This column is required to run the [slivar inheritance step](#slivar-inheritance-step), which tags variants by mode of inheritance and identifies compound heterozygotes from a VEP-annotated VCF. As with `familyPheno`, the value must be identical for all members of the same family.
 
+> **Note:** the `sample` (and `familyId`) values in the samplesheet are used only for this pipeline's own file naming and internal tracking (e.g. `meta.id`, published filenames, CSV manifests). They are **not** validated against the sample name actually embedded in the corresponding `gvcf`/`vcf` file's header — if the two differ, the pipeline will not detect or warn about it, and everything downstream that reads sample names directly from the VCF/PED/phenopacket files (GATK joint genotyping, slivar's inheritance tagging, exomiser's phenotype matching) will use the file's own embedded name regardless of what the samplesheet says. As of 2026-08-24 this is understood to be intentional (e.g. to allow a LIMS-assigned identifier to differ from a sequencing core's internal sample name).
+
 **sample.csv**
 
 ```csv

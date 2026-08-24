@@ -148,6 +148,7 @@ A few patterns worth knowing before editing:
 - **Reference inputs** are resolved at the top of `POSTPROCESSING` from `params.referenceGenome` + `params.referenceGenomeFasta` (the Fasta lives _inside_ the referenceGenome directory; `.fai` and `.dict` are derived from the Fasta path).
 - **Adding an nf-core module:** use `nf-core modules install <tool>` so `modules.json` stays consistent. Local-only logic goes under `modules/local/`.
 - **Schema and params stay in sync.** `nextflow_schema.json` is the source of truth for parameter validation (driven by the `nf-schema` plugin, `nf-schema@2.1.0` — migrated from `nf-validation` in v3.0.0). When adding a param, update both `nextflow.config` defaults and the schema.
+- **Samplesheet `sample`/`familyId` are not cross-checked against file content.** `BCFTOOLS_VIEW` (standardize) never inspects or renames the actual sample name embedded in the gVCF/VCF header, so a samplesheet typo or swapped file goes undetected — everything downstream that matches on sample names (GATK, slivar/PED, exomiser/phenopacket) uses the file's own embedded name, not the samplesheet's. See `docs/usage.md`'s samplesheet section for the full note; as of 2026-08-24 this is understood to be intentional.
 
 ## Outputs
 

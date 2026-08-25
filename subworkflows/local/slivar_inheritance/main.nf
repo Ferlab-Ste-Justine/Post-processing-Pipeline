@@ -20,7 +20,6 @@ workflow SLIVAR_INHERITANCE {
             return [meta, expr_vcf, ped]
         }
 
-
     SLIVAR_COMPOUNDHETS(ch_compoundhets_in)
 
     ch_annotate = SLIVAR_EXPR.out.vcf

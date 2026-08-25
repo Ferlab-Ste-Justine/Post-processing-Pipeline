@@ -1,0 +1,45 @@
+nextflow_function {
+
+    name "Test Subworkflow UTILS_NFCORE_POSTPROCESSING_PIPELINE samplesheetToList type coercion for familyId/sample"
+    script "subworkflows/local/utils_nfcore_postprocessing_pipeline/main.nf"
+    tag "local"
+
+    function "samplesheetToList"
+
+    // BIOINFO-221: familyId/sample were widened from "string" to ["string", "integer"]
+    // in assets/schema_input.json so purely-numeric IDs don't need quoting in the
+    // samplesheet. nf-schema's coercion is lossless-aware: a plain numeric value
+    // (no leading zeros) becomes a real Integer, while a value that wouldn't
+    // round-trip back to the same text (e.g. zero-padded "007") stays a String so
+    // no digits are silently dropped. Non-numeric IDs are untouched either way.
+    test("familyId/sample coerce to Integer only when lossless, otherwise stay String") {
+        when {
+            function {
+                """
+                input[0] = "subworkflows/local/utils_nfcore_postprocessing_pipeline/tests/samplesheet_integer_ids.csv"
+                input[1] = "${projectDir}/assets/schema_input.json"
+                """
+            }
+        }
+        then {
+            assertAll(
+                { assert function.success },
+                // plain numeric, no padding -> real Integer
+                { assert function.result[0][0].familyId == 42 },
+                { assert function.result[0][0].familyId instanceof Integer },
+                { assert function.result[0][0].sample == 7 },
+                { assert function.result[0][0].sample instanceof Integer },
+                // zero-padded numeric -> stays String, padding preserved exactly
+                { assert function.result[1][0].familyId == "007" },
+                { assert function.result[1][0].familyId instanceof String },
+                { assert function.result[1][0].sample == "019238" },
+                { assert function.result[1][0].sample instanceof String },
+                // non-numeric -> unaffected, still String (regression check)
+                { assert function.result[2][0].familyId == "CONGE-XXX" },
+                { assert function.result[2][0].familyId instanceof String },
+                { assert function.result[2][0].sample == "S01" },
+                { assert function.result[2][0].sample instanceof String }
+            )
+        }
+    }
+}

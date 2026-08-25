@@ -5,6 +5,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### `Fixed`
+
+- [#XXX](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/XXX) BIOINFO-221: Allow `familyId` and `sample` to be specified as integers in the samplesheet, not only strings.
+
 ## [v3.0.0 - 2026-06-02]
 
 ### `Added`

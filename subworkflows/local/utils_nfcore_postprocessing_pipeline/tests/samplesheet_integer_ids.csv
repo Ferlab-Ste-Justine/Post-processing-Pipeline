@@ -1,0 +1,4 @@
+familyId,sample,sequencingType,gvcf
+42,7,WGS,subworkflows/local/utils_nfcore_postprocessing_pipeline/tests/fake.g.vcf.gz
+007,019238,WGS,subworkflows/local/utils_nfcore_postprocessing_pipeline/tests/fake.g.vcf.gz
+CONGE-XXX,S01,WGS,subworkflows/local/utils_nfcore_postprocessing_pipeline/tests/fake.g.vcf.gz

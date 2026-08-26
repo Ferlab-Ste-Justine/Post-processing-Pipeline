@@ -87,8 +87,16 @@ workflow POSTPROCESSING {
     def slivarGnotateFiles              = [gnomadGnotate, topmedGnotate].findAll{ f -> f }
     def slivarJs                        = params.slivar_js ? file(params.slivar_js) : []
 
-    def HOMO_SAPIENS_SPECIES = "homo_sapiens"
-    def cache_species        = params.download_cache_species
+    // vep_annotation ('merged'/'refseq'/unset) selects the cache flavor. ENSEMBLVEP_DOWNLOAD's
+    // `vep_install --SPECIES` expects the flavor baked into the species name (e.g.
+    // "homo_sapiens_merged"), so vep_species_download reconstructs that. The annotation `vep
+    // --species` flag is different: VEP rejects a "_merged"/"_refseq" suffix there and instead
+    // wants the plain species name, with --merged/--refseq (added conditionally in
+    // conf/modules.config based on vep_annotation) selecting the matching cache subdirectory.
+    // See BIOINFO-220.
+    def vep_species            = params.vep_species ?: 'homo_sapiens'
+    def vep_cache_flavor       = params.vep_annotation ?: ''
+    def vep_species_download   = vep_cache_flavor ? "${vep_species}_${vep_cache_flavor}" : vep_species
 
     // Aggregated version YAML emitted by every called subworkflow/process; flushed at the end via softwareVersionsToYAML.
     ch_versions = channel.empty()
@@ -250,7 +258,7 @@ workflow POSTPROCESSING {
 
         // Download VEP cache if download = true. Assuming we want to download even if cache provided.
         if (params.download_cache) {
-            ensemblvep_info = channel.of([ [ id: "${params.vep_cache_version}_${params.vep_genome}" ], params.vep_genome, cache_species, params.vep_cache_version ])
+            ensemblvep_info = channel.of([ [ id: "${params.vep_cache_version}_${params.vep_genome}" ], params.vep_genome, vep_species_download, params.vep_cache_version ])
             ENSEMBLVEP_DOWNLOAD(ensemblvep_info)
             vep_cache = ENSEMBLVEP_DOWNLOAD.out.cache.collect().map{ _meta, cache -> [ cache ] }.first()
             ch_versions = ch_versions.mix(ENSEMBLVEP_DOWNLOAD.out.versions.first())
@@ -266,7 +274,7 @@ workflow POSTPROCESSING {
             vcf_for_vep.map{ meta, vcf, _tbi -> [meta, vcf, []] },  // meta, vcf, optional_custom_files
             [[id: 'reference'], pathReferenceGenomeFasta],                        // meta2, fasta
             params.vep_genome,
-            HOMO_SAPIENS_SPECIES,
+            vep_species,
             params.vep_cache_version,
             vep_cache,
             []                                                       // extra files

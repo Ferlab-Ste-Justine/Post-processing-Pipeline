@@ -43,7 +43,7 @@ The `pipeline_info` subdirectory contains details about the pipeline execution a
 
 The `csv` subdirectory includes auto-generated index csv files for each of the analysis steps included. They keep the original output channel structure. They are used by the pipeline to further process/re-start from previously generated output.
 
-The `normalized_genotypes` subdirectory contains the output after running GATK GenotypeGVCFs and normalizing the variants and will appear if `save_genotyped = true`.
+The `normalized_genotypes` subdirectory contains the output after running GATK GenotypeGVCFs, splitting multi-allelics, and normalizing genotype ploidy (`bcftools +fixploidy`, forcing diploid GT notation on hemizygous non-PAR X/Y calls) and will appear if `save_genotyped = true`.
 
 The `ensemblvep` subdirectory contains the output after running vep and will appear only if vep is specified in the `tools` parameters.
 
@@ -168,6 +168,24 @@ Slivar treats each family independently. The same variant can fire different tag
 | Single-parent + sib(s)              | Same as duo: `recessive`/`x_recessive` + `candidate`, `slivar_comphet` (treat as candidate). Siblings contribute to `fam.every` checks.                                                                                                                                                 |
 | Solo / sibship (no parents in PED)  | Only `slivar_comphet` can fire (from a pair of hets in the proband; treat as candidate). Single-variant `recessive`/`x_recessive` are intentionally **suppressed** by the `no_parents_in_fam(fam)` gate — neither solos nor sibships provide segregation evidence.                      |
 | Sibship (no parents)                | Like a solo from slivar's perspective — no parental data to segregate against.                                                                                                                                                                                                          |
+
+### Parental origin tags
+
+For families that form a complete trio (affected proband + both parents), each variant additionally carries at most one parental-origin `INFO` tag, computed by `parental_origin()` in [`assets/slivar-functions.js`](../assets/slivar-functions.js) and wired up via the `--trio` expressions in [`conf/slivar.config`](../conf/slivar.config). Non-trio families do not get these tags.
+
+| Tag                    | Meaning                                                                                          |
+| ---------------------- | ------------------------------------------------------------------------------------------------- |
+| `po_denovo`            | Neither parent's genotype explains the proband's alt allele(s) — apparent de novo variant.        |
+| `po_mother`            | The proband's alt allele(s) are explained by the mother's genotype alone.                         |
+| `po_father`            | The proband's alt allele(s) are explained by the father's genotype alone.                         |
+| `po_both`              | The proband is hom-alt and both parents carry the alt allele — origin cannot be narrowed further. |
+| `po_ambiguous`         | Both parents' genotypes are consistent with having transmitted the allele; origin can't be resolved. |
+| `po_possible_denovo`   | One parent is hom-ref and the other is unknown — de novo is possible but not confirmed.            |
+| `po_possible_mother`   | The mother's genotype is consistent with transmission, but the father's genotype is unknown.       |
+| `po_possible_father`   | The father's genotype is consistent with transmission, but the mother's genotype is unknown.       |
+| `po_unknown`           | Origin cannot be determined — a required genotype is missing, or was downgraded due to low read depth (allele depth between 1 and 2 reads is treated as unreliable and reset to unknown before origin is resolved). |
+
+Origin is resolved separately depending on the variant's location: autosomal and pseudoautosomal (PAR) sites use one lookup table (proband, father, and mother all diploid); non-PAR X and Y sites use sex-aware tables that account for male hemizygosity. This requires genotypes to be in diploid GT notation — see the [ploidy normalization note](usage.md#starting-with-normalization---step-normalize) in the usage docs, which this tagging depends on for callers (e.g. DRAGEN) that emit true haploid calls on non-PAR X/Y.
 
 ### Notes
 

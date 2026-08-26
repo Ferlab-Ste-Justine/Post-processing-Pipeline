@@ -90,17 +90,19 @@ For more details, see [Gatk documentation](https://gatk.broadinstitute.org/hc/en
 
 VEP requires a species- and version-specific cache directory. The pipeline supports two modes:
 
-**1. Use an existing cache** (default): set `vep_cache` to the directory containing the pre-downloaded cache. The cache layout must match what VEP expects — typically `<vep_cache>/<species>/<vep_cache_version>_<vep_genome>/`. Required parameters:
+**1. Use an existing cache** (default): set `vep_cache` to the directory containing the pre-downloaded cache. The cache layout must match what VEP expects — `<vep_cache>/<vep_species>[_<vep_annotation>]/<vep_cache_version>_<vep_genome>/`. Required parameters:
 
 - `vep_cache` — path to the cache root directory.
-- `vep_cache_version` — VEP cache version (e.g. `111`). Must match the version baked into the VEP container (currently `release_111.0`).
+- `vep_cache_version` — VEP cache version (e.g. `114`). Must match the version baked into the VEP container (currently `release_114.2`).
 - `vep_genome` — genome assembly (e.g. `GRCh38`).
+- `vep_species` — the plain species name (default `homo_sapiens`), passed as-is to VEP's `--species` at annotation time. Note that VEP's `--species` never takes a `_merged`/`_refseq` suffix, even when using one of those cache flavors — that's what `vep_annotation` is for.
+- `vep_annotation` — optional cache flavor: `merged` for the combined Ensembl/RefSeq cache, `refseq` for the RefSeq-only cache, unset for the default Ensembl-only cache. Must match the cache's own subdirectory name, e.g. set it to `merged` if `vep_cache` points at `<vep_cache>/homo_sapiens_merged/...`. Getting this wrong (e.g. leaving it unset while pointing at a merged cache) makes VEP look in the wrong subdirectory and fail to find the cache. Setting it to `merged` also makes the pipeline add VEP's `--merged`/`--mane` flags and the MANE/RefSeq-specific output fields; `refseq` adds `--refseq`.
 
-To obtain a cache manually, follow the [VEP installation procedure](https://github.com/Ensembl/ensembl-vep). For human data, the relevant tarballs live at e.g. [ftp.ensembl.org](https://ftp.ensembl.org/pub/release-111/variation/vep/homo_sapiens_vep_111_GRCh38.tar.gz). Always match the cache release to the VEP container version.
+To obtain a cache manually, follow the [VEP installation procedure](https://github.com/Ensembl/ensembl-vep). For human data, the relevant tarballs live at e.g. [ftp.ensembl.org](https://ftp.ensembl.org/pub/release-114/variation/indexed_vep_cache/homo_sapiens_vep_114_GRCh38.tar.gz) (or `homo_sapiens_merged_vep_114_GRCh38.tar.gz` for the merged cache). Always match the cache release to the VEP container version.
 
-**2. Download the cache from Ensembl on the fly**: set `--download_cache` to `true`. The pipeline runs the `ENSEMBLVEP_DOWNLOAD` step before VEP, which fetches the cache for the species/version/genome specified by `download_cache_species` (default `homo_sapiens`), `vep_cache_version`, and `vep_genome`. The downloaded cache is written to `outdir_cache` if set; otherwise to `${outdir}/cache/`. When `--download_cache` is enabled the locally downloaded cache is used regardless of any `vep_cache` value.
+**2. Download the cache from Ensembl on the fly**: set `--download_cache` to `true`. The pipeline runs the `ENSEMBLVEP_DOWNLOAD` step before VEP, which fetches the cache for the species/flavor/version/genome specified by `vep_species` + `vep_annotation` (default `homo_sapiens`, no flavor), `vep_cache_version`, and `vep_genome`. Unlike the annotation step, the downloader (`vep_install`) does expect the flavor suffix baked into its species argument (e.g. `homo_sapiens_merged`) — the pipeline builds that string for you from `vep_species`/`vep_annotation`. The downloaded cache is written to `outdir_cache` if set; otherwise to `${outdir}/cache/`. When `--download_cache` is enabled the locally downloaded cache is used regardless of any `vep_cache` value.
 
-The container used for downloading is a conda-based VEP image (`quay.io/biocontainers/ensembl-vep:111.0--pl5321h2a3209d_0`).
+The container used for downloading is a conda-based VEP image (`quay.io/biocontainers/ensembl-vep:114.2--pl5321h2a3209d_1`).
 
 ## Slivar reference data
 

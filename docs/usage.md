@@ -83,6 +83,10 @@ If you wish to repeatedly use the same parameters for multiple runs, rather than
 
 To start from the normalization step, the csv samplesheet must contain the columns `familyId`, `sample`, `sequencingType`, and `vcf`, with the optional `tbi`. This allows you to skip the joint genotyping and VQSR/hard filtering steps and start directly from the normalization of already processed VCF files.
 
+This step also normalizes genotype ploidy (`bcftools +fixploidy`) right after splitting multi-allelics, forcing diploid GT notation on hemizygous non-PAR X/Y calls. This is needed because some callers (e.g. DRAGEN) emit true haploid genotypes there, which slivar's dosage model cannot parse — see the [slivar parental origin notes](#parental-origin) for details. GATK4-called VCFs, which are already diploid, pass through unchanged.
+
+> **Note:** the ploidy fix only runs as part of this pipeline's `genotype`/`normalize` step. If you enter the pipeline later (`--step annotation`, `exomiser`, or `inheritance`) with VCFs that were normalized outside this pipeline, DRAGEN-style haploid X/Y calls will not be corrected, and mode-of-inheritance/parental-origin tagging in the slivar step may misbehave for those sites.
+
 **sample.csv**
 
 ```csv
@@ -245,6 +249,12 @@ Each threshold is only applied when the corresponding gnotate file is provided.
 #### Slivar output
 
 Slivar output is always written to the `slivar` subfolder within the main output directory (`--outdir`). For details on the slivar output files, see [output.md](output.md#slivar-step-slivar).
+
+#### Parental origin
+
+For families with a full trio (affected proband + both parents), the slivar step additionally tags each variant with its most likely parental origin (`po_denovo`, `po_mother`, `po_father`, `po_both`, `po_ambiguous`, `po_possible_denovo`, `po_possible_mother`, `po_possible_father`, `po_unknown`), computed by `parental_origin()` in `assets/slivar-functions.js`. Origin is resolved separately for autosomal/PAR, X (son/daughter), and Y sites, and genotype calls backed by very low allele depth are downgraded to `po_unknown` rather than trusted. Non-trio families do not get parental-origin tags. See [output.md](output.md#slivar-step-slivar) for what each tag means.
+
+This relies on the ploidy normalization described above in [Starting with normalization](#starting-with-normalization---step-normalize) — without it, hemizygous X/Y calls from some callers would otherwise resolve to `po_unknown`.
 
 ### Customize versions and commands
 

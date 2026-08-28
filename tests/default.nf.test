@@ -84,11 +84,7 @@ nextflow_pipeline {
         // subdirectory) makes VEP die outright rather than silently annotate wrong.
         //
         // Requires a homo_sapiens_refseq/<vep_cache_version>_<vep_genome> cache under
-        // the test dataset's vep_cache path -- not present as of this writing, only
-        // homo_sapiens/ and homo_sapiens_merged/ have been uploaded. This test will
-        // fail until that cache is added (same process as the merged one: download
-        // homo_sapiens_refseq_vep_<version>_<genome>.tar.gz from Ensembl, keep only
-        // chr22, upload to both S3 test-dataset buckets).
+        // the test dataset's vep_cache path.
         when {
             params {
                 outdir         = "$outputDir"

@@ -9,7 +9,7 @@ nextflow_function {
     test("Test Function validateVepCacheVersion succeeds when cache version matches VEP container") {
         when {
             params {
-                vep_cache_version = "111"
+                vep_cache_version = "114"
                 download_cache    = false
             }
         }
@@ -37,7 +37,7 @@ nextflow_function {
     test("Test Function validateVepCacheVersion succeeds when cache version matches both VEP and download containers") {
         when {
             params {
-                vep_cache_version = "111"
+                vep_cache_version = "114"
                 download_cache    = true
             }
         }

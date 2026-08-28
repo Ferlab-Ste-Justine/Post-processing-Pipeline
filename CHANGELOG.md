@@ -5,9 +5,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### `Changed`
+
+- [#108](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/XXX) **Breaking:** BIOINFO-220: Renamed the `download_cache_species` parameter to `vep_species` (always the plain species name, e.g. `homo_sapiens`) and added a new `vep_annotation` parameter (`merged`/`refseq`/unset) for the cache flavor, since VEP's `--species` flag never takes a `_merged`/`_refseq` suffix — that's controlled by `--merged`/`--refseq` instead. Update any `params.json`/`params.yaml` using `download_cache_species` (or a suffixed `vep_species` value from an earlier `[Unreleased]` build of this branch) to use `vep_species` + `vep_annotation` separately.
+- [#108](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/XXX) BIOINFO-220: Bump the VEP containers (`ENSEMBLVEP_VEP`, `ENSEMBLVEP_DOWNLOAD` — now `release_114.2`/`114.2--pl5321h2a3209d_1`) and the test profile's `vep_cache_version` from 111 to 114.
+
 ### `Fixed`
 
 - [#106](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/106) BIOINFO-221: Allow `familyId` and `sample` to be specified as integers in the samplesheet, not only strings.
+- [#108](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/XXX) BIOINFO-220: Fix VEP annotation looking for the wrong cache subdirectory (e.g. `homo_sapiens` instead of `homo_sapiens_merged`) when a non-default `vep_annotation` cache flavor is set. VEP's `--merged`/`--mane` (or `--refseq`) flags and the MANE/RefSeq output fields are now also enabled automatically for the merged/refseq cache.
 
 ## [v3.0.0 - 2026-06-02]
 

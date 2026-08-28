@@ -374,6 +374,8 @@ var POSSIBLE_DENOVO = "POSSIBLE_DENOVO";
 var POSSIBLE_MOTHER = "POSSIBLE_MOTHER";
 var POSSIBLE_FATHER = "POSSIBLE_FATHER";
 var UNKNOWN = "UNKNOWN";
+// JT: suggestion to keep 3 or 4 values only : DENOVO/MOTHER/FATHER/BOTH (Bi-parental) /UNKNOWN
+// Bi-parental: for homozygous-recessive cases where both parents are obligate carriers
 
 // Autosomal: keyed "kid_dad_mom" dosage. Exact port of AUTOSOMAL_ORIGINS_LOOKUP.
 /*
@@ -425,7 +427,8 @@ var AUTOSOMAL_ORIGINS = { // i.e. non-sex chromosomes AND PAR regions
 // a non-carrier and parental_origin is only ever evaluated for a carrier).
 // Outside PAR, dad's X is never transmitted to a son -- his genotype here
 // is diagnostic context only, never the true source of the son's allele.
-// dad_mom. Only 2 numbers (not 3) because kid dosage is always 2 (or more precisely 100% alt-allele. Remember that a row only exists because the kid carries something.)
+// dad_mom. Only 2 numbers (not 3) because kid dosage is always 2 
+// (or more precisely 100% alt-allele. Remember that a row only exists because the kid carries something.)
 //
 // REVIEW CANDIDATE 1 "1_0" / "2_0"                                               <-------
 // (mom confirmed hom-ref) -> unhedged FATHER, but "1_-1" / "2_-1" (mom simply
@@ -446,16 +449,23 @@ var AUTOSOMAL_ORIGINS = { // i.e. non-sex chromosomes AND PAR regions
 // shouldn't be able to.
 var X_SON_ORIGINS = {
   "0_0":  DENOVO,           "0_1":  MOTHER,           "0_2":  MOTHER,              "0_-1":  POSSIBLE_DENOVO,
-  "1_2":  MOTHER,           "1_-1": POSSIBLE_FATHER,
+  "1_2":  MOTHER,// **            "1_-1": POSSIBLE_FATHER,
   "2_1":  MOTHER,           "2_2":  MOTHER,           "2_-1": POSSIBLE_FATHER,
   "-1_0": POSSIBLE_DENOVO,  "-1_1": MOTHER,           "-1_2": MOTHER,              "-1_-1": UNKNOWN,
   "1_0":  FATHER,   // Should be POSSIBLE_FATHER?
   "2_0":  FATHER,   // Should be POSSIBLE_FATHER?
-  "1_1":  AMBIGUOUS // Should me MOTHER?
+  "1_1":  AMBIGUOUS // Should me MOTHER? ** discussed with David 
 };
-
+// JT: hoW CAN A FATHER BE 2?
+// After fixploidy, will all Dads be 2s? Even GATK vcfs should be always 2?
 // X, kid.sex == "female" (diploid). keyed "kid_dad_mom" dosage.
-//
+// Expanding vocabulary to ex: FATHER_CONTRIB (we are 100% /(2_1_0) 2_2_0, 2_1_-1, 2_2_-1, sure the father contrib)
+// 2_-1_1 MOTHER CONTRIB
+// 2-1_2 MOTHER CONTRIB
+// Also clack convo about XY sperm.
+// 1_0_-1: why chose possible de novo. Could be unknown? possible is a wide word.
+// ex: 1_1_2 vs 1_2_1 why ambiguous vs father.
+
 // REVIEW CANDIDATE 1: same "unknown parent's forced contribution isn't         <-------
 // reflected as BOTH" pattern as AUTOSOMAL_ORIGINS above -- "2_1_-1" /
 // "2_2_-1" (dad known-alt, mom unknown) and "2_-1_1" / "2_-1_2" (mom
@@ -476,7 +486,7 @@ var X_DAUGHTER_ORIGINS = {
   "1_1_0":  FATHER,            "1_1_1":  AMBIGUOUS,       "1_1_2":  AMBIGUOUS,   "1_1_-1":  FATHER,
   "1_2_0":  FATHER,            "1_2_1":  FATHER,          "1_2_2":  AMBIGUOUS,   "1_2_-1":  FATHER,
   "1_-1_0": POSSIBLE_DENOVO,   "1_-1_1": POSSIBLE_MOTHER, "1_-1_2": MOTHER,      "1_-1_-1": UNKNOWN,
-  "2_0_0":  DENOVO,            "2_0_1":  MOTHER,          "2_0_2":  MOTHER,      "2_0_-1":  POSSIBLE_DENOVO,
+  "2_0_0":  DENOVO,            "2_0_1":  MOTHER,          "2_0_2":  MOTHER,      "2_0_-1":  POSSIBLE_DENOVO, // denovo...
   "2_1_0":  FATHER,            "2_1_1":  BOTH,            "2_1_2":  BOTH,        "2_1_-1":  FATHER, //Should be POSSIBLE_FATHER?
   "2_2_0":  FATHER,            "2_2_1":  BOTH,            "2_2_2":  BOTH,        "2_2_-1":  FATHER, //Should be POSSIBLE_FATHER?
   "2_-1_0": POSSIBLE_DENOVO,   "2_-1_1": MOTHER,          "2_-1_2": MOTHER,      "2_-1_-1": UNKNOWN
@@ -499,13 +509,15 @@ var X_DAUGHTER_ORIGINS = {
 // introduced by this port.
 var Y_ORIGINS = {
   "0_-1": DENOVO,   "2_-1": FATHER,      "-1_-1": UNKNOWN,
-  "0_0":  DENOVO,   "0_1":  MOTHER,      "0_2":   MOTHER,
+  "0_0":  DENOVO,   
+  "0_1":  MOTHER,      "0_2":   MOTHER, // Should not happen
   "1_0":  FATHER,   "1_1":  AMBIGUOUS,   "1_2":   AMBIGUOUS, // Here, why AMBIGUOUS when MOM cannot give her non-existent Y chromosome?
   "2_0":  FATHER,   "2_1":  AMBIGUOUS,   "2_2":   AMBIGUOUS  // Here, why AMBIGUOUS when MOM cannot give her non-existent Y chromosome?
 };
 
 // GRCh38/hg38 pseudoautosomal region boundaries (1-based, inclusive; VCF
 // POS convention). PAR2 differs in length between chrX and chrY.
+// read file or what genome we prodive.
 var PAR_REGIONS = {
   X: [[10001, 2781479], [155701383, 156030895]],
   Y: [[10001, 2781479], [56887903, 57217415]],
@@ -525,14 +537,15 @@ function isPseudoautosomal(chrom, pos) {
 // hom-ref with 0 < AD[ref] < 3  -> unknown
 // NOTE: faithful to the Python, the rule only fires when the AD value is > 0
 // (in Python an AD of 0 becomes None and short-circuits the check).
-function po_adj(s) {
-  var a = s.alts;
-  if (a === -1 || a === undefined) { return -1; }
-  if (typeof s.AD !== "undefined" && s.AD.length > 1) {
-    var ad_ref = s.AD[0];
-    var ad_alt = s.AD[1];
-    if ((a === 1 || a === 2) && ad_alt > 0 && ad_alt < 3) { return -1; }
-    if (a === 0 && ad_ref > 0 && ad_ref < 3) { return -1; }
+// JT: Put more meaningful variables.
+function po_adj(individual) {
+  var alt = individual.alts;
+  if (alt === -1 || alt === undefined) { return -1; }
+  if (typeof individual.AD !== "undefined" && individual.AD.length > 1) {
+    var ad_ref = individual.AD[0];
+    var ad_alt = individual.AD[1];
+    if ((alt === 1 || alt === 2) && ad_alt > 0 && ad_alt < 3) { return -1; }
+    if (alt === 0 && ad_ref > 0 && ad_ref < 3) { return -1; }
   }
   return a;
 }

@@ -419,6 +419,9 @@ var AUTOSOMAL_ORIGINS = { // i.e. non-sex chromosomes AND PAR regions
   "2_-1_1": MOTHER, // Since dad is unknown, should be UNKNOWN or AMBIGUOUS?
   "2_-1_2": MOTHER  // Since dad is unknown, should be UNKNOWN or AMBIGUOUS?
 };
+// Also clack convo about XY sperm.
+// 1_0_-1: why chose possible de novo. Could be unknown? possible is a wide word.
+// ex: 1_1_2 vs 1_2_1 why ambiguous vs father.
 
 // X, kid.sex == "male", NON-PAR (i.e. Sex chromosomes) only (true hemizygous -- PAR calls are
 // routed to AUTOSOMAL_ORIGINS before this table is ever consulted, so there
@@ -462,9 +465,7 @@ var X_SON_ORIGINS = {
 // Expanding vocabulary to ex: FATHER_CONTRIB (we are 100% /(2_1_0) 2_2_0, 2_1_-1, 2_2_-1, sure the father contrib)
 // 2_-1_1 MOTHER CONTRIB
 // 2-1_2 MOTHER CONTRIB
-// Also clack convo about XY sperm.
-// 1_0_-1: why chose possible de novo. Could be unknown? possible is a wide word.
-// ex: 1_1_2 vs 1_2_1 why ambiguous vs father.
+
 
 // REVIEW CANDIDATE 1: same "unknown parent's forced contribution isn't         <-------
 // reflected as BOTH" pattern as AUTOSOMAL_ORIGINS above -- "2_1_-1" /

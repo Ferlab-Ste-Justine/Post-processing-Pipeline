@@ -17,6 +17,8 @@ nextflow_pipeline {
             def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}'])
             // stable_path: All files in ${params.outdir}/ with stable content
             // def stable_path = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
+            def vepVcfs = getAllFilesFromDir(params.outdir, relative: false, includeDir: false)
+                .findAll { it.toString().endsWith(".vcf.gz") && it.toString().contains("/ensemblvep/") }
             assertAll(
                 { assert workflow.success},
                 { assert snapshot(
@@ -26,7 +28,78 @@ nextflow_pipeline {
                     stable_name,
                     // All files with stable contents
                     // stable_path
-                ).match() }
+                ).match() },
+                // BIOINFO-220 regression guard, default-cache side: with no vep_annotation
+                // set, the CSQ header must NOT carry the merged-only fields (SOURCE,
+                // MANE_SELECT) -- if it did, the merged/refseq branch in
+                // conf/modules.config would be firing when it shouldn't.
+                { assert vepVcfs.every { vcf ->
+                    def csqHeader = path(vcf.toString()).linesGzip.find { line -> line.startsWith("##INFO=<ID=CSQ") }
+                    csqHeader != null && !csqHeader.contains("SOURCE") && !csqHeader.contains("MANE_SELECT")
+                } }
+            )
+        }
+    }
+
+    test("-profile test - vep merged cache") {
+
+        // Regression test for BIOINFO-220: VEP annotation was looking in the wrong
+        // cache subdirectory (e.g. homo_sapiens instead of homo_sapiens_merged) when
+        // a non-default vep_annotation cache flavor was set, and passing the flavor
+        // suffix directly as VEP's --species crashes VEP outright ("Should not use
+        // homo_sapiens_merged as --species"). Restricted to tools=vep to keep this
+        // fast -- exomiser/slivar aren't relevant to the cache-flavor logic.
+        when {
+            params {
+                outdir         = "$outputDir"
+                tools          = "vep"
+                vep_annotation = "merged"
+            }
+        }
+
+        then {
+            def vepVcfs = getAllFilesFromDir(params.outdir, relative: false, includeDir: false)
+                .findAll { it.toString().endsWith(".vcf.gz") && it.toString().contains("/ensemblvep/") }
+
+            assertAll(
+                { assert workflow.success },
+                { assert vepVcfs.size() > 0 },
+                // SOURCE is only emitted by VEP's --merged/--mane flags -- its presence
+                // in the CSQ header confirms the merged cache flavor actually took
+                // effect, not just that annotation didn't crash.
+                { assert vepVcfs.every { vcf ->
+                    path(vcf.toString()).linesGzip.any { line -> line.startsWith("##INFO=<ID=CSQ") && line.contains("SOURCE") }
+                } }
+            )
+        }
+    }
+
+    test("-profile test - vep refseq cache") {
+
+        // Regression test for BIOINFO-220, refseq side. Unlike the merged flavor,
+        // --refseq doesn't change the --fields list in conf/modules.config (only
+        // adds the --refseq flag), so there's no CSQ-content signal to distinguish
+        // it from the default cache -- workflow.success is the meaningful check
+        // here, since the bug this guards against (wrong --species / cache
+        // subdirectory) makes VEP die outright rather than silently annotate wrong.
+        //
+        // Requires a homo_sapiens_refseq/<vep_cache_version>_<vep_genome> cache under
+        // the test dataset's vep_cache path.
+        when {
+            params {
+                outdir         = "$outputDir"
+                tools          = "vep"
+                vep_annotation = "refseq"
+            }
+        }
+
+        then {
+            def vepVcfs = getAllFilesFromDir(params.outdir, relative: false, includeDir: false)
+                .findAll { it.toString().endsWith(".vcf.gz") && it.toString().contains("/ensemblvep/") }
+
+            assertAll(
+                { assert workflow.success },
+                { assert vepVcfs.size() > 0 }
             )
         }
     }

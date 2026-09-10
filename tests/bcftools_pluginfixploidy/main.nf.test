@@ -1,0 +1,60 @@
+nextflow_process {
+
+    name "Test Process BCFTOOLS_PLUGINFIXPLOIDY"
+    script "../../modules/nf-core/bcftools/pluginfixploidy/main.nf"
+    process "BCFTOOLS_PLUGINFIXPLOIDY"
+    config "./nextflow.config"
+
+    tag "bcftools"
+    tag "bcftools/pluginfixploidy"
+
+    // Lives outside modules/nf-core/**/tests/ on purpose: nf-test.config ignores
+    // that whole path tree (upstream nf-core module tests aren't run here), which
+    // would silently exclude this too. BIOINFO-217 relies on `-f 2` losslessly
+    // normalizing DRAGEN-style haploid GT (male non-PAR X/Y) to its diploid
+    // equivalent -- this is real pipeline behaviour, not upstream boilerplate, so
+    // it gets its own test outside the ignored tree. Reproduces the production
+    // ext.args/args2 from conf/modules.config and the empty ploidy/sex/regions/
+    // targets call from workflows/postprocessing.nf.
+    test("fixploidy - haploid GT normalized, diploid GT untouched") {
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'fixploidy_test' ],
+                    file("\${projectDir}/tests/bcftools_pluginfixploidy/fixtures/fixploidy_test.vcf.gz", checkIfExists: true),
+                    file("\${projectDir}/tests/bcftools_pluginfixploidy/fixtures/fixploidy_test.vcf.gz.tbi", checkIfExists: true)
+                ]
+                input[1] = []
+                input[2] = []
+                input[3] = []
+                input[4] = []
+                """
+            }
+        }
+
+        then {
+            def lines = path(process.out.vcf.get(0).get(1)).linesGzip.findAll { !it.startsWith('#') }
+
+            assertAll(
+                { assert process.success },
+                { assert lines.size() == 4 },
+                // already-diploid GT is left untouched
+                { assert lines.find { it.startsWith("chr1\t1000\t") }.contains("\t0/1:10,10:60") },
+                // DRAGEN-style haploid alt/ref are expanded to their diploid equivalent.
+                // bcftools 1.23.1's +fixploidy (the module's pinned container version)
+                // emits these phased ("|"), unlike the "/" of a genuinely-called diploid
+                // GT -- irrelevant to slivar's dosage-based parsing (phase is ignored
+                // there), but worth pinning explicitly since it differs from what an
+                // ad hoc bcftools 1.20 run produces.
+                { assert lines.find { it.startsWith("chrX\t3000000\t") }.contains("\t1|1:0,20:60") },
+                { assert lines.find { it.startsWith("chrX\t4000000\t") }.contains("\t0|0:20,0:60") },
+                // a haploid *missing* call ("." -- DRAGEN's no-call convention on
+                // non-PAR X/Y) is the same class of problem as a called haploid GT:
+                // slivar can't parse it any better. Confirm it expands to "./." rather
+                // than being left as an unparseable bare ".".
+                { assert lines.find { it.startsWith("chrX\t5000000\t") }.contains("\t./.:.,.:.") }
+            )
+        }
+    }
+}

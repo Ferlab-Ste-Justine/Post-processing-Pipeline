@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [#106](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/106) BIOINFO-221: Allow `familyId` and `sample` to be specified as integers in the samplesheet, not only strings.
 - [#108](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/XXX) BIOINFO-220: Fix VEP annotation looking for the wrong cache subdirectory (e.g. `homo_sapiens` instead of `homo_sapiens_merged`) when a non-default `vep_annotation` cache flavor is set. VEP's `--merged`/`--mane` (or `--refseq`) flags and the MANE/RefSeq output fields are now also enabled automatically for the merged/refseq cache.
+- [#XXX](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/XXX) BIOINFO-217: Fix `slivar-functions.js`'s `po_adj()` helper referencing an undefined variable (`return a;` instead of `return alt;`), which made every `parental_origin`-based `--trio`/`--family-expr` in `SLIVAR_EXPR` fail with a duktape `ReferenceError` on any variant that didn't hit one of the low-depth early-return branches.
 
 ## [v3.0.0 - 2026-06-02]
 

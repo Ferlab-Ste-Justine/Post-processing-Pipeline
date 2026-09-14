@@ -264,10 +264,10 @@
                     "pattern": "^(vep|exomiser|slivar)?(,(vep|exomiser|slivar))*$",
                     "description": "List of tools to use separate with comma.  Available tools: [vep, exomiser, slivar]"
                 },
-                "exclude_mnps": {
+                "gvcf_filtering": {
                     "type": "boolean",
-                    "description": "If true (default), remove lines from input gvcf files that cause compatibility issues with specific pipeline steps.",
-                    "help_text": "If true (default), Remove lines from input gvcf files that cause compatibility issues with specific pipeline steps. See usage documentation for more details.",
+                    "description": "If true (default), sanitize input gvcf files by removing malformed records (e.g. missing the required <NON_REF> allele) and duplicate-position records that cause compatibility issues with joint genotyping.",
+                    "help_text": "If true (default), removes gVCF records missing the required <NON_REF> allele (a known defect in some DRAGEN gVCF outputs that otherwise makes GATK4_GENOTYPEGVCFS fail) and duplicate-position records. See usage documentation for more details.",
                     "default": true
                 },
                 "step": {

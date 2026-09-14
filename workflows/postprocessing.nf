@@ -6,7 +6,7 @@
 
 //modules and subworkflows
 include { softwareVersionsToYAML  } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { EXCLUDE_MNPS            } from "../subworkflows/local/exclude_mnps"
+include { SANITIZE_GVCF_RECORDS   } from "../subworkflows/local/sanitize_gvcf_records"
 include { VQSR                    } from "../subworkflows/local/vqsr"
 include { SLIVAR_INHERITANCE      } from '../subworkflows/local/slivar_inheritance'
 include { BCFTOOLS_VIEW           } from '../modules/nf-core/bcftools/view/main'
@@ -130,17 +130,17 @@ workflow POSTPROCESSING {
         ch_versions = ch_versions.mix(BCFTOOLS_VIEW.out.versions)
         ch_vcf_tbi_standardized = BCFTOOLS_VIEW.out.vcf.join(BCFTOOLS_VIEW.out.tbi)
 
-        //Optionally drop MNPs
-        if (params.exclude_mnps) {
-            ch_input_excludemnps = ch_vcf_tbi_standardized.map{ meta, vcf, _tbi -> [meta, vcf] }
-            EXCLUDE_MNPS(ch_input_excludemnps, [[id: 'reference'], pathReferenceGenomeFasta])
-            ch_versions = ch_versions.mix(EXCLUDE_MNPS.out.versions)
-            ch_output_from_handle_mnps = EXCLUDE_MNPS.out.vcf_tbi
+        //Optionally sanitize malformed/duplicate gVCF records (see BIOINFO-222)
+        if (params.gvcf_filtering) {
+            ch_input_sanitize_gvcf = ch_vcf_tbi_standardized.map{ meta, vcf, _tbi -> [meta, vcf] }
+            SANITIZE_GVCF_RECORDS(ch_input_sanitize_gvcf, [[id: 'reference'], pathReferenceGenomeFasta])
+            ch_versions = ch_versions.mix(SANITIZE_GVCF_RECORDS.out.versions)
+            ch_output_from_sanitize_gvcf = SANITIZE_GVCF_RECORDS.out.vcf_tbi
         } else {
-            ch_output_from_handle_mnps = ch_vcf_tbi_standardized
+            ch_output_from_sanitize_gvcf = ch_vcf_tbi_standardized
         }
 
-        ch_grouped_by_family = ch_output_from_handle_mnps
+        ch_grouped_by_family = ch_output_from_sanitize_gvcf
             //Attach a familyId groupKey so groupTuple knows when each family is complete
             .map{ meta, vcf, tbi -> tuple(groupKey(meta.familyId, meta.sampleSize), meta, vcf, tbi) }
             .groupTuple()

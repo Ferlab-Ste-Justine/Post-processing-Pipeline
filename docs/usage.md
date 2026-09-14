@@ -144,20 +144,20 @@ Slivar output is always written to the `slivar` subfolder of `--outdir`.
 
 For more details on the pipeline outputs, see [output.md](output.md)
 
-### Enable or Disable GVCF Cleaning with `exclude_mnps`
+### Enable or Disable GVCF Cleaning with `gvcf_filtering`
 
-At the start of the workflow, by default, we run steps to filter out lines in the input gVCF files that could cause compatibility issues with the joint genotyping procedure.
+At the start of the workflow, by default, we run steps to sanitize the input gVCF files, removing records that could cause compatibility issues with the joint genotyping procedure.
 
-The following lines are removed:
+The following records are removed:
 
-- **Fake MNPs**: SNPs with incorrectly trimmed reference and alternate alleles that can be mistaken for MNPs by GATK's `CombineGVCF` step.
-- **Duplicated Positions**: Lines with duplicate positions, which can also cause issues with `CombineGVCF`.
+- **Records missing the required `<NON_REF>` allele**: every record in a valid gVCF must carry the `<NON_REF>` symbolic allele (used by joint genotyping to represent "some other possible allele"). Some gVCF producers occasionally emit records without it — for example, DRAGEN 4.4.7 has been observed to omit it from a small fraction of records — which otherwise makes GATK's `GenotypeGVCFs` fail outright with an error like `the list of input alleles must contain <NON_REF>`.
+- **Duplicated Positions**: lines with duplicate positions, which can also cause issues with `CombineGVCFs`.
 
-You can optionally skip this filtering logic if you have no reason to suspect that the underlying data problems will occur. To do so, set the `exclude_mnps` parameter to `false` (default is `true`).
+You can optionally skip this filtering logic if you have no reason to suspect that the underlying data problems will occur. To do so, set the `gvcf_filtering` parameter to `false` (default is `true`).
 
-Note that, despite the name, no true MNPs will be removed when the `exclude_mnps` parameter is set to true. The name originates from its original purpose of addressing fake MNPs.
+By default, this gVCF sanitization feature is enabled to maintain previous behaviour in CQDG. However, use this feature with caution. We may improve the pipeline to handle these issues differently in the future.
 
-By default, the gvcf cleaning feature is enabled to maintain previous behaviour in CQDG. However, use this feature with caution. We may improve the pipeline to handle these issues differently in the future.
+> **Note:** this parameter was previously named `exclude_mnps`. It was renamed because, despite the old name, the underlying filter never actually removed MNPs (multi-nucleotide polymorphisms) — that was a long-standing dead code path, not a deliberate design choice — and its real, working purpose has always been the record sanitization described above.
 
 ### Tools
 
@@ -335,7 +335,7 @@ NXF_OPTS='-Xms1g -Xmx4g'
 | `download_cache`                      | _Optional_ | Download vep cache (default: false)                                                                                                            |
 | `outdir_cache`                        | _Optional_ | Path to write the cache to. If not declared, cache will be written to `<outputdir>/cache/`                                                     |
 | `vep_outdir`                          | _Optional_ | If specified, publish vep output files to this location                                                                                        |
-| `exclude_mnps`                        | _Optional_ | Remove lines from input gvcf files that cause compatibility issues with specific pipeline steps (default: true).                               |
+| `gvcf_filtering`                      | _Optional_ | Sanitize input gvcf files by removing malformed (missing `<NON_REF>`) and duplicate-position records that cause compatibility issues with joint genotyping (default: true). |
 | `exomiser_data_dir`                   | _Optional_ | Path to the exomiser reference data directory                                                                                                  |
 | `exomiser_genome`                     | _Optional_ | Genome assembly version to be used by exomiser(`hg19` or `hg38`)                                                                               |
 | `exomiser_data_version`               | _Optional_ | Exomiser data version (e.g., `2402`)                                                                                                           |

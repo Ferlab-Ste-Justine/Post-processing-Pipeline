@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `Fixed`
 
 - [#106](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/106) BIOINFO-221: Allow `familyId` and `sample` to be specified as integers in the samplesheet, not only strings.
+- [#XXX](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/XXX) BIOINFO-222: `BCFTOOLS_FILTER` (in the renamed `SANITIZE_GVCF_RECORDS` subworkflow) now removes gVCF records missing the required `<NON_REF>` allele — a defect observed in ~0.005% of DRAGEN 4.4.7 gVCF records that otherwise makes `GATK4_GENOTYPEGVCFS` fail with `the list of input alleles must contain <NON_REF>`. This replaces the previous MNP-exclusion filter (`strlen(REF)>1 & strlen(REF)==strlen(ALT) & TYPE="snp"`), which could never match any record — bcftools classifies any same-length, >1bp substitution as `TYPE="mnp"`, never `TYPE="snp"`, so that expression was unsatisfiable for any input, from any caller.
 - [#108](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/pull/XXX) BIOINFO-220: Fix VEP annotation looking for the wrong cache subdirectory (e.g. `homo_sapiens` instead of `homo_sapiens_merged`) when a non-default `vep_annotation` cache flavor is set. VEP's `--merged`/`--mane` (or `--refseq`) flags and the MANE/RefSeq output fields are now also enabled automatically for the merged/refseq cache.
 
 ## [v3.0.0 - 2026-06-02]

@@ -1,0 +1,65 @@
+nextflow_workflow {
+
+    name "Test Subworkflow SANITIZE_GVCF_RECORDS"
+    script "../../subworkflows/local/sanitize_gvcf_records/main.nf"
+    workflow "SANITIZE_GVCF_RECORDS"
+    config "./nextflow.config"
+
+    tag "subworkflows"
+    tag "subworkflows_local"
+    tag "sanitize_gvcf_records"
+
+    // Lives outside modules/nf-core/**/tests/ and subworkflows/nf-core/**/tests/ on
+    // purpose -- both are ignored by nf-test.config. This is pipeline-specific
+    // regression coverage for BIOINFO-222, not upstream module boilerplate.
+    //
+    // For over a year, nothing validated this step's actual filter expression
+    // against realistic record shapes -- only generic nf-core module wiring
+    // tests existed. That's exactly how BCFTOOLS_FILTER's old MNP-exclusion
+    // expression (`strlen(REF)>1 & strlen(REF)==strlen(ALT) & TYPE="snp"`) went
+    // unnoticed as a complete no-op: bcftools classifies any same-length,
+    // >1bp substitution as TYPE="mnp", never TYPE="snp", so that condition
+    // could never match anything, for any input.
+    //
+    // The fixture below mirrors the exact record shapes used to diagnose that
+    // bug and verify the replacement (`-i 'ALT~"NON_REF"'`):
+    //   chr1:100  AT>GC,<NON_REF>  -- well-formed "true" MNP (kept)
+    //   chr1:200  C>T              -- malformed: missing <NON_REF> (dropped)
+    //   chr1:300  C>T,<NON_REF>    -- well-formed SNP (kept)
+    //   chr1:400  C><NON_REF>      -- well-formed ref-confidence block (kept)
+    //   chr1:500  AT>GC            -- malformed: missing <NON_REF> (dropped)
+    // chr1:200 and chr1:500 reproduce the DRAGEN 4.4.7 defect (a record
+    // missing the <NON_REF> allele GATK4_GENOTYPEGVCFS requires); the other
+    // three prove well-formed records -- SNP, MNP, and ref-block alike --
+    // survive untouched regardless of their TYPE.
+    test("keeps well-formed gVCF records, drops records missing <NON_REF>") {
+
+        when {
+            workflow {
+                """
+                input[0] = [
+                    [ id: 'sanitize_test' ],
+                    file("\${projectDir}/tests/sanitize_gvcf_records/fixtures/sanitize_test.vcf.gz", checkIfExists: true)
+                ]
+                input[1] = [
+                    [ id: 'reference' ],
+                    file("\${projectDir}/tests/sanitize_gvcf_records/fixtures/ref.fa", checkIfExists: true)
+                ]
+                """
+            }
+        }
+
+        then {
+            def records = path(workflow.out.vcf_tbi.get(0).get(1)).linesGzip.findAll { !it.startsWith('#') }
+            def positions = records.collect { it.tokenize('\t')[1] }
+
+            assertAll(
+                { assert workflow.success },
+                { assert positions.size() == 3 },
+                { assert positions.containsAll(['100', '300', '400']) },
+                { assert !positions.contains('200') },
+                { assert !positions.contains('500') }
+            )
+        }
+    }
+}

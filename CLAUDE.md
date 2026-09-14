@@ -94,6 +94,8 @@ nextflow run Ferlab-Ste-Justine/Post-processing-Pipeline -profile test,docker,ar
 
 To clean-up outputs, run `nextflow clean -f`.
 
+For the manual smoke-test routine (debug+test profile, plain test profile, and a VEP merged-cache check) as a single command, run `scripts/run-smoke-tests.sh` — it verifies `data-test/` is synced and Docker is running before starting, and leaves existing output directories in place rather than wiping them.
+
 ### Tests (nf-test)
 
 `nf-test` is the testing framework. Config in `nf-test.config` sets `profile "test"` (add `docker` on the command line, e.g. `--profile test,docker`). nf-core upstream tests are excluded via the `ignore` glob.
@@ -112,6 +114,8 @@ Test snapshots live alongside each module as `tests/main.nf.test.snap`.
 
 To clean-up test outputs, run `nf-test clean` or manually delete the `.test_output/` directory.
 
+`scripts/run-test-suite.sh` runs the full nf-test suite (unfiltered — every discoverable `.nf.test` file, so nothing new gets silently missed the way a hand-picked path list can) as a single pre-push gate, along with lint (see below).
+
 ### Linting
 
 CI lint workflow: `.github/workflows/linting.yml` (nf-core lint + nf-test). Run locally with:
@@ -127,6 +131,8 @@ To format the files before commiting run:
 ```bash
 pre-commit run --all-files
 ```
+
+`nf-core lint`/`pipelines lint --release` is also bundled into `scripts/run-test-suite.sh`, alongside the full nf-test suite. `pre-commit run --all-files` is deliberately left out of that script — it's already wired into `.github/workflows/linting.yml` and runs automatically on every PR, so it doesn't need duplicating locally too.
 
 ## Samplesheet format
 

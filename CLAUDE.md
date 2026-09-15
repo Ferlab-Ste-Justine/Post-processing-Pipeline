@@ -14,7 +14,7 @@ Nextflow version range: `>=23.10.1, <26.0.0`. Pipeline version is tracked in `ne
 
 The single entry workflow is in `main.nf`, which calls `POSTPROCESSING` in `workflows/postprocessing.nf`. That workflow is gated by the `--step` parameter so the pipeline can be entered at five points:
 
-1. `genotype` (default): standardize input VCFs → optional MNP exclusion → `COMBINEGVCFS` → `GATK4_GENOTYPEGVCFS` → tag artifacts (VQSR for WGS, GATK `VariantFiltration` hard-filtering for WES)
+1. `genotype` (default): standardize input VCFs → optional gVCF record sanitization → `COMBINEGVCFS` → `GATK4_GENOTYPEGVCFS` → tag artifacts (VQSR for WGS, GATK `VariantFiltration` hard-filtering for WES)
 2. `normalize`: starts from filtered VCFs → `SPLIT_MULTIALLELICS` (bcftools norm)
 3. `annotation`: starts from normalized VCFs → VEP (`VCF_ANNOTATE_ENSEMBLVEP`); cache is downloaded via `ENSEMBLVEP_DOWNLOAD` when `--download_cache` is set
 4. `inheritance`: starts from VEP-annotated VCFs → `SLIVAR_INHERITANCE` (tags by mode of inheritance, detects compound heterozygotes)
@@ -34,8 +34,8 @@ main.nf                      # Entry point — calls PIPELINE_INITIALISATION, FE
 nextflow.config              # Params, profiles, per-process resources, manifest
 nextflow_schema.json         # Authoritative parameter schema (use this, not the README)
 nf-test.config               # nf-test runner config (profile "test")
-workflows/postprocessing.nf  # Main POSTPROCESSING workflow — step gating + inlined stage logic (standardize, MNP handling, artifact tagging, VEP/slivar/exomiser branches); the old helper closures were inlined in v3.0.0 (their names survive only as `ch_output_from_*` channels)
-subworkflows/local/          # exclude_mnps, vqsr, slivar_inheritance, channel_create_csv, utils_nfcore_postprocessing_pipeline
+workflows/postprocessing.nf  # Main POSTPROCESSING workflow — step gating + inlined stage logic (standardize, gVCF sanitization, artifact tagging, VEP/slivar/exomiser branches); the old helper closures were inlined in v3.0.0 (their names survive only as `ch_output_from_*` channels)
+subworkflows/local/          # sanitize_gvcf_records, vqsr, slivar_inheritance, channel_create_csv, utils_nfcore_postprocessing_pipeline
 subworkflows/nf-core/        # utils_nextflow_pipeline, utils_nfcore_pipeline, utils_nfschema_plugin, vcf_annotate_ensemblvep
 modules/local/               # combine_gvcfs, exomiser, gatk4/applyvqsr, slivar/{expr,compoundhets}, split_multiallelics
 modules/nf-core/             # bcftools (annotate/filter/norm/view), ensemblvep (vep, download), gatk4 (genotypegvcfs, variantfiltration, variantrecalibrator), tabix
@@ -94,6 +94,8 @@ nextflow run Ferlab-Ste-Justine/Post-processing-Pipeline -profile test,docker,ar
 
 To clean-up outputs, run `nextflow clean -f`.
 
+For the manual smoke-test routine (debug+test profile, plain test profile, and a VEP merged-cache check) as a single command, run `scripts/run-smoke-tests.sh` — it verifies `data-test/` is synced and Docker is running before starting, and leaves existing output directories in place rather than wiping them.
+
 ### Tests (nf-test)
 
 `nf-test` is the testing framework. Config in `nf-test.config` sets `profile "test"` (add `docker` on the command line, e.g. `--profile test,docker`). nf-core upstream tests are excluded via the `ignore` glob.
@@ -112,6 +114,8 @@ Test snapshots live alongside each module as `tests/main.nf.test.snap`.
 
 To clean-up test outputs, run `nf-test clean` or manually delete the `.test_output/` directory.
 
+`scripts/run-test-suite.sh` runs the full nf-test suite (unfiltered — every discoverable `.nf.test` file, so nothing new gets silently missed the way a hand-picked path list can) as a single pre-push gate, along with lint (see below).
+
 ### Linting
 
 CI lint workflow: `.github/workflows/linting.yml` (nf-core lint + nf-test). Run locally with:
@@ -127,6 +131,8 @@ To format the files before commiting run:
 ```bash
 pre-commit run --all-files
 ```
+
+`nf-core lint`/`pipelines lint --release` is also bundled into `scripts/run-test-suite.sh`, alongside the full nf-test suite. `pre-commit run --all-files` is deliberately left out of that script — it's already wired into `.github/workflows/linting.yml` and runs automatically on every PR, so it doesn't need duplicating locally too.
 
 ## Samplesheet format
 

@@ -1,13 +1,14 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
-name: "exclude_mnps"
+name: "sanitize_gvcf_records"
 description: |
-  Drop multi-nucleotide polymorphisms (MNPs) from each input GVCF, then left-normalize the
-  remainder against the reference. BCFTOOLS_FILTER discards records where REF and ALT have
-  equal length greater than 1bp; BCFTOOLS_NORM then left-aligns and merges duplicates.
+  Drop malformed records from each input GVCF, then left-normalize the remainder against the
+  reference. BCFTOOLS_FILTER discards records missing the required <NON_REF> allele (e.g. the
+  DRAGEN 4.4.7 defect that otherwise makes GATK4_GENOTYPEGVCFS fail -- BIOINFO-222);
+  BCFTOOLS_NORM then left-aligns indels and removes duplicate-position records.
 keywords:
   - vcf
+  - gvcf
   - bcftools
-  - mnp
   - filter
   - normalize
 components:
@@ -25,7 +26,7 @@ input:
 output:
   - vcf_tbi:
       description: |
-        MNP-filtered, left-normalized VCF and its tabix index
+        Sanitized, left-normalized VCF and its tabix index
         Structure: [ val(meta), path(vcf), path(tbi) ]
   - versions:
       description: |

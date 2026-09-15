@@ -548,7 +548,7 @@ function po_adj(individual) {
     if ((alt === 1 || alt === 2) && ad_alt > 0 && ad_alt < 3) { return -1; }
     if (alt === 0 && ad_ref > 0 && ad_ref < 3) { return -1; }
   }
-  return a;
+  return alt;
 }
 
 // chrom/pos: pass variant.CHROM, variant.POS. kid/dad/mom: slivar sample

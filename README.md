@@ -94,7 +94,7 @@ See [docs/output.md](docs/output.md) for more details about pipeline outputs.
 
 ## Credits
 
-Ferlab-Ste-Justine/Post-processing-Pipeline was originally written by Damien Geneste, David Morais, Felix-Antoine Le Sieur, Jeremy Costanza, Lysiane Bouchard, Georgette Femerling.
+Ferlab-Ste-Justine/Post-processing-Pipeline was originally written by Damien Geneste, David Morais, Felix-Antoine Le Sieur, Jeremy Costanza, Lysiane Bouchard, Georgette Femerling, Julien Tremblay.
 
 ## Contributions and Support
 

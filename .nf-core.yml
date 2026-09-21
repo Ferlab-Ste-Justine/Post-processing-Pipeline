@@ -19,8 +19,24 @@ lint:
     - assets/email_template.html
     - assets/email_template.txt
     - assets/sendmail_template.txt
+    # Newer nf-core template's sharded nf-test CI pattern -- this repo already has its own
+    # working .github/workflows/ci.yml + linting.yml, so this isn't being adopted.
+    - .github/workflows/nf-test.yml
+    - .github/actions/get-shards/action.yml
+    - .github/actions/nf-test/action.yml
+    - .github/workflows/pr-comment.yml
+    - docs/CONTRIBUTING.md
+    - assets/multiqc_config.yml # No MultiQC in this pipeline
+    - conf/igenomes_ignored.config # Superseded by this repo's own conf/igenomes.config
+    - ro-crate-metadata.json # Already excluded from pre-commit too
   files_unchanged: false
   multiqc_config: false
+  # Points at https://github.com/nf-core/configs' pipeline/<name>.config, which only exists for
+  # published nf-core pipelines -- this repo isn't one, so that file will never exist there.
+  included_configs: false
+  pipeline_name_conventions: false # Renaming the repo (uppercase/hyphens) would be a breaking change
+  readme:
+    - nfcore_template_badge # Not a published nf-core pipeline, so this badge doesn't apply
   nextflow_config:
     - manifest.name
     - manifest.homePage
@@ -35,7 +51,7 @@ lint:
         - params.exomiser_analysis_wes
         - params.exomiser_analysis_wgs
         - params.slivar_js
-nf_core_version: 3.2.0
+nf_core_version: 4.1.0
 repository_type: pipeline
 template:
   org: Ferlab-Ste-Justine

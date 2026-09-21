@@ -10,6 +10,7 @@ keywords:
 components:
   - slivar/expr
   - slivar/compoundhets
+  - bcftools/annotate
 input:
   - ch_vcf_ped:
       description: |

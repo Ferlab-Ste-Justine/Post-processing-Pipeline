@@ -173,17 +173,17 @@ Slivar treats each family independently. The same variant can fire different tag
 
 For families that form a complete trio (affected proband + both parents), each variant additionally carries at most one parental-origin `INFO` tag, computed by `parental_origin()` in [`assets/slivar-functions.js`](../assets/slivar-functions.js) and wired up via the `--trio` expressions in [`conf/slivar.config`](../conf/slivar.config). Non-trio families do not get these tags.
 
-| Tag                    | Meaning                                                                                          |
-| ---------------------- | ------------------------------------------------------------------------------------------------- |
-| `po_denovo`            | Neither parent's genotype explains the proband's alt allele(s) — apparent de novo variant.        |
-| `po_mother`            | The proband's alt allele(s) are explained by the mother's genotype alone.                         |
-| `po_father`            | The proband's alt allele(s) are explained by the father's genotype alone.                         |
-| `po_both`              | The proband is hom-alt and both parents carry the alt allele — origin cannot be narrowed further. |
-| `po_ambiguous`         | Both parents' genotypes are consistent with having transmitted the allele; origin can't be resolved. |
-| `po_possible_denovo`   | One parent is hom-ref and the other is unknown — de novo is possible but not confirmed.            |
-| `po_possible_mother`   | The mother's genotype is consistent with transmission, but the father's genotype is unknown.       |
-| `po_possible_father`   | The father's genotype is consistent with transmission, but the mother's genotype is unknown.       |
-| `po_unknown`           | Origin cannot be determined — a required genotype is missing, or was downgraded due to low read depth (allele depth between 1 and 2 reads is treated as unreliable and reset to unknown before origin is resolved). |
+| Tag                  | Meaning                                                                                                                                                                                                             |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `po_denovo`          | Neither parent's genotype explains the proband's alt allele(s) — apparent de novo variant.                                                                                                                          |
+| `po_mother`          | The proband's alt allele(s) are explained by the mother's genotype alone.                                                                                                                                           |
+| `po_father`          | The proband's alt allele(s) are explained by the father's genotype alone.                                                                                                                                           |
+| `po_both`            | The proband is hom-alt and both parents carry the alt allele — origin cannot be narrowed further.                                                                                                                   |
+| `po_ambiguous`       | Both parents' genotypes are consistent with having transmitted the allele; origin can't be resolved.                                                                                                                |
+| `po_possible_denovo` | One parent is hom-ref and the other is unknown — de novo is possible but not confirmed.                                                                                                                             |
+| `po_possible_mother` | The mother's genotype is consistent with transmission, but the father's genotype is unknown.                                                                                                                        |
+| `po_possible_father` | The father's genotype is consistent with transmission, but the mother's genotype is unknown.                                                                                                                        |
+| `po_unknown`         | Origin cannot be determined — a required genotype is missing, or was downgraded due to low read depth (allele depth between 1 and 2 reads is treated as unreliable and reset to unknown before origin is resolved). |
 
 Origin is resolved separately depending on the variant's location: autosomal and pseudoautosomal (PAR) sites use one lookup table (proband, father, and mother all diploid); non-PAR X and Y sites use sex-aware tables that account for male hemizygosity. This requires genotypes to be in diploid GT notation — see the [ploidy normalization note](usage.md#starting-with-normalization---step-normalize) in the usage docs, which this tagging depends on for callers (e.g. DRAGEN) that emit true haploid calls on non-PAR X/Y.
 

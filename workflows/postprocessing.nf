@@ -252,7 +252,7 @@ workflow POSTPROCESSING {
         // PL/AD-array inconsistency risk of touching raw gVCFs, and covers both
         // VEP (-> slivar) and exomiser's default (non-VEP) input in one step.
         BCFTOOLS_PLUGINFIXPLOIDY(ch_output_from_splitMultiAllelics, [], [], [], [])
-        ch_versions = ch_versions.mix(BCFTOOLS_PLUGINFIXPLOIDY.out.versions) // JT: I had to add this so that it shows in Processing-Pipeline_software_mqc_versions.yml (like every other tool) 
+        ch_versions = ch_versions.mix(BCFTOOLS_PLUGINFIXPLOIDY.out.versions) // JT: I had to add this so that it shows in Processing-Pipeline_software_mqc_versions.yml (like every other tool)
         ch_output_from_splitMultiAllelics = BCFTOOLS_PLUGINFIXPLOIDY.out.vcf.join(BCFTOOLS_PLUGINFIXPLOIDY.out.index)
 
         if (params.save_genotyped || !params.tools) {

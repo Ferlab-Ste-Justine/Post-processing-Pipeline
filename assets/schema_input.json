@@ -14,7 +14,7 @@
                 "meta": ["sample"]
             },
             "familyId": {
-                "type":["string", "integer"],
+                "type": ["string", "integer"],
                 "pattern": "^\\S+$",
                 "errorMessage": "familyId must be provided and cannot contain spaces",
                 "meta": ["familyId"]

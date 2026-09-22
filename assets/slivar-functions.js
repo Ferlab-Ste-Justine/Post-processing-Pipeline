@@ -342,7 +342,7 @@ function moi_candidate(fam) {
 //   In other words:
 //     what fraction of this person's copies at this site are alt?"
 //     0 = 0% alt (all copies ref)
-//     1 = 50% alt (exactly possible only with 2 copies: one ref, one alt — heterozygous) 
+//     1 = 50% alt (exactly possible only with 2 copies: one ref, one alt — heterozygous)
 //     2 = 100% alt (every copy present is alt)
 // They never expose raw genotype ploidy (a true haploid "1" GT vs a diploid
 // "1/1" GT). The Python implementation leans on that raw ploidy, in a few
@@ -379,21 +379,21 @@ var UNKNOWN = "UNKNOWN";
 
 // Autosomal: keyed "kid_dad_mom" dosage. Exact port of AUTOSOMAL_ORIGINS_LOOKUP.
 /*
-break down the key format: "kid_dad_mom", where each number is that sample's dosage — 
-how many copies of the alt allele they carry at this position (matching Slivar's own 
+break down the key format: "kid_dad_mom", where each number is that sample's dosage —
+how many copies of the alt allele they carry at this position (matching Slivar's own
 .alts convention: -1 unknown, 0 hom-ref, 1 het, 2 hom-alt).
-A person is diploid — two copies of each autosome, one from each parent. So dosage 2 
-doesn't mean "two alt alleles that arrived together," it means the genotype call is 
+A person is diploid — two copies of each autosome, one from each parent. So dosage 2
+doesn't mean "two alt alleles that arrived together," it means the genotype call is
 1/1: both of that person's copies at this position are the alt allele. Dosage 0 = 0/0
  (both copies ref), 1 = 0/1 (one ref, one alt — heterozygous).
       Example:
-      "2_0_0": DENOVO — kid is 1/1 (has alt on both copies), dad is 0/0, mom is 0/0. 
-      Neither parent has a single alt allele between them, yet the kid has two. 
-      That's not really explainable by a single ordinary transmission event — normally 
-      you'd need an alt allele from at least one parent to end up with even one copy 
-      in the kid. This bucket is really "unexplained by the observed parental genotypes" 
-      — it's labeled DENOVO as the best-fit bucket, but with two alt copies and zero alt 
-      alleles in either parent, this combination in real data is more often a 
+      "2_0_0": DENOVO — kid is 1/1 (has alt on both copies), dad is 0/0, mom is 0/0.
+      Neither parent has a single alt allele between them, yet the kid has two.
+      That's not really explainable by a single ordinary transmission event — normally
+      you'd need an alt allele from at least one parent to end up with even one copy
+      in the kid. This bucket is really "unexplained by the observed parental genotypes"
+      — it's labeled DENOVO as the best-fit bucket, but with two alt copies and zero alt
+      alleles in either parent, this combination in real data is more often a
       genotyping/Mendelian-inconsistency flag than a literal two-mutation event.
 */
 // REVIEW CANDIDATE: "2_1_-1" / "2_2_-1" (dad known-alt, mom unknown) and their   <-------
@@ -430,7 +430,7 @@ var AUTOSOMAL_ORIGINS = { // i.e. non-sex chromosomes AND PAR regions
 // a non-carrier and parental_origin is only ever evaluated for a carrier).
 // Outside PAR, dad's X is never transmitted to a son -- his genotype here
 // is diagnostic context only, never the true source of the son's allele.
-// dad_mom. Only 2 numbers (not 3) because kid dosage is always 2 
+// dad_mom. Only 2 numbers (not 3) because kid dosage is always 2
 // (or more precisely 100% alt-allele. Remember that a row only exists because the kid carries something.)
 //
 // REVIEW CANDIDATE 1 "1_0" / "2_0"                                               <-------
@@ -457,7 +457,7 @@ var X_SON_ORIGINS = {
   "-1_0": POSSIBLE_DENOVO,  "-1_1": MOTHER,           "-1_2": MOTHER,              "-1_-1": UNKNOWN,
   "1_0":  FATHER,   // Should be POSSIBLE_FATHER?
   "2_0":  FATHER,   // Should be POSSIBLE_FATHER?
-  "1_1":  AMBIGUOUS // Should me MOTHER? ** discussed with David 
+  "1_1":  AMBIGUOUS // Should me MOTHER? ** discussed with David
 };
 // JT: hoW CAN A FATHER BE 2?
 // After fixploidy, will all Dads be 2s? Even GATK vcfs should be always 2?
@@ -510,7 +510,7 @@ var X_DAUGHTER_ORIGINS = {
 // introduced by this port.
 var Y_ORIGINS = {
   "0_-1": DENOVO,   "2_-1": FATHER,      "-1_-1": UNKNOWN,
-  "0_0":  DENOVO,   
+  "0_0":  DENOVO,
   "0_1":  MOTHER,      "0_2":   MOTHER, // Should not happen
   "1_0":  FATHER,   "1_1":  AMBIGUOUS,   "1_2":   AMBIGUOUS, // Here, why AMBIGUOUS when MOM cannot give her non-existent Y chromosome?
   "2_0":  FATHER,   "2_1":  AMBIGUOUS,   "2_2":   AMBIGUOUS  // Here, why AMBIGUOUS when MOM cannot give her non-existent Y chromosome?

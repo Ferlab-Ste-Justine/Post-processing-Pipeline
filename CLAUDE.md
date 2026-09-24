@@ -114,7 +114,7 @@ Test snapshots live alongside each module as `tests/main.nf.test.snap`.
 
 To clean-up test outputs, run `nf-test clean` or manually delete the `.test_output/` directory.
 
-`scripts/run-test-suite.sh` runs the full nf-test suite (unfiltered — every discoverable `.nf.test` file, so nothing new gets silently missed the way a hand-picked path list can) as a single pre-push gate, along with lint (see below).
+`scripts/run-test-suite.sh` runs the full nf-test suite (unfiltered — every discoverable `.nf.test` file, so nothing new gets silently missed the way a hand-picked path list can) as a single pre-push gate, along with lint (see below), pre-commit, an installed-nf-core-CLI-version check, and a launch check under the pipeline's declared minimum Nextflow version.
 
 ### Linting
 
@@ -132,7 +132,7 @@ To format the files before commiting run:
 pre-commit run --all-files
 ```
 
-`nf-core lint`/`pipelines lint --release` is also bundled into `scripts/run-test-suite.sh`, alongside the full nf-test suite. `pre-commit run --all-files` is deliberately left out of that script — it's already wired into `.github/workflows/linting.yml` and runs automatically on every PR, so it doesn't need duplicating locally too.
+`nf-core lint`/`pipelines lint --release` and `pre-commit run --all-files` are also bundled into `scripts/run-test-suite.sh`, alongside the full nf-test suite — duplicated on purpose with `.github/workflows/linting.yml` so formatting issues surface locally before CI does.
 
 ## Samplesheet format
 

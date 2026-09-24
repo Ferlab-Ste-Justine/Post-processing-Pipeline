@@ -136,9 +136,59 @@
                 "split/family3.splitted.vcf.gz.tbi",
                 "split/family4.splitted.vcf.gz",
                 "split/family4.splitted.vcf.gz.tbi"
-            ]
+            ],
+            {
+                "BCFTOOLS_FILTER": {
+                    "bcftools": 1.2
+                },
+                "BCFTOOLS_NORM": {
+                    "bcftools": 1.2
+                },
+                "BCFTOOLS_PLUGINFIXPLOIDY": {
+                    "bcftools": "1.23.1"
+                },
+                "BCFTOOLS_VIEW": {
+                    "bcftools": 1.2
+                },
+                "COMBINEGVCFS": {
+                    "gatk4": "4.5.0.0"
+                },
+                "ENSEMBLVEP_VEP": {
+                    "ensemblvep": 114.2
+                },
+                "EXOMISER": {
+                    "exomiser": "14.0.0"
+                },
+                "GATK4_APPLYVQSR_INDEL": {
+                    "gatk4": "4.5.0.0"
+                },
+                "GATK4_APPLYVQSR_SNP": {
+                    "gatk4": "4.5.0.0"
+                },
+                "GATK4_GENOTYPEGVCFS": {
+                    "gatk4": "4.5.0.0"
+                },
+                "GATK4_VARIANTFILTRATION": {
+                    "gatk4": "4.5.0.0"
+                },
+                "GATK4_VARIANTRECALIBRATOR_INDEL": {
+                    "gatk4": "4.5.0.0"
+                },
+                "GATK4_VARIANTRECALIBRATOR_SNP": {
+                    "gatk4": "4.5.0.0"
+                },
+                "SPLIT_MULTIALLELICS": {
+                    "bcftools": 1.2
+                },
+                "TABIX_TABIX": {
+                    "tabix": 1.2
+                },
+                "Workflow": {
+                    "Ferlab-Ste-Justine/Post-Processing-Pipeline": "v3.0.0"
+                }
+            }
         ],
-        "timestamp": "2026-08-26T19:46:29.428061295",
+        "timestamp": "2026-09-21T19:40:13.674716225",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "24.10.5"

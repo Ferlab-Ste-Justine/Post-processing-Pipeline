@@ -28,6 +28,9 @@ nextflow_pipeline {
                     stable_name,
                     // All files with stable contents
                     // stable_path
+                    // Aggregated software versions, with the Nextflow version itself stripped
+                    // (varies per environment/matrix entry, so it isn't stable across runs)
+                    removeNextflowVersion("$outputDir/pipeline_info/Post-Processing-Pipeline_software_mqc_versions.yml")
                 ).match() },
                 // BIOINFO-220 regression guard, default-cache side: with no vep_annotation
                 // set, the CSQ header must NOT carry the merged-only fields (SOURCE,

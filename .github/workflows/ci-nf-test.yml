@@ -23,6 +23,7 @@ jobs:
           - "23.10.1"
           - "24.10.5"
           - "25.10.4"
+          - "latest-everything"
     env:
       NXF_FILE_ROOT: ${{ github.workspace }}
 
@@ -40,7 +41,7 @@ jobs:
           aws s3 cp s3://ferlab-public-dataset/nextflow/Post-Processing-Pipeline/V7/data-test data-test --recursive
 
       - name: Install Nextflow
-        uses: nf-core/setup-nextflow@v2
+        uses: nf-core/setup-nextflow@6c2e22b4d901f0c42ca66c5069f8026df026d165 # v2.1.4
         with:
           version: "${{ matrix.NXF_VER }}"
 
@@ -53,6 +54,7 @@ jobs:
         uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
 
       - name: Run nf-test
+        continue-on-error: ${{ matrix.NXF_VER == 'latest-everything' }}
         run: |
           nf-test test \
             --profile=+${{ matrix.profile }} \

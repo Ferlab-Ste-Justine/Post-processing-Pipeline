@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "channel_create_csv"
+description: |
+  Writes a per-step CSV manifest of published output files (one row per family, one column
+  per file type), keyed by each file's meta map. The CSV emitted for one pipeline step is a
+  valid `--input` for the next step, which is what makes restarting from intermediate steps
+  work (see docs/output.md).
+keywords:
+  - csv
+  - manifest
+  - restart
+components: []
+input:
+  - ch_input:
+      description: |
+        Channel of published output files with metadata
+        Structure: [ val(meta), path(file1), path(file2), ... ]
+  - tool:
+      type: string
+      description: Name of the pipeline step/tool the CSV is being generated for (used in the output filename and as the default subdirectory under outdir)
+  - outdir:
+      type: string
+      description: Pipeline output directory (params.outdir)
+  - tool_outdir:
+      type: string
+      description: Optional override for the tool's output directory referenced in the CSV's file paths. Defaults to "${outdir}/${tool}" when not provided.
+output: []
+authors:
+  - "@georgette-femerling"
+maintainers:
+  - "@georgette-femerling"

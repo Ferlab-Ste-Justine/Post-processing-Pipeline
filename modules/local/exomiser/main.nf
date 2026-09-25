@@ -85,7 +85,7 @@ process EXOMISER {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        "exomiser": "\$(cat /EXOMISER_VERSION.txt)"
+        "exomiser": "\$(basename /app/libs/exomiser-core-*.jar .jar | cut -d- -f3-)"
     END_VERSIONS
     """
 
@@ -102,7 +102,7 @@ process EXOMISER {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-       "exomiser": "\$(cat /EXOMISER_VERSION.txt)"
+       "exomiser": "\$(basename /app/libs/exomiser-core-*.jar .jar | cut -d- -f3-)"
     END_VERSIONS
     """
 }

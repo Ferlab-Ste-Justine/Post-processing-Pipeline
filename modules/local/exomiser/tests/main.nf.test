@@ -57,8 +57,8 @@ nextflow_process {
                     file(process.out.genetsv[0][1]).name,
                     file(process.out.variantstsv[0][1]).name
                 ).match() }
-                // Versions intentionally not snapshotted: the stub's `cat /EXOMISER_VERSION.txt`
-                // depends on whatever the container has baked in, which is mutable across image rebuilds.
+                // Versions intentionally not snapshotted: the stub reads the exomiser version from the
+                // jar filename inside the container, so it depends on which image is configured.
             )
         }
     }

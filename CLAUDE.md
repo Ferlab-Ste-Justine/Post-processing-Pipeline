@@ -40,7 +40,6 @@ subworkflows/nf-core/        # utils_nextflow_pipeline, utils_nfcore_pipeline, u
 modules/local/               # combine_gvcfs, exomiser, gatk4/applyvqsr, slivar/{expr,compoundhets}, split_multiallelics
 modules/nf-core/             # bcftools (annotate/filter/norm/view), ensemblvep (vep, download), gatk4 (genotypegvcfs, variantfiltration, variantrecalibrator), tabix
 conf/                        # base.config, modules.config, slivar.config, igenomes.config, test.config, test_full.config
-containers/                  # Dockerfiles for exomiser and exomiser-13
 assets/                      # TestSampleSheet.csv, schema_input.json, slivar-functions.js, exomiser/ (default analysis YAMLs)
 docs/                        # usage.md, output.md, reference_data.md
 ```

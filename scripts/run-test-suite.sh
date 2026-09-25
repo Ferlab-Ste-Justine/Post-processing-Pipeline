@@ -5,7 +5,7 @@
 # Fail-fast (set -e) so the first broken step stops the script.
 #
 # pre-commit is now included here -- it's still wired into
-# .github/workflows/linting.yml too (duplicated on purpose), so a local run
+# .github/workflows/ci-linting.yml too (duplicated on purpose), so a local run
 # catches formatting issues before CI does rather than after.
 #
 # Unlike quality-control-pipeline's run-test-suite.sh, there's no commit
@@ -15,7 +15,7 @@
 # Not covered here, left to CI: .github/workflows/ci-nf-test.yml's NXF_VER
 # matrix only ever runs the full nf-test suite under this machine's single
 # installed Nextflow version (see step 4) -- it does NOT also run the full
-# suite under every CI-pinned version (23.10.1, 25.10.4, latest-everything),
+# suite under every CI-pinned version (24.10.5, 25.10.4, latest-everything),
 # since that would mean installing/switching Nextflow versions and roughly
 # quadrupling this script's runtime. Step 3 only smoke-checks the floor.
 #
@@ -48,7 +48,7 @@ step() { echo; echo "==> $1"; }
 # If .snap file needs to be generated.
 # nf-test test modules/local/slivar_expr --updateSnapshot
 
-# Mirrors linting.yml's "nf-core" job, which reads nf_core_version from
+# Mirrors ci-linting.yml's "nf-core" job, which reads nf_core_version from
 # .nf-core.yml and installs exactly that version before linting -- a locally
 # drifted nf-core CLI could pass/fail differently than CI without this check.
 nf_core_pinned=$(grep -oP "nf_core_version:\s*\K[0-9.]+" .nf-core.yml)

@@ -19,11 +19,10 @@ lint:
     - assets/email_template.html
     - assets/email_template.txt
     - assets/sendmail_template.txt
-    # Newer nf-core template's sharded nf-test CI pattern -- this repo already has its own
-    # working .github/workflows/ci.yml + linting.yml, so this isn't being adopted.
+    # This repo uses the nf-core template's sharded nf-test design, but its workflow files
+    # carry a ci- prefix (ci-nf-test.yml, ci-linting.yml), and it doesn't post PR comments.
     - .github/workflows/nf-test.yml
-    - .github/actions/get-shards/action.yml
-    - .github/actions/nf-test/action.yml
+    - .github/workflows/linting.yml
     - .github/workflows/pr-comment.yml
     - docs/CONTRIBUTING.md
     - assets/multiqc_config.yml # No MultiQC in this pipeline

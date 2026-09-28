@@ -25,6 +25,25 @@ _Decided 2026-09-28, BIOINFO-231._
 - For single-commit PRs, GitHub's default squash message is the commit's own message, not the PR title. An admin should set Settings → General → Pull Requests → "Default commit message" for squash merging to "Pull request title" (or "Pull request title and commit details") so the checked title is what lands on `main`.
 - quality-control-pipeline and cnv-post-processing still use the Ferlab action with merge commits. Moving them to squash plus this title check keeps the three pipelines consistent with each other and with the lab guideline.
 
+### Keep `ci-full-run.yml` alongside the nf-test pipeline tests
+
+_Decided 2026-09-28, BIOINFO-231. Applies to all three pipelines._
+
+**Decision:** keep `ci-full-run.yml`, a plain `nextflow run . -profile test,docker` on Nextflow 24.10.5 and 25.10.4, on every pull request, push to `main` and `v*` tag, even though `nf-test.yml`'s pipeline tests (`tests/default.nf.test`) also run the pipeline end to end with `-profile test,docker`.
+
+**Why:**
+
+- On pull requests, nf-test only runs the tests affected by the PR (`--changed-since HEAD^`). It works that out by following `include` statements between `.nf` files, plus the `triggers` list in `nf-test.config`. A PR that only changes files outside both, such as `conf/modules.config`, `conf/slivar.config`, `assets/slivar-functions.js` or `assets/schema_input.json`, can skip the pipeline test entirely.
+- That gap is real: the parental-origin bug (BIOINFO-217, fixed in #110) lived in `assets/slivar-functions.js`, and the full run in `ci.yml` (now `ci-full-run.yml`) is the job that caught it in CI.
+- `ci-full-run.yml` always runs, whatever the PR changes, so it gives a signal that doesn't depend on change detection.
+
+**Cost:** one extra full pipeline run per Nextflow version on every PR, partly overlapping the nf-test pipeline test. We accept that cost for a check that doesn't depend on change detection.
+
+**Considered and set aside:**
+
+- Dropping `ci-full-run.yml` and relying on nf-test alone, possibly after adding the `conf/` files to `triggers`. That leaves any file outside the `include` graph and outside `triggers` untested, and every new asset would have to be remembered in `triggers`.
+- Using `ci-full-run.yml` to test another container engine instead. Production runs on Kubernetes, which can't reasonably be tested on GitHub's hosted runners.
+
 ## TODO
 
 ### Require `confirm-pass` before merging into `main`
@@ -48,3 +67,15 @@ Once required, a failing check blocks every merge method (squash and merge, merg
 4. Apply the same rule, and the same `confirm-pass` change, to quality-control-pipeline and cnv-post-processing, which use the same `nf-test.yml` design.
 
 **Who:** someone with admin rights on the repository.
+
+### Test starting the pipeline from a later step
+
+_Noted 2026-09-28, BIOINFO-231._
+
+`tests/default.nf.test` only runs the default `genotype` step. Restarting from `normalize`, `annotation`, `inheritance` or `exomiser` with the CSV manifests written by a previous run (`channel_create_csv`, see `docs/output.md`) is a real feature that no test covers. Add it as an nf-test pipeline test rather than in `ci-full-run.yml`, so it gets real checks: for example, a first run with `-profile test`, then a second one with `--step annotation --input <outdir>/csv/normalized_genotypes.csv`, checking that it succeeds and produces the expected outputs.
+
+### Check the official exomiser image on Kubernetes before releasing BIOINFO-232
+
+_Noted 2026-09-28, BIOINFO-231._
+
+BIOINFO-232 (#114) switched `EXOMISER` to the official `exomiser/exomiser-cli:14.0.0-bash` image, whose `ENTRYPOINT` is `/bin/bash`. The `--entrypoint ""` override that makes it work is only set in the `docker` and `podman` profiles. Production runs on Kubernetes. Nextflow's Kubernetes executor is expected to set the pod's `command`, which overrides the image's `ENTRYPOINT`, so it should work without the override. That hasn't been tested, though. Before a release containing BIOINFO-232 reaches production, run the pipeline (or at least the `EXOMISER` step) once on a production-like Kubernetes setup. If exomiser fails with `/bin/bash: /bin/bash: cannot execute binary file` (exit 126), the entrypoint needs clearing for Kubernetes too.

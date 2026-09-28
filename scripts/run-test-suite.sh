@@ -5,14 +5,14 @@
 # Fail-fast (set -e) so the first broken step stops the script.
 #
 # pre-commit is now included here -- it's still wired into
-# .github/workflows/ci-linting.yml too (duplicated on purpose), so a local run
+# .github/workflows/linting.yml too (duplicated on purpose), so a local run
 # catches formatting issues before CI does rather than after.
 #
 # Unlike quality-control-pipeline's run-test-suite.sh, there's no commit
 # message lint step here: this repo has no .github/workflows/commit_lint.yml
 # to mirror -- add one if/when this repo adopts that convention too.
 #
-# Not covered here, left to CI: .github/workflows/ci-nf-test.yml's NXF_VER
+# Not covered here, left to CI: .github/workflows/nf-test.yml's NXF_VER
 # matrix only ever runs the full nf-test suite under this machine's single
 # installed Nextflow version (see step 4) -- it does NOT also run the full
 # suite under every CI-pinned version (24.10.5, 25.10.4, latest-everything),
@@ -48,7 +48,7 @@ step() { echo; echo "==> $1"; }
 # If .snap file needs to be generated.
 # nf-test test modules/local/slivar_expr --updateSnapshot
 
-# Mirrors ci-linting.yml's "nf-core" job, which reads nf_core_version from
+# Mirrors linting.yml's "nf-core" job, which reads nf_core_version from
 # .nf-core.yml and installs exactly that version before linting -- a locally
 # drifted nf-core CLI could pass/fail differently than CI without this check.
 nf_core_pinned=$(grep -oP "nf_core_version:\s*\K[0-9.]+" .nf-core.yml)
@@ -64,7 +64,7 @@ step "[2/6] pre-commit (prettier, trailing-whitespace, end-of-file-fixer)"
 pre-commit run --all-files
 
 # Only CI actually runs the pipeline under multiple pinned Nextflow versions
-# (see .github/workflows/ci-nf-test.yml's NXF_VER matrix) -- this just checks
+# (see .github/workflows/nf-test.yml's NXF_VER matrix) -- this just checks
 # the one boundary that's most likely to be wrong: the floor manifest.nextflowVersion
 # itself claims to support. `--help` is NOT enough for this: nf-schema answers
 # --help straight from nextflow_schema.json without ever executing main.nf's

@@ -19,11 +19,7 @@ lint:
     - assets/email_template.html
     - assets/email_template.txt
     - assets/sendmail_template.txt
-    # This repo uses the nf-core template's sharded nf-test design, but its workflow files
-    # carry a ci- prefix (ci-nf-test.yml, ci-linting.yml), and it doesn't post PR comments.
-    - .github/workflows/nf-test.yml
-    - .github/workflows/linting.yml
-    - .github/workflows/pr-comment.yml
+    - .github/workflows/pr-comment.yml # No PR comment bot in this repo
     - docs/CONTRIBUTING.md
     - assets/multiqc_config.yml # No MultiQC in this pipeline
     - conf/igenomes_ignored.config # Superseded by this repo's own conf/igenomes.config

@@ -117,7 +117,7 @@ To clean-up test outputs, run `nf-test clean` or manually delete the `.test_outp
 
 ### Linting
 
-CI workflows live in `.github/workflows/`: `ci-linting.yml` (pre-commit + nf-core lint), `ci-nf-test.yml` (sharded nf-test, using the composite actions in `.github/actions/`), and `ci-full-run.yml` (full `-profile test` pipeline run). Run lint locally with:
+CI workflows live in `.github/workflows/`: `linting.yml` (pre-commit + nf-core lint), `nf-test.yml` (sharded nf-test, using the composite actions in `.github/actions/`), and `ci-full-run.yml` (full `-profile test` pipeline run). Run lint locally with:
 
 ```bash
 nf-core lint
@@ -131,7 +131,7 @@ To format the files before commiting run:
 pre-commit run --all-files
 ```
 
-`nf-core lint`/`pipelines lint --release` and `pre-commit run --all-files` are also bundled into `scripts/run-test-suite.sh`, alongside the full nf-test suite — duplicated on purpose with `.github/workflows/ci-linting.yml` so formatting issues surface locally before CI does.
+`nf-core lint`/`pipelines lint --release` and `pre-commit run --all-files` are also bundled into `scripts/run-test-suite.sh`, alongside the full nf-test suite — duplicated on purpose with `.github/workflows/linting.yml` so formatting issues surface locally before CI does.
 
 ## Samplesheet format
 

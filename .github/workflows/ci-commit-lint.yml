@@ -1,0 +1,17 @@
+name: Commit Lint Check
+
+# Checks every commit message from HEAD back to the most recent commit whose message starts
+# with "Merge pull request #" (i.e. the last PR merged with a merge commit). Messages must look
+# like "<type>: <TICKET-123> <description>", e.g. "fix: BIOINFO-231 pin actions/checkout".
+on: [push]
+
+jobs:
+  build:
+    name: Commit Lint Check
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+      - name: Lint Commits
+        uses: Ferlab-Ste-Justine/action-commit-lint@4bf9cedef4219306741a66f28fa738dbc4633cfe # v2

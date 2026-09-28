@@ -8,7 +8,7 @@ This file gives Claude Code the context it needs to work effectively in this rep
 
 The repo is structured following nf-core conventions. It is _not_ a published nf-core pipeline.
 
-Nextflow version range: `>=23.10.1, <26.0.0`. Pipeline version is tracked in `nextflow.config` (`manifest.version`) and `.nf-core.yml` (`template.version`).
+Nextflow version range: `>=24.10.5, <26.0.0`. Pipeline version is tracked in `nextflow.config` (`manifest.version`) and `.nf-core.yml` (`template.version`).
 
 ## High-level pipeline flow
 
@@ -66,6 +66,7 @@ Important conventions:
 
 The test data is expected to be accessible locally under the launch directory. Before testing the pipeline, verify that the test-data directory exists.
 The data lives in a private AWS S3 bucket `s3://ferlab-public-dataset/nextflow/Post-Processing-Pipeline/V7/data-test` and in a private CEPH S3 bucket `s3://cqdg-prod-file-import/test-datasets/Post-Processing-Pipeline/V7/data-test`.
+In CI, `nf-test.yml` and `ci-full-run.yml` both download it through the `.github/actions/copy-test-data` composite action, the only place CI defines the S3 path. When the dataset version changes, update it there, in `scripts/run-smoke-tests.sh`, in `tests/nextflow.config` (`pipelines_testdata_base_path`, which nf-core lint requires but no test reads), and here.
 
 ### Stub / quick smoke test
 
@@ -117,7 +118,7 @@ To clean-up test outputs, run `nf-test clean` or manually delete the `.test_outp
 
 ### Linting
 
-CI lint workflow: `.github/workflows/linting.yml` (nf-core lint + nf-test). Run locally with:
+CI workflows live in `.github/workflows/`: `linting.yml` (pre-commit + nf-core lint), `nf-test.yml` (sharded nf-test, using the composite actions in `.github/actions/`), `ci-full-run.yml` (full `-profile test` pipeline run), and `ci-pr-title-lint.yml` (the PR title must look like `<type>: <TICKET-123> <description>`, e.g. `fix: BIOINFO-231 pin actions/checkout`; PRs are squash-merged, so the title becomes the commit message on `main`). Run lint locally with:
 
 ```bash
 nf-core lint

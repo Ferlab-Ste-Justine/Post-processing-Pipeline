@@ -9,13 +9,13 @@
 # catches formatting issues before CI does rather than after.
 #
 # Unlike quality-control-pipeline's run-test-suite.sh, there's no commit
-# message lint step here: this repo has no .github/workflows/commit_lint.yml
-# to mirror -- add one if/when this repo adopts that convention too.
+# message lint step here: this repo squash-merges PRs and checks the PR title
+# instead (.github/workflows/ci-pr-title-lint.yml), which only exists on GitHub.
 #
-# Not covered here, left to CI: .github/workflows/ci-nf-test.yml's NXF_VER
+# Not covered here, left to CI: .github/workflows/nf-test.yml's NXF_VER
 # matrix only ever runs the full nf-test suite under this machine's single
 # installed Nextflow version (see step 4) -- it does NOT also run the full
-# suite under every CI-pinned version (23.10.1, 25.10.4, latest-everything),
+# suite under every CI-pinned version (24.10.5, 25.10.4, latest-everything),
 # since that would mean installing/switching Nextflow versions and roughly
 # quadrupling this script's runtime. Step 3 only smoke-checks the floor.
 #
@@ -64,7 +64,7 @@ step "[2/6] pre-commit (prettier, trailing-whitespace, end-of-file-fixer)"
 pre-commit run --all-files
 
 # Only CI actually runs the pipeline under multiple pinned Nextflow versions
-# (see .github/workflows/ci-nf-test.yml's NXF_VER matrix) -- this just checks
+# (see .github/workflows/nf-test.yml's NXF_VER matrix) -- this just checks
 # the one boundary that's most likely to be wrong: the floor manifest.nextflowVersion
 # itself claims to support. `--help` is NOT enough for this: nf-schema answers
 # --help straight from nextflow_schema.json without ever executing main.nf's

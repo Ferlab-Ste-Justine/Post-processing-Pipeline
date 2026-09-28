@@ -19,12 +19,7 @@ lint:
     - assets/email_template.html
     - assets/email_template.txt
     - assets/sendmail_template.txt
-    # Newer nf-core template's sharded nf-test CI pattern -- this repo already has its own
-    # working .github/workflows/ci.yml + linting.yml, so this isn't being adopted.
-    - .github/workflows/nf-test.yml
-    - .github/actions/get-shards/action.yml
-    - .github/actions/nf-test/action.yml
-    - .github/workflows/pr-comment.yml
+    - .github/workflows/pr-comment.yml # No PR comment bot in this repo
     - docs/CONTRIBUTING.md
     - assets/multiqc_config.yml # No MultiQC in this pipeline
     - conf/igenomes_ignored.config # Superseded by this repo's own conf/igenomes.config

@@ -9,9 +9,8 @@
 # catches formatting issues before CI does rather than after.
 #
 # Unlike quality-control-pipeline's run-test-suite.sh, there's no commit
-# message lint step here yet, even though .github/workflows/ci-commit-lint.yml
-# now exists: until this repo's first PR is merged with a merge commit, the
-# check still reaches back through old squash-merge commits and always fails.
+# message lint step here: this repo squash-merges PRs and checks the PR title
+# instead (.github/workflows/ci-pr-title-lint.yml), which only exists on GitHub.
 #
 # Not covered here, left to CI: .github/workflows/nf-test.yml's NXF_VER
 # matrix only ever runs the full nf-test suite under this machine's single

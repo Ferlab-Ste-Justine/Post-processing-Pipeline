@@ -1,0 +1,29 @@
+name: PR Title Lint Check
+
+# PRs are squash-merged (lab guideline), so the PR title becomes the commit message on main.
+# This checks the title uses the same "<type>: <TICKET-123> <description>" format as
+# Ferlab-Ste-Justine/action-commit-lint, e.g. "fix: BIOINFO-231 pin actions/checkout".
+# Commits on the branch itself are not checked: they disappear when the PR is squashed.
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  pr-title:
+    name: PR Title Lint Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR title
+        env:
+          # Passed through env, not ${{ }} in the script, since PR titles are user input.
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          regex='^([a-z]+(\([a-zA-Z0-9_-]+\))?!?: [A-Z]{2,8}-[0-9]+ .+|Revert ".+"|Auto-release .+|Adding release .+|Removing release .+)$'
+          if [[ "$TITLE" =~ $regex ]]; then
+            echo "PR title OK: $TITLE"
+          else
+            echo "::error::PR title doesn't follow the convention: $TITLE"
+            echo "Expected '<type>: <TICKET-123> <description>', e.g. 'fix: BIOINFO-231 pin actions/checkout'."
+            echo "Edit the PR title on GitHub; this check reruns automatically."
+            exit 1
+          fi

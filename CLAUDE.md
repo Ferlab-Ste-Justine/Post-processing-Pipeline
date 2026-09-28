@@ -118,7 +118,7 @@ To clean-up test outputs, run `nf-test clean` or manually delete the `.test_outp
 
 ### Linting
 
-CI workflows live in `.github/workflows/`: `linting.yml` (pre-commit + nf-core lint), `nf-test.yml` (sharded nf-test, using the composite actions in `.github/actions/`), `ci-full-run.yml` (full `-profile test` pipeline run), and `ci-commit-lint.yml` (commit messages must look like `<type>: <TICKET-123> <description>`, checked back to the last `Merge pull request #` commit, so PRs must be merged with a merge commit, not squashed). Run lint locally with:
+CI workflows live in `.github/workflows/`: `linting.yml` (pre-commit + nf-core lint), `nf-test.yml` (sharded nf-test, using the composite actions in `.github/actions/`), `ci-full-run.yml` (full `-profile test` pipeline run), and `ci-pr-title-lint.yml` (the PR title must look like `<type>: <TICKET-123> <description>`, e.g. `fix: BIOINFO-231 pin actions/checkout`; PRs are squash-merged, so the title becomes the commit message on `main`). Run lint locally with:
 
 ```bash
 nf-core lint

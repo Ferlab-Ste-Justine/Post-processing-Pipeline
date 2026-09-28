@@ -8,7 +8,7 @@ This file gives Claude Code the context it needs to work effectively in this rep
 
 The repo is structured following nf-core conventions. It is _not_ a published nf-core pipeline.
 
-Nextflow version range: `>=23.10.1, <26.0.0`. Pipeline version is tracked in `nextflow.config` (`manifest.version`) and `.nf-core.yml` (`template.version`).
+Nextflow version range: `>=24.10.5, <26.0.0`. Pipeline version is tracked in `nextflow.config` (`manifest.version`) and `.nf-core.yml` (`template.version`).
 
 ## High-level pipeline flow
 

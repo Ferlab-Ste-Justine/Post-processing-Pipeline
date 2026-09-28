@@ -25,3 +25,8 @@ repos:
               subworkflows/nf-core/.*|
               .*\.snap$
           )$
+  - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
+    rev: "3.1.2"
+    hooks:
+      - id: editorconfig-checker
+        alias: ec

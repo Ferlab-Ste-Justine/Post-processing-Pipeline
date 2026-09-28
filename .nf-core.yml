@@ -11,7 +11,6 @@ lint:
     - .github/workflows/awsfulltest.yml
     - .github/workflows/linting_comment.yml
     - .github/.dockstore.yml
-    - .editorconfig
     - .prettierignore
     - .prettierrc.yml
     - LICENSE

@@ -2,6 +2,29 @@
 
 Running notes on decisions, open questions and follow-ups for this pipeline.
 
+## Decisions
+
+### Check the PR title, not every commit message
+
+_Decided 2026-09-28, BIOINFO-231._
+
+**Decision:** CI checks that each PR's title follows `<type>: <TICKET-123> <description>` (e.g. `fix: BIOINFO-231 pin actions/checkout`), using `.github/workflows/ci-pr-title-lint.yml`. Individual commits on a branch are not checked. PRs are squash-merged.
+
+**Why:**
+
+- The lab guideline says PRs are "typically" squash-merged, and that the branch is rebased if someone else merged first.
+- quality-control-pipeline and cnv-post-processing check commits with Ferlab's own action, `Ferlab-Ste-Justine/action-commit-lint`. Its README says it "will scan all the commits up to the last merge", stopping at the first commit starting with `Merge pull request #`, the message GitHub gives merge commits. It assumes PRs are merged with merge commits, which conflicts with the guideline.
+- Under squash merging, that stopping point never appears. Here the action would have checked every commit back to #105, including squash titles like `Fix/bioinfo 228 update linting (#112)`, and failed on every push from now on.
+- Even with merge commits, one badly worded commit on a branch keeps every later push red until someone rewrites history (`git rebase -i`) and force-pushes. That's easy to trigger by accident: a typo or a missing ticket number, a commit made in GitHub's web editor (`Update README.md`), accepting review suggestions (`Apply suggestions from code review`), or merging `main` into the branch. With squash merging, that effort buys nothing, since those commits don't reach `main`.
+- With squash merging, the PR title becomes the commit message on `main`, so it's the one message worth checking. A bad title is fixed by editing it on GitHub, and the check reruns on its own. No history rewriting is needed.
+
+**Details:** same format as the Ferlab action, except that the type must come first (the Ferlab action accepts the pattern anywhere in the message) and GitHub's `Revert "..."` titles are allowed. The individual commits of a squashed PR remain visible on the PR's Commits tab, and can be fetched with `git fetch origin pull/<number>/head`.
+
+**Follow-ups:**
+
+- For single-commit PRs, GitHub's default squash message is the commit's own message, not the PR title. An admin should set Settings → General → Pull Requests → "Default commit message" for squash merging to "Pull request title" (or "Pull request title and commit details") so the checked title is what lands on `main`.
+- quality-control-pipeline and cnv-post-processing still use the Ferlab action with merge commits. Moving them to squash plus this title check keeps the three pipelines consistent with each other and with the lab guideline.
+
 ## TODO
 
 ### Require `confirm-pass` before merging into `main`

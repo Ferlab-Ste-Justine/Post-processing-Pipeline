@@ -43,11 +43,10 @@ jobs:
           fetch-depth: 0
 
       - name: Copy test data from S3
-        run: | # the s3 client is already installed in the ubuntu-latest image
-          AWS_ACCESS_KEY_ID="${{ secrets.FERLAB_PUBLIC_DATASET_READ_AWS_ACCESS_KEY_ID }}" \
-          AWS_SECRET_ACCESS_KEY="${{ secrets.FERLAB_PUBLIC_DATASET_READ_AWS_SECRET_ACCESS_KEY }}" \
-          AWS_DEFAULT_REGION=ca-central-1 \
-          aws s3 cp s3://ferlab-public-dataset/nextflow/Post-Processing-Pipeline/V7/data-test data-test --recursive
+        uses: ./.github/actions/copy-test-data
+        with:
+          aws_access_key_id: ${{ secrets.FERLAB_PUBLIC_DATASET_READ_AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.FERLAB_PUBLIC_DATASET_READ_AWS_SECRET_ACCESS_KEY }}
 
       - name: Install Nextflow
         uses: nf-core/setup-nextflow@6c2e22b4d901f0c42ca66c5069f8026df026d165 # v2.1.4

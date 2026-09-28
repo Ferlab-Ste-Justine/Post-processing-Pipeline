@@ -96,11 +96,10 @@ jobs:
           fetch-depth: 0
 
       - name: Copy test data from S3
-        run: | # the s3 client is already installed in the ubuntu-latest image
-          AWS_ACCESS_KEY_ID="${{ secrets.FERLAB_PUBLIC_DATASET_READ_AWS_ACCESS_KEY_ID }}" \
-          AWS_SECRET_ACCESS_KEY="${{ secrets.FERLAB_PUBLIC_DATASET_READ_AWS_SECRET_ACCESS_KEY }}" \
-          AWS_DEFAULT_REGION=ca-central-1 \
-          aws s3 cp s3://ferlab-public-dataset/nextflow/Post-Processing-Pipeline/V7/data-test data-test --recursive
+        uses: ./.github/actions/copy-test-data
+        with:
+          aws_access_key_id: ${{ secrets.FERLAB_PUBLIC_DATASET_READ_AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.FERLAB_PUBLIC_DATASET_READ_AWS_SECRET_ACCESS_KEY }}
 
       - name: Disk space cleanup
         uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1

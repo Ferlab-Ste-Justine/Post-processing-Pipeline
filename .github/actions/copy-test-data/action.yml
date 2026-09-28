@@ -1,0 +1,28 @@
+name: "Copy test data"
+description: "Download this pipeline's test dataset from S3 into data-test/, where conf/test.config expects it"
+inputs:
+  aws_access_key_id:
+    description: "AWS access key ID with read access to the test dataset bucket"
+    required: true
+  aws_secret_access_key:
+    description: "AWS secret access key matching aws_access_key_id"
+    required: true
+  s3_path:
+    description: "S3 location of the test dataset. The one place CI defines it."
+    required: false
+    default: "s3://ferlab-public-dataset/nextflow/Post-Processing-Pipeline/V7/data-test"
+  destination:
+    description: "Local directory to copy the dataset into"
+    required: false
+    default: "data-test"
+runs:
+  using: "composite"
+  steps:
+    - name: Copy test data from S3
+      shell: bash
+      env:
+        AWS_ACCESS_KEY_ID: ${{ inputs.aws_access_key_id }}
+        AWS_SECRET_ACCESS_KEY: ${{ inputs.aws_secret_access_key }}
+        AWS_DEFAULT_REGION: ca-central-1
+      # The AWS CLI is already installed in the ubuntu-latest image.
+      run: aws s3 cp "${{ inputs.s3_path }}" "${{ inputs.destination }}" --recursive

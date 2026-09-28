@@ -164,7 +164,7 @@ function segregating_dominant_x(s) {
   // Female: inherited dominant only -- de novos on chrX are handled by segregating_denovo_x.
   if (("mom" in s) || ("dad" in s)) {
     if (!((("mom" in s) && s.mom.affected && s.mom.het)
-       || (("dad" in s) && s.dad.affected && s.dad.het))) return false;
+      || (("dad" in s) && s.dad.affected && s.dad.het))) return false;
     if (("dad" in s) && !hq1(s.dad, true)) return false;
     if (("mom" in s) && !hq1(s.mom, true)) return false;
   }
@@ -327,7 +327,7 @@ function moi_candidate(fam) {
 /*
 
 ##########################################
-             PARENTAL ORIGIN
+            PARENTAL ORIGIN
 ##########################################
 
 */
@@ -385,7 +385,7 @@ how many copies of the alt allele they carry at this position (matching Slivar's
 A person is diploid — two copies of each autosome, one from each parent. So dosage 2
 doesn't mean "two alt alleles that arrived together," it means the genotype call is
 1/1: both of that person's copies at this position are the alt allele. Dosage 0 = 0/0
- (both copies ref), 1 = 0/1 (one ref, one alt — heterozygous).
+(both copies ref), 1 = 0/1 (one ref, one alt — heterozygous).
       Example:
       "2_0_0": DENOVO — kid is 1/1 (has alt on both copies), dad is 0/0, mom is 0/0.
       Neither parent has a single alt allele between them, yet the kid has two.

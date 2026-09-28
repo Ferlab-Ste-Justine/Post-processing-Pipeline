@@ -114,11 +114,11 @@ workflow POSTPROCESSING {
 
     writemeta()
 
- /*
-  ================================================================================
-       STAGE 1 — Joint genotyping (gVCFs → multi-sample VCF + artifact tagging)
-  ================================================================================
- */
+    /*
+    ================================================================================
+        STAGE 1 — Joint genotyping (gVCFs → multi-sample VCF + artifact tagging)
+    ================================================================================
+    */
 
     if (params.step == 'genotype') {
 
@@ -226,11 +226,11 @@ workflow POSTPROCESSING {
         ch_output_from_tagArtifacts = VQSR.out.vcf_tbi.mix(ch_variantfiltration_output)
     }
 
- /*
-  ================================================================================
-       STAGE 2 — Normalization (VCF → split multi-allelics VCF)
-  ================================================================================
- */
+    /*
+    ================================================================================
+        STAGE 2 — Normalization (VCF → split multi-allelics VCF)
+    ================================================================================
+    */
 
     if (params.step in ['genotype', 'normalize']) {
         vcf_for_norm = params.step == 'genotype'
@@ -260,11 +260,11 @@ workflow POSTPROCESSING {
         }
     }
 
- /*
-  ================================================================================
-       STAGE 3 — Variant annotation and prioritization (VEP, Slivar, Exomiser)
-  ================================================================================
- */
+    /*
+    ================================================================================
+        STAGE 3 — Variant annotation and prioritization (VEP, Slivar, Exomiser)
+    ================================================================================
+    */
 
     if ((params.step in ['genotype', 'normalize'] && isVepToolIncluded()) || params.step == 'annotation') {
 

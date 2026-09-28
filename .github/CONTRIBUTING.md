@@ -70,7 +70,7 @@ If you wish to contribute a new step, please use the following coding standards:
 5. Add any new parameters to `nextflow_schema.json` with help text (via the `nf-core schema build` tool).
 6. Add sanity checks and validation for all relevant parameters.
 7. Perform local tests to validate that the new code works as expected.
-8. If applicable, add a new test command in `.github/workflow/ci.yml`.
+8. If applicable, add a new test command in `.github/workflows/ci-full-run.yml`.
 9. If applicable, write nf-test unit tests
 10. Add a description of the output files if relevant to `docs/output.md`.
 

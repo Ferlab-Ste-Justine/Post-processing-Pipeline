@@ -60,7 +60,7 @@ if [[ "$nf_core_installed" != "$nf_core_pinned" ]]; then
     exit 1
 fi
 
-step "[2/6] pre-commit (prettier, trailing-whitespace, end-of-file-fixer)"
+step "[2/6] pre-commit (prettier, trailing-whitespace, end-of-file-fixer, editorconfig-checker)"
 pre-commit run --all-files
 
 # Only CI actually runs the pipeline under multiple pinned Nextflow versions

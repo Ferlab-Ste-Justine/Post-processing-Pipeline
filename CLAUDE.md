@@ -107,7 +107,7 @@ If running locally,
 ```bash
 nf-test test                         # run all tests
 nf-test test --profile test,docker --tag pipeline          # run the entire pipeline test
-nf-test test modules/local/exomiser  # target one module/subworkflow
+nf-test test --profile test,docker modules/local/exomiser  # target one module/subworkflow
 ```
 
 Test snapshots live alongside each module as `tests/main.nf.test.snap`.
@@ -121,7 +121,7 @@ To clean-up test outputs, run `nf-test clean` or manually delete the `.test_outp
 CI workflows live in `.github/workflows/`: `linting.yml` (pre-commit + nf-core lint), `nf-test.yml` (sharded nf-test, using the composite actions in `.github/actions/`), `ci-full-run.yml` (full `-profile test` pipeline run), and `ci-pr-title-lint.yml` (the PR title must look like `<type>: <TICKET-123> <description>`, e.g. `fix: BIOINFO-231 pin actions/checkout`; PRs are squash-merged, so the title becomes the commit message on `main`). Run lint locally with:
 
 ```bash
-nf-core lint
+nf-core pipelines lint --release
 ```
 
 `.nf-core.yml` carries lint overrides — several nf-core-template files are deliberately not present (e.g. `CODE_OF_CONDUCT.md`, nf-core logos, AWS CI workflows) because this is a Ferlab workflow, not a published nf-core pipeline. Don't reintroduce those files; instead update `.nf-core.yml` if you need to change lint behavior.
@@ -132,7 +132,7 @@ To format the files before commiting run:
 pre-commit run --all-files
 ```
 
-`nf-core lint`/`pipelines lint --release` and `pre-commit run --all-files` are also bundled into `scripts/run-test-suite.sh`, alongside the full nf-test suite — duplicated on purpose with `.github/workflows/linting.yml` so formatting issues surface locally before CI does.
+`nf-core pipelines lint --release` and `pre-commit run --all-files` are also bundled into `scripts/run-test-suite.sh`, alongside the full nf-test suite — duplicated on purpose with `.github/workflows/linting.yml` so formatting issues surface locally before CI does.
 
 ## Samplesheet format
 

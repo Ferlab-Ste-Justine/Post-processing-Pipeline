@@ -19,7 +19,9 @@ We follows the guidelines outlined by Ferlab for our git flow, which are detaile
 
 Please ensure that you adhere to the conventions for branch names and commit messages.
 
-If applicable, use `nf-core schema build` to add new parameters to the pipeline JSON schema. This requires [nf-core tools](https://github.com/nf-core/tools) version 1.10 or higher.
+Pull requests are squash-merged, so the PR title becomes the commit message on `main`. CI checks that it follows `<type>: <TICKET-123> <description>`, e.g. `fix: BIOINFO-231 pin actions/checkout`.
+
+If applicable, use `nf-core pipelines schema build` to add new parameters to the pipeline JSON schema. This requires [nf-core tools](https://github.com/nf-core/tools), in the version pinned in `.nf-core.yml` (`nf_core_version`).
 
 ## Tests
 
@@ -27,31 +29,35 @@ When you create a pull request with changes, [GitHub Actions](https://github.com
 
 A pull-request should only be merged when all these tests are passing.
 
-There are 3 types of tests run, that are described below.
+There are 4 checks, described below. To run the same checks locally before pushing, use `bash scripts/run-test-suite.sh`.
 
 ### Lint tests
 
-The lint test will run the nf-core linter, i.e. the following command and check for errors/warnings.
-`nf-core lint`
+The lint tests (`.github/workflows/linting.yml`) run on every pull request:
 
-It is currently deactivated, but we highly recommend to run it locally. Ensure that no lint test fails and that no additional warnings appear compared to the main branch.
+- `pre-commit run --all-files`: prettier, trailing whitespace and end-of-file fixes, and editorconfig-checker against `.editorconfig`. The check fails if a hook would change a file, so run it locally and commit the result.
+- `nf-core pipelines lint`, with `--release` for pull requests into `main`. CI installs the nf-core tools version pinned in `.nf-core.yml` (`nf_core_version`). Ensure that no lint test fails and that no additional warnings appear compared to the main branch.
 
 At Ferlab, we don't enforce all linting rules. If a test should be ignored, it should be added to .nf-core.yml.
 
 ### Pipeline tests
 
-This test runs the pipeline with a minimal set of test data. It only checks that the pipeline can run successfully. Since our test setup is not fully ready yet, it runs in stub mode at the moment.
+This test (`.github/workflows/ci-full-run.yml`) runs the pipeline with the minimal test dataset (`-profile test,docker`) and checks that it completes successfully. CI downloads the test data from S3 with the `.github/actions/copy-test-data` action.
 
-These tests are run both with the latest available version of `Nextflow` and also the minimum required version that is stated in the pipeline code.
+These tests are run with the minimum Nextflow version stated in the pipeline code (`manifest.nextflowVersion`) and with a more recent version (see the workflow's `NXF_VER` matrix).
 
-You are encouraged to test in non-stub mode locally and in integration environments. Reach out to the Ferlab bioinformatics team if you need help with this. You can find example commands in the test.config
+You are encouraged to also test locally and in integration environments. Reach out to the Ferlab bioinformatics team if you need help with this. You can find example commands in the test.config
 configuration file.
 
 ### nf-test tests
 
-This test runs unit tests with nf-test. For now, for performance reasons, it only runs tests applicable to the submitted changes and tests tagged with the keyword "local".
+This test (`.github/workflows/nf-test.yml`) runs the nf-test tests. On pull requests, it only runs the tests affected by the submitted changes. Releases and manual runs run the whole suite.
 
-The tests are only run with the Nextflow version expected in production, also for performance reasons.
+The tests are run with the minimum Nextflow version, a more recent version and the latest Nextflow release. A failure with the latest release is reported as a warning but doesn't fail the check.
+
+### PR title
+
+`.github/workflows/ci-pr-title-lint.yml` checks that the pull request title follows the format described under [Contribution workflow](#contribution-workflow). If it fails, edit the title on GitHub; the check reruns by itself.
 
 ## Pipeline contribution conventions
 
@@ -67,7 +73,7 @@ If you wish to contribute a new step, please use the following coding standards:
 2. Write the process block (see below).
 3. Define the output channel if needed (see below).
 4. Add any new parameters to `nextflow.config` with a default (see below).
-5. Add any new parameters to `nextflow_schema.json` with help text (via the `nf-core schema build` tool).
+5. Add any new parameters to `nextflow_schema.json` with help text (via the `nf-core pipelines schema build` tool).
 6. Add sanity checks and validation for all relevant parameters.
 7. Perform local tests to validate that the new code works as expected.
 8. If applicable, add a new test command in `.github/workflows/ci-full-run.yml`.
@@ -78,7 +84,7 @@ If you wish to contribute a new step, please use the following coding standards:
 
 Parameters should be initialised / defined with default values in `nextflow.config` under the `params` scope.
 
-Once there, use `nf-core schema build` to add to `nextflow_schema.json`.
+Once there, use `nf-core pipelines schema build` to add to `nextflow_schema.json`.
 
 ### Default processes resource requirements
 
@@ -95,4 +101,6 @@ Please use the following naming schemes, to make it easy to understand what is g
 
 ### Nextflow version bumping
 
-If you are using a new feature from core Nextflow, you may bump the minimum required version of nextflow in the pipeline with: `nf-core bump-version --nextflow . [min-nf-version]`
+If you are using a new feature from core Nextflow, you may bump the minimum required version of nextflow in the pipeline with: `nf-core pipelines bump-version --nextflow [min-nf-version]`
+
+Then check that the `NXF_VER` matrices in `.github/workflows/nf-test.yml` and `.github/workflows/ci-full-run.yml` include the new minimum (nf-core lint fails if `nf-test.yml` doesn't test it), and update the Nextflow version installed in `.github/workflows/linting.yml`.

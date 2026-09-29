@@ -1,7 +1,7 @@
 # Ferlab-Ste-Justine/Post-processing-Pipeline: Usage
 
 > _Parameters documentation is available in the [pipeline schema](../nextflow_schema.json)._
-> _You can use the command `nf-core schema docs` to output parameters documentation._
+> _You can use the command `nf-core pipelines schema docs` to output parameters documentation._
 > _To avoid duplication of information, we minimize parameters details in markdown files._
 > _Currently, we only add context for the reference data parameters and provide parameter summaries for convenience._
 

@@ -42,17 +42,17 @@
                     },
                     "gatk4/genotypegvcfs": {
                         "branch": "master",
-                        "git_sha": "06c8865e36741e05ad32ef70ab3fac127486af48",
+                        "git_sha": "d5de7a949aa84689f4098c958f05733a6c3804f5",
                         "installed_by": ["modules"]
                     },
                     "gatk4/variantfiltration": {
                         "branch": "master",
-                        "git_sha": "666652151335353eef2fcd58880bcef5bc2928e1",
+                        "git_sha": "d5de7a949aa84689f4098c958f05733a6c3804f5",
                         "installed_by": ["modules"]
                     },
                     "gatk4/variantrecalibrator": {
                         "branch": "master",
-                        "git_sha": "81880787133db07d9b4c1febd152c090eb8325dc",
+                        "git_sha": "d5de7a949aa84689f4098c958f05733a6c3804f5",
                         "installed_by": ["modules"]
                     },
                     "tabix/tabix": {

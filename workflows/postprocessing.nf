@@ -173,7 +173,6 @@ workflow POSTPROCESSING {
             [[id: 'dbsnp'],     dbsnpFile],
             [[id: 'dbsnp_idx'], dbsnpFileIndex]
         )
-        ch_versions = ch_versions.mix(GATK4_GENOTYPEGVCFS.out.versions)
         ch_output_from_genotypegvcf = GATK4_GENOTYPEGVCFS.out.vcf.join(GATK4_GENOTYPEGVCFS.out.tbi)
 
         //Tag variants that are probable artifacts.
@@ -215,9 +214,9 @@ workflow POSTPROCESSING {
             ch_by_seqtype.wes,
             [[id: 'reference'], pathReferenceGenomeFasta],
             [[id: 'reference'], pathReferenceGenomeFai],
-            [[id: 'reference'], pathReferenceDict]
+            [[id: 'reference'], pathReferenceDict],
+            [[:], []] // gzi: only needed for a bgzipped fasta
         )
-        ch_versions = ch_versions.mix(GATK4_VARIANTFILTRATION.out.versions)
         ch_variantfiltration_output = GATK4_VARIANTFILTRATION.out.vcf
             .join(GATK4_VARIANTFILTRATION.out.tbi)
 

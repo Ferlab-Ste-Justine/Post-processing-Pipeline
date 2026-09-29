@@ -38,7 +38,7 @@ workflows/postprocessing.nf  # Main POSTPROCESSING workflow — step gating + in
 subworkflows/local/          # sanitize_gvcf_records, vqsr, slivar_inheritance, channel_create_csv, utils_nfcore_postprocessing_pipeline
 subworkflows/nf-core/        # utils_nextflow_pipeline, utils_nfcore_pipeline, utils_nfschema_plugin, vcf_annotate_ensemblvep
 modules/local/               # combine_gvcfs, exomiser, gatk4/applyvqsr, slivar/{expr,compoundhets}, split_multiallelics
-modules/nf-core/             # bcftools (annotate/filter/norm/view), ensemblvep (vep, download), gatk4 (genotypegvcfs, variantfiltration, variantrecalibrator), tabix
+modules/nf-core/             # bcftools (annotate/filter/norm/view), ensemblvep (vep, download), gatk4 (genotypegvcfs, variantfiltration, variantrecalibrator)
 conf/                        # base.config, modules.config, slivar.config, igenomes.config, test.config, test_full.config
 assets/                      # TestSampleSheet.csv, schema_input.json, slivar-functions.js, exomiser/ (default analysis YAMLs)
 docs/                        # usage.md, output.md, reference_data.md

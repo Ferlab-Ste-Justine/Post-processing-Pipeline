@@ -1,7 +1,7 @@
 {
     "-profile test": {
         "content": [
-            65,
+            61,
             [
                 "bcftools",
                 "bcftools/family1.NA19238.filtered.vcf.gz",
@@ -157,7 +157,9 @@
                     "gatk4": "4.5.0.0"
                 },
                 "ENSEMBLVEP_VEP": {
-                    "ensemblvep": 114.2
+                    "ensemblvep": 114.2,
+                    "perl-math-cdf": 0.1,
+                    "tabix": 1.9
                 },
                 "EXOMISER": {
                     "exomiser": "14.0.0"
@@ -183,15 +185,12 @@
                 "SPLIT_MULTIALLELICS": {
                     "bcftools": 1.2
                 },
-                "TABIX_TABIX": {
-                    "tabix": 1.2
-                },
                 "Workflow": {
                     "Ferlab-Ste-Justine/Post-Processing-Pipeline": "v3.0.0"
                 }
             }
         ],
-        "timestamp": "2026-09-29T16:15:47.476964759",
+        "timestamp": "2026-09-29T16:43:32.022135706",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "24.10.5"

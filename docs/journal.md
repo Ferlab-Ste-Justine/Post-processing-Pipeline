@@ -44,6 +44,26 @@ _Decided 2026-09-28, BIOINFO-231. Applies to all three pipelines._
 - Dropping `ci-full-run.yml` and relying on nf-test alone, possibly after adding the `conf/` files to `triggers`. That leaves any file outside the `include` graph and outside `triggers` untested, and every new asset would have to be remembered in `triggers`.
 - Using `ci-full-run.yml` to test another container engine instead. Production runs on Kubernetes, which can't reasonably be tested on GitHub's hosted runners.
 
+### Keep some nf-core components behind their latest version
+
+_Decided 2026-09-29, BIOINFO-233._
+
+**Decision:** BIOINFO-233 updated the nf-core modules and subworkflows to their latest version, except the five below. Each is at the newest version that works with this pipeline's constraints. nf-core lint reports them as "New version available"; that warning is expected.
+
+| Component                                   | Installed              | Why not the latest                                                                                                                                                                                                                                                                                     | Update when                                                                               |
+| ------------------------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| `ensemblvep/vep`, `vcf_annotate_ensemblvep` | `b0bd00e` (2026-02-07) | From `34505e1` (2026-02-09), the module sets `prefix` without `def` (the output globs use it) and then uses it in a `def`. Nextflow 24.10 refuses to compile that: "Variable `prefix` already defined in the process scope".                                                                           | The minimum Nextflow version is 25.04 or later (the latest compiles on 25.10.4).          |
+| `ensemblvep/download`                       | `f50d3c6` (2026-01-08) | From `09ea5d9` (2026-02-02), the module also reports its version with `perl -MMath::CDF`. The container we pin for it, `quay.io/biocontainers/ensembl-vep:114.2`, doesn't have Math::CDF, and a failing `eval` output fails the task ("Unable to evaluate output"), so `--download_cache` would break. | The download container changes to one that has Math::CDF, for example with a VEP upgrade. |
+| `utils_nextflow_pipeline`                   | `d20fb2a`              | The latest uses `nextflow.script.types.VersionNumber`, which doesn't exist in Nextflow 24.10.                                                                                                                                                                                                          | The minimum Nextflow version is 25.04 or later.                                           |
+| `utils_nfcore_pipeline`                     | `2fdce49`              | The latest removes `nfCoreLogo`, `dashedLine` and `workflowCitation`, which `utils_nfcore_postprocessing_pipeline` imports.                                                                                                                                                                            | Someone reworks that subworkflow (separate ticket).                                       |
+
+**Also:** the `container` overrides in `conf/modules.config` are deliberate. They pin the tools that run (VEP 114.2, bcftools 1.20, GATK 4.5.0.0) whatever version a module declares, so updating a module doesn't change results. Upgrading a tool is a separate, validated change.
+
+**Before updating any of these:**
+
+- Run `NXF_VER=24.10.5 nextflow run . -profile test,docker -preview` (step 3 of `scripts/run-test-suite.sh`). It catches compile errors like the `prefix` one in seconds.
+- For each new `eval(...)` version command, run it in the container we override the module with, e.g. `docker run --rm --entrypoint "" <image> bash -c '<command>'`. It must exit 0.
+
 ## TODO
 
 ### Require `confirm-pass` before merging into `main`

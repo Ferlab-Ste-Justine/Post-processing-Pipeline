@@ -271,7 +271,6 @@ workflow POSTPROCESSING {
             ensemblvep_info = channel.of([ [ id: "${params.vep_cache_version}_${params.vep_genome}" ], params.vep_genome, vep_species_download, params.vep_cache_version ])
             ENSEMBLVEP_DOWNLOAD(ensemblvep_info)
             vep_cache = ENSEMBLVEP_DOWNLOAD.out.cache.collect().map{ _meta, cache -> [ cache ] }.first()
-            ch_versions = ch_versions.mix(ENSEMBLVEP_DOWNLOAD.out.versions.first())
         } else {
             vep_cache = file(params.vep_cache)
         }
@@ -289,7 +288,6 @@ workflow POSTPROCESSING {
             vep_cache,
             []                                                       // extra files
         )
-        ch_versions = ch_versions.mix(VCF_ANNOTATE_ENSEMBLVEP.out.versions)
         ch_output_from_vep = VCF_ANNOTATE_ENSEMBLVEP.out.vcf_tbi
 
         CHANNEL_CREATE_CSV_VEP(ch_output_from_vep, "ensemblvep", params.outdir, params.vep_outdir ?: [])

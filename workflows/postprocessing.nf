@@ -128,14 +128,12 @@ workflow POSTPROCESSING {
             [meta, vcf, tbi.exists() ? tbi : []]
         }
         BCFTOOLS_VIEW(ch_view_input, [], [], [])
-        ch_versions = ch_versions.mix(BCFTOOLS_VIEW.out.versions)
-        ch_vcf_tbi_standardized = BCFTOOLS_VIEW.out.vcf.join(BCFTOOLS_VIEW.out.tbi)
+        ch_vcf_tbi_standardized = BCFTOOLS_VIEW.out.vcf.join(BCFTOOLS_VIEW.out.index)
 
         //Optionally sanitize malformed/duplicate gVCF records (see BIOINFO-222)
         if (params.gvcf_filtering) {
             ch_input_sanitize_gvcf = ch_vcf_tbi_standardized.map{ meta, vcf, _tbi -> [meta, vcf] }
             SANITIZE_GVCF_RECORDS(ch_input_sanitize_gvcf, [[id: 'reference'], pathReferenceGenomeFasta])
-            ch_versions = ch_versions.mix(SANITIZE_GVCF_RECORDS.out.versions)
             ch_output_from_sanitize_gvcf = SANITIZE_GVCF_RECORDS.out.vcf_tbi
         } else {
             ch_output_from_sanitize_gvcf = ch_vcf_tbi_standardized
@@ -252,7 +250,6 @@ workflow POSTPROCESSING {
         // PL/AD-array inconsistency risk of touching raw gVCFs, and covers both
         // VEP (-> slivar) and exomiser's default (non-VEP) input in one step.
         BCFTOOLS_PLUGINFIXPLOIDY(ch_output_from_splitMultiAllelics, [], [], [], [])
-        ch_versions = ch_versions.mix(BCFTOOLS_PLUGINFIXPLOIDY.out.versions) // JT: I had to add this so that it shows in Processing-Pipeline_software_mqc_versions.yml (like every other tool)
         ch_output_from_splitMultiAllelics = BCFTOOLS_PLUGINFIXPLOIDY.out.vcf.join(BCFTOOLS_PLUGINFIXPLOIDY.out.index)
 
         if (params.save_genotyped || !params.tools) {

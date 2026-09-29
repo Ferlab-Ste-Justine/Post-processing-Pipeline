@@ -12,19 +12,16 @@ workflow SANITIZE_GVCF_RECORDS {
         ch_fasta  // tuple:   (val(meta2), path(fasta))
 
     main:
-        ch_versions = channel.empty()
+        // BCFTOOLS_FILTER takes an optional index; the filter expression doesn't need one.
+        BCFTOOLS_FILTER(ch_input.map { meta, vcf -> [meta, vcf, []] })
 
-        BCFTOOLS_FILTER(ch_input)
-        ch_versions = ch_versions.mix(BCFTOOLS_FILTER.out.versions)
-
-        ch_norm_input = BCFTOOLS_FILTER.out.vcf.join(BCFTOOLS_FILTER.out.tbi)
+        ch_norm_input = BCFTOOLS_FILTER.out.vcf.join(BCFTOOLS_FILTER.out.index)
 
         BCFTOOLS_NORM(ch_norm_input, ch_fasta)
-        ch_versions = ch_versions.mix(BCFTOOLS_NORM.out.versions)
 
-        ch_vcf_tbi = BCFTOOLS_NORM.out.vcf.join(BCFTOOLS_NORM.out.tbi)
+        ch_vcf_tbi = BCFTOOLS_NORM.out.vcf.join(BCFTOOLS_NORM.out.index)
 
+    // Software versions are reported through the `versions` topic channel.
     emit:
         vcf_tbi  = ch_vcf_tbi  // channel: (val(meta), vcf, tbi)
-        versions = ch_versions // channel: [ versions.yml ]
 }

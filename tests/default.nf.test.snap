@@ -138,6 +138,9 @@
                 "split/family4.splitted.vcf.gz.tbi"
             ],
             {
+                "BCFTOOLS_ANNOTATE": {
+                    "bcftools": 1.2
+                },
                 "BCFTOOLS_FILTER": {
                     "bcftools": 1.2
                 },
@@ -188,7 +191,7 @@
                 }
             }
         ],
-        "timestamp": "2026-09-21T19:40:13.674716225",
+        "timestamp": "2026-09-29T16:15:47.476964759",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "24.10.5"

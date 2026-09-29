@@ -33,7 +33,7 @@ _Decided 2026-09-28, BIOINFO-231. Applies to all three pipelines._
 
 **Why:**
 
-- On pull requests, nf-test only runs the tests affected by the PR (`--changed-since HEAD^`). It works that out by following `include` statements between `.nf` files, plus the `triggers` list in `nf-test.config`. A PR that only changes files outside both, such as `conf/modules.config`, `conf/slivar.config`, `assets/slivar-functions.js` or `assets/schema_input.json`, can skip the pipeline test entirely.
+- On pull requests, nf-test only runs the tests affected by the PR (`--changed-since HEAD^`). It works that out by following `include` statements between `.nf` files, plus the `triggers` list in `nf-test.config`. A PR that only changes files outside both, such as `conf/modules.config` or `conf/slivar.config`, can skip the pipeline test entirely. When this was decided, `assets/slivar-functions.js` and `assets/schema_input.json` were outside both too; BIOINFO-233 added them to `triggers` (`assets/*.js` covers the slivar functions).
 - That gap is real: the parental-origin bug (BIOINFO-217, fixed in #110) lived in `assets/slivar-functions.js`, and the full run in `ci.yml` (now `ci-full-run.yml`) is the job that caught it in CI.
 - `ci-full-run.yml` always runs, whatever the PR changes, so it gives a signal that doesn't depend on change detection.
 

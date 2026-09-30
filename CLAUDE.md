@@ -38,7 +38,7 @@ workflows/postprocessing.nf  # Main POSTPROCESSING workflow — step gating + in
 subworkflows/local/          # sanitize_gvcf_records, vqsr, slivar_inheritance, channel_create_csv, utils_nfcore_postprocessing_pipeline
 subworkflows/nf-core/        # utils_nextflow_pipeline, utils_nfcore_pipeline, utils_nfschema_plugin, vcf_annotate_ensemblvep
 modules/local/               # combine_gvcfs, exomiser, gatk4/applyvqsr, slivar/{expr,compoundhets}, split_multiallelics
-modules/nf-core/             # bcftools (annotate/filter/norm/view), ensemblvep (vep, download), gatk4 (genotypegvcfs, variantfiltration, variantrecalibrator), tabix
+modules/nf-core/             # bcftools (annotate/filter/norm/view), ensemblvep (vep, download), gatk4 (genotypegvcfs, variantfiltration, variantrecalibrator)
 conf/                        # base.config, modules.config, slivar.config, igenomes.config, test.config, test_full.config
 assets/                      # TestSampleSheet.csv, schema_input.json, slivar-functions.js, exomiser/ (default analysis YAMLs)
 docs/                        # usage.md, output.md, reference_data.md
@@ -107,7 +107,7 @@ If running locally,
 ```bash
 nf-test test                         # run all tests
 nf-test test --profile test,docker --tag pipeline          # run the entire pipeline test
-nf-test test modules/local/exomiser  # target one module/subworkflow
+nf-test test --profile test,docker modules/local/exomiser  # target one module/subworkflow
 ```
 
 Test snapshots live alongside each module as `tests/main.nf.test.snap`.
@@ -121,7 +121,7 @@ To clean-up test outputs, run `nf-test clean` or manually delete the `.test_outp
 CI workflows live in `.github/workflows/`: `linting.yml` (pre-commit + nf-core lint), `nf-test.yml` (sharded nf-test, using the composite actions in `.github/actions/`), `ci-full-run.yml` (full `-profile test` pipeline run), and `ci-pr-title-lint.yml` (the PR title must look like `<type>: <TICKET-123> <description>`, e.g. `fix: BIOINFO-231 pin actions/checkout`; PRs are squash-merged, so the title becomes the commit message on `main`). Run lint locally with:
 
 ```bash
-nf-core lint
+nf-core pipelines lint --release
 ```
 
 `.nf-core.yml` carries lint overrides — several nf-core-template files are deliberately not present (e.g. `CODE_OF_CONDUCT.md`, nf-core logos, AWS CI workflows) because this is a Ferlab workflow, not a published nf-core pipeline. Don't reintroduce those files; instead update `.nf-core.yml` if you need to change lint behavior.
@@ -132,7 +132,7 @@ To format the files before commiting run:
 pre-commit run --all-files
 ```
 
-`nf-core lint`/`pipelines lint --release` and `pre-commit run --all-files` are also bundled into `scripts/run-test-suite.sh`, alongside the full nf-test suite — duplicated on purpose with `.github/workflows/linting.yml` so formatting issues surface locally before CI does.
+`nf-core pipelines lint --release` and `pre-commit run --all-files` are also bundled into `scripts/run-test-suite.sh`, alongside the full nf-test suite — duplicated on purpose with `.github/workflows/linting.yml` so formatting issues surface locally before CI does.
 
 ## Samplesheet format
 
@@ -148,11 +148,13 @@ Required columns depend on `--step`. See `assets/schema_input.json` for the auth
 
 A few patterns worth knowing before editing:
 
-- **Channel shape convention.** Most VCF channels carry `[meta, vcf, tbi]`. After a `BCFTOOLS_*` / `GATK4_*` call, the index is usually emitted separately and joined back: `out.vcf.join(out.tbi)`.
+- **Channel shape convention.** Most VCF channels carry `[meta, vcf, tbi]`. After a `BCFTOOLS_*` / `GATK4_*` call, the index is usually emitted separately and joined back: `out.vcf.join(out.index)` for the nf-core bcftools modules, `out.vcf.join(out.tbi)` for GATK4 and VEP.
+- **Software versions.** nf-core modules report their versions through the `versions` topic channel, which `POSTPROCESSING` collects; don't mix their outputs into `ch_versions`. Local modules still emit `versions.yml`, mixed into `ch_versions`. Reading a topic needs `nextflow.preview.topic` on Nextflow 24.10, which `main.nf` sets only below 25.04 (25.04+ fails if it's set).
 - **Per-process resources** live in `nextflow.config` under `process { withName: '...' }`, gated by the `check_max(...)` function and the `max_cpus / max_memory / max_disk / max_time` params. When adding a new process, follow the same `errorStrategy = 'retry'` + `task.attempt`-scaled pattern.
 - **Hard filters** for WES are defined as a list of `[name, expression]` pairs in `nextflow.config` (`params.hardFilters`). VQSR tranches/annotations are in the same block.
 - **Reference inputs** are resolved at the top of `POSTPROCESSING` from `params.referenceGenome` + `params.referenceGenomeFasta` (the Fasta lives _inside_ the referenceGenome directory; `.fai` and `.dict` are derived from the Fasta path).
 - **Adding an nf-core module:** use `nf-core modules install <tool>` so `modules.json` stays consistent. Local-only logic goes under `modules/local/`.
+- **Updating nf-core modules:** the `container` overrides in `conf/modules.config` pin the tools that actually run (VEP 114.2, bcftools 1.20, GATK 4.5.0.0); keep them, so a module update never changes results. Some components are deliberately held behind their latest version because newer ones break on Nextflow 24.10 or in our pinned containers; `docs/journal.md` lists them and the checks to run before updating.
 - **Schema and params stay in sync.** `nextflow_schema.json` is the source of truth for parameter validation (driven by the `nf-schema` plugin, `nf-schema@2.1.0` — migrated from `nf-validation` in v3.0.0). When adding a param, update both `nextflow.config` defaults and the schema.
 - **Samplesheet `sample`/`familyId` are not cross-checked against file content.** `BCFTOOLS_VIEW` (standardize) never inspects or renames the actual sample name embedded in the gVCF/VCF header, so a samplesheet typo or swapped file goes undetected — everything downstream that matches on sample names (GATK, slivar/PED, exomiser/phenopacket) uses the file's own embedded name, not the samplesheet's. See `docs/usage.md`'s samplesheet section for the full note; as of 2026-08-24 this is understood to be intentional.
 

@@ -28,10 +28,6 @@ output:
       description: |
         Sanitized, left-normalized VCF and its tabix index
         Structure: [ val(meta), path(vcf), path(tbi) ]
-  - versions:
-      description: |
-        Aggregated software versions from the underlying processes
-        Structure: [ path(versions.yml) ]
 authors:
   - "@FelixAntoineLeSieur"
   - "@dmorais"

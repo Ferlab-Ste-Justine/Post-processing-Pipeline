@@ -17,8 +17,7 @@ process BCFTOOLS_PLUGINFIXPLOIDY {
     output:
     tuple val(meta), path("*.{vcf,vcf.gz,bcf,bcf.gz}"), emit: vcf
     tuple val(meta), path("*.{tbi,csi}"), emit: index, optional: true
-    path "versions.yml", emit: versions // JT: had to swap the topic-channel version emmission for the classic path "versions.yml", emit: versions pattern.
-                                        //     This also the case in bcftools/annotate.
+    tuple val("${task.process}"), val('bcftools'), eval("bcftools --version | sed '1!d; s/^.*bcftools //'"), topic: versions, emit: versions_bcftools
 
     when:
     task.ext.when == null || task.ext.when
@@ -54,11 +53,6 @@ process BCFTOOLS_PLUGINFIXPLOIDY {
         ${ploidy_arg} \\
         ${sex_arg} \\
         ${args2}
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        bcftools: \$(bcftools --version 2>&1 | head -n1 | sed 's/^.*bcftools //; s/ .*\$//')
-    END_VERSIONS
     """
 
     stub:
@@ -85,10 +79,5 @@ process BCFTOOLS_PLUGINFIXPLOIDY {
     """
     ${create_cmd} ${prefix}.${extension}
     ${create_index}
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        bcftools: \$(bcftools --version 2>&1 | head -n1 | sed 's/^.*bcftools //; s/ .*\$//')
-    END_VERSIONS
     """
 }

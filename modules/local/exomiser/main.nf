@@ -102,7 +102,7 @@ process EXOMISER {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-       "exomiser": "\$(basename /app/libs/exomiser-core-*.jar .jar | cut -d- -f3-)"
+        "exomiser": "\$(basename /app/libs/exomiser-core-*.jar .jar | cut -d- -f3-)"
     END_VERSIONS
     """
 }

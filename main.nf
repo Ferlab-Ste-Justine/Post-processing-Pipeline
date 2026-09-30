@@ -9,6 +9,14 @@
 
 nextflow.enable.dsl = 2
 
+// nf-core modules report software versions through the `versions` topic channel. Reading a
+// topic needs this preview flag on Nextflow 24.10; from 25.04 topics are stable and setting
+// the flag is an error. Same guard as quality-control-pipeline and cnv-post-processing.
+def version_25_04 = new nextflow.util.VersionNumber('25.04.0')
+if (nextflow.version < version_25_04) {
+    nextflow.preview.topic = true
+}
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT FUNCTIONS / MODULES / SUBWORKFLOWS / WORKFLOWS

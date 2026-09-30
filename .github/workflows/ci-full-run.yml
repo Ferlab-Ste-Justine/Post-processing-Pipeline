@@ -28,6 +28,13 @@ jobs:
     name: "Run pipeline with test data (${{ matrix.NXF_VER }} | ${{ matrix.test_name }} | ${{ matrix.profile }})"
     runs-on: ubuntu-latest
     strategy:
+      # Serialized on purpose: in the quality-control-pipeline, concurrent
+      # legs starting within seconds of each other have been observed to
+      # all get stuck retrying that same blob until the 1h test-profile time
+      # limit kills them -- max-parallel: 1 avoids that by never letting two
+      # legs pull it at once. Costs total wall-clock time; trades that for
+      # reliability.
+      max-parallel: 1
       matrix:
         NXF_VER:
           - "24.10.5"

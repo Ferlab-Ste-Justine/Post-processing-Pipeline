@@ -35,7 +35,6 @@ workflow VQSR {
             ch_fai,
             ch_dict
         )
-        ch_versions = ch_versions.mix(GATK4_VARIANTRECALIBRATOR_SNP.out.versions)
 
         // Apply the SNP VQSR model
         ch_snp_apply_input = ch_input
@@ -63,7 +62,6 @@ workflow VQSR {
             ch_fai,
             ch_dict
         )
-        ch_versions = ch_versions.mix(GATK4_VARIANTRECALIBRATOR_INDEL.out.versions)
 
         // Apply the INDEL VQSR model
         ch_indel_apply_input = ch_indel_recal_input

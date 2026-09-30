@@ -32,7 +32,7 @@ workflow SLIVAR_INHERITANCE {
     BCFTOOLS_ANNOTATE(ch_annotate)
 
     ch_vcf_tbi = BCFTOOLS_ANNOTATE.out.vcf
-        .join(BCFTOOLS_ANNOTATE.out.tbi)
+        .join(BCFTOOLS_ANNOTATE.out.index)
         .map { meta, vcf, tbi ->
             return [meta, vcf, tbi]
         }

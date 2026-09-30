@@ -37,10 +37,10 @@ nextflow_workflow {
         when {
             workflow {
                 """
-                input[0] = [
+                input[0] = channel.of([
                     [ id: 'sanitize_test' ],
                     file("\${projectDir}/tests/sanitize_gvcf_records/fixtures/sanitize_test.vcf.gz", checkIfExists: true)
-                ]
+                ])
                 input[1] = [
                     [ id: 'reference' ],
                     file("\${projectDir}/tests/sanitize_gvcf_records/fixtures/ref.fa", checkIfExists: true)

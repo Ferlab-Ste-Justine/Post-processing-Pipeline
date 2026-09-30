@@ -200,7 +200,7 @@ workflow PIPELINE_COMPLETION {
 // Extracts the nextflow log file path from the given command line string.
 // If the '-log' option is present, it returns the specified log file path.
 // Otherwise, it defaults to '.nextflow.log'.
- //
+//
 def getLogFile(command_line) {
     if (!command_line) {
         error "Command line not provided"

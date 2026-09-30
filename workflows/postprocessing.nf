@@ -114,11 +114,11 @@ workflow POSTPROCESSING {
 
     writemeta()
 
- /*
-  ================================================================================
-       STAGE 1 — Joint genotyping (gVCFs → multi-sample VCF + artifact tagging)
-  ================================================================================
- */
+    /*
+    ================================================================================
+        STAGE 1 — Joint genotyping (gVCFs → multi-sample VCF + artifact tagging)
+    ================================================================================
+    */
 
     if (params.step == 'genotype') {
 
@@ -128,14 +128,12 @@ workflow POSTPROCESSING {
             [meta, vcf, tbi.exists() ? tbi : []]
         }
         BCFTOOLS_VIEW(ch_view_input, [], [], [])
-        ch_versions = ch_versions.mix(BCFTOOLS_VIEW.out.versions)
-        ch_vcf_tbi_standardized = BCFTOOLS_VIEW.out.vcf.join(BCFTOOLS_VIEW.out.tbi)
+        ch_vcf_tbi_standardized = BCFTOOLS_VIEW.out.vcf.join(BCFTOOLS_VIEW.out.index)
 
         //Optionally sanitize malformed/duplicate gVCF records (see BIOINFO-222)
         if (params.gvcf_filtering) {
             ch_input_sanitize_gvcf = ch_vcf_tbi_standardized.map{ meta, vcf, _tbi -> [meta, vcf] }
             SANITIZE_GVCF_RECORDS(ch_input_sanitize_gvcf, [[id: 'reference'], pathReferenceGenomeFasta])
-            ch_versions = ch_versions.mix(SANITIZE_GVCF_RECORDS.out.versions)
             ch_output_from_sanitize_gvcf = SANITIZE_GVCF_RECORDS.out.vcf_tbi
         } else {
             ch_output_from_sanitize_gvcf = ch_vcf_tbi_standardized
@@ -175,7 +173,6 @@ workflow POSTPROCESSING {
             [[id: 'dbsnp'],     dbsnpFile],
             [[id: 'dbsnp_idx'], dbsnpFileIndex]
         )
-        ch_versions = ch_versions.mix(GATK4_GENOTYPEGVCFS.out.versions)
         ch_output_from_genotypegvcf = GATK4_GENOTYPEGVCFS.out.vcf.join(GATK4_GENOTYPEGVCFS.out.tbi)
 
         //Tag variants that are probable artifacts.
@@ -217,20 +214,20 @@ workflow POSTPROCESSING {
             ch_by_seqtype.wes,
             [[id: 'reference'], pathReferenceGenomeFasta],
             [[id: 'reference'], pathReferenceGenomeFai],
-            [[id: 'reference'], pathReferenceDict]
+            [[id: 'reference'], pathReferenceDict],
+            [[:], []] // gzi: only needed for a bgzipped fasta
         )
-        ch_versions = ch_versions.mix(GATK4_VARIANTFILTRATION.out.versions)
         ch_variantfiltration_output = GATK4_VARIANTFILTRATION.out.vcf
             .join(GATK4_VARIANTFILTRATION.out.tbi)
 
         ch_output_from_tagArtifacts = VQSR.out.vcf_tbi.mix(ch_variantfiltration_output)
     }
 
- /*
-  ================================================================================
-       STAGE 2 — Normalization (VCF → split multi-allelics VCF)
-  ================================================================================
- */
+    /*
+    ================================================================================
+        STAGE 2 — Normalization (VCF → split multi-allelics VCF)
+    ================================================================================
+    */
 
     if (params.step in ['genotype', 'normalize']) {
         vcf_for_norm = params.step == 'genotype'
@@ -252,7 +249,6 @@ workflow POSTPROCESSING {
         // PL/AD-array inconsistency risk of touching raw gVCFs, and covers both
         // VEP (-> slivar) and exomiser's default (non-VEP) input in one step.
         BCFTOOLS_PLUGINFIXPLOIDY(ch_output_from_splitMultiAllelics, [], [], [], [])
-        ch_versions = ch_versions.mix(BCFTOOLS_PLUGINFIXPLOIDY.out.versions) // JT: I had to add this so that it shows in Processing-Pipeline_software_mqc_versions.yml (like every other tool)
         ch_output_from_splitMultiAllelics = BCFTOOLS_PLUGINFIXPLOIDY.out.vcf.join(BCFTOOLS_PLUGINFIXPLOIDY.out.index)
 
         if (params.save_genotyped || !params.tools) {
@@ -260,11 +256,11 @@ workflow POSTPROCESSING {
         }
     }
 
- /*
-  ================================================================================
-       STAGE 3 — Variant annotation and prioritization (VEP, Slivar, Exomiser)
-  ================================================================================
- */
+    /*
+    ================================================================================
+        STAGE 3 — Variant annotation and prioritization (VEP, Slivar, Exomiser)
+    ================================================================================
+    */
 
     if ((params.step in ['genotype', 'normalize'] && isVepToolIncluded()) || params.step == 'annotation') {
 
@@ -275,7 +271,6 @@ workflow POSTPROCESSING {
             ensemblvep_info = channel.of([ [ id: "${params.vep_cache_version}_${params.vep_genome}" ], params.vep_genome, vep_species_download, params.vep_cache_version ])
             ENSEMBLVEP_DOWNLOAD(ensemblvep_info)
             vep_cache = ENSEMBLVEP_DOWNLOAD.out.cache.collect().map{ _meta, cache -> [ cache ] }.first()
-            ch_versions = ch_versions.mix(ENSEMBLVEP_DOWNLOAD.out.versions.first())
         } else {
             vep_cache = file(params.vep_cache)
         }
@@ -293,7 +288,6 @@ workflow POSTPROCESSING {
             vep_cache,
             []                                                       // extra files
         )
-        ch_versions = ch_versions.mix(VCF_ANNOTATE_ENSEMBLVEP.out.versions)
         ch_output_from_vep = VCF_ANNOTATE_ENSEMBLVEP.out.vcf_tbi
 
         CHANNEL_CREATE_CSV_VEP(ch_output_from_vep, "ensemblvep", params.outdir, params.vep_outdir ?: [])
@@ -370,8 +364,30 @@ workflow POSTPROCESSING {
         )
     }
 
-    // Collate and write the aggregated software versions for MultiQC.
-    softwareVersionsToYAML(ch_versions)
+    // Collate and write the aggregated software versions for MultiQC: the versions.yml files
+    // collected in ch_versions (local modules), plus what nf-core modules send to the `versions`
+    // topic, either as versions.yml files or as [process, tool, version] tuples.
+    // No `def` on topic_versions: in this workflow, Nextflow 24.10 rejects
+    // `def topic_versions = channel.topic(...)` ("Variable `channel` already defined").
+    topic_versions = channel.topic("versions")
+        .distinct()
+        .branch { entry ->
+            versions_file: entry instanceof Path
+            versions_tuple: true
+        }
+
+    def topic_versions_string = topic_versions.versions_tuple
+        .map { process, tool, version ->
+            [ process[process.lastIndexOf(':')+1..-1], "  ${tool}: ${version}" ]
+        }
+        .groupTuple(by:0)
+        .map { process, tool_versions ->
+            tool_versions.unique().sort()
+            "${process}:\n${tool_versions.join('\n')}"
+        }
+
+    softwareVersionsToYAML(ch_versions.mix(topic_versions.versions_file))
+        .mix(topic_versions_string)
         .collectFile(
             storeDir: "${params.outdir}/pipeline_info",
             name:     'Post-Processing-Pipeline_software_mqc_versions.yml',

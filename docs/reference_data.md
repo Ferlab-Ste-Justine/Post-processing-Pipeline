@@ -1,4 +1,4 @@
-# Ferlab-Ste-Justine/Post-processing-Pipeline: Reference Data
+# Ferlab-Ste-Justine/snv-post-processing: Reference Data
 
 Reference files are essential at various steps of the pipeline, including joint-genotyping, VQSR, the Variant Effect Predictor (VEP), slivar, and exomiser.
 

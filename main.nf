@@ -1,9 +1,9 @@
 #!/usr/bin/env nextflow
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Ferlab-Ste-Justine/Post-Processing-Pipeline
+    Ferlab-Ste-Justine/snv-post-processing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Github : https://github.com/Ferlab-Ste-Justine/Post-Processing-Pipeline
+    Github : https://github.com/Ferlab-Ste-Justine/snv-post-processing
 ----------------------------------------------------------------------------------------
 */
 

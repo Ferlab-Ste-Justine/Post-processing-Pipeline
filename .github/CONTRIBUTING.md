@@ -1,7 +1,7 @@
-# Ferlab-Ste-Justine/Post-Processing-Pipeline: Contributing Guidelines
+# Ferlab-Ste-Justine/snv-post-processing: Contributing Guidelines
 
 Hi there!
-Many thanks for taking an interest in improving Ferlab-Ste-Justine/Post-Processing-Pipeline.
+Many thanks for taking an interest in improving Ferlab-Ste-Justine/snv-post-processing.
 
 If you haven't already, we recommend creating a GitHub issue to describe your task. Please use the pre-filled template to save time.
 
@@ -61,7 +61,7 @@ The tests are run with the minimum Nextflow version, a more recent version and t
 
 ## Pipeline contribution conventions
 
-To make the Ferlab-Ste-Justine/Post-Processing-Pipeline code and processing logic more understandable for new contributors and to ensure quality, we try to follow nf-core standards as much as possible.
+To make the Ferlab-Ste-Justine/snv-post-processing code and processing logic more understandable for new contributors and to ensure quality, we try to follow nf-core standards as much as possible.
 
 They are described below. Try to follow them as much as possible. If you are unsure, feel free to reach out to the bioinformatics team.
 

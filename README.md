@@ -9,7 +9,7 @@
 
 ## Introduction
 
-**Ferlab-Ste-Justine/Post-processing-Pipeline** is a bioinformatics pipeline designed for family-based analysis of GVCFs from multiple samples.
+**Ferlab-Ste-Justine/snv-post-processing** is a bioinformatics pipeline designed for family-based analysis of GVCFs from multiple samples.
 It performs joint genotyping, tags low-quality variants, and optionally annotates the final vcf data using vep and/or prioritize variant using exomiser.
 
 The pipeline can be started from different entry points depending on your needs:
@@ -38,7 +38,7 @@ The pipeline can be started from different entry points depending on your needs:
 
 ### Workflow subway schema
 
-The full Ferlab workflow is shown in the image below, including the steps applicable prior to this pipeline. The steps relevant to the Ferlab-Ste-Justine/Post-processing-Pipeline correspond to the post-processing block.
+The full Ferlab workflow is shown in the image below, including the steps applicable prior to this pipeline. The steps relevant to the Ferlab-Ste-Justine/snv-post-processing correspond to the post-processing block.
 ![PostProcessingDiagram](docs/images/ferlab_workflow.svg)
 
 This schema was done using [inkscape](https://inkscape.org/) with the good pratices recommended by the nf-core community. See [nf-core Graphic Design](https://nf-co.re/docs/guidelines/graphic_design).
@@ -48,7 +48,7 @@ This schema was done using [inkscape](https://inkscape.org/) with the good prati
 Here is an example nextflow command to run the pipeline:
 
 ```bash
-nextflow run -c cluster.config Ferlab-Ste-Justine/Post-processing-Pipeline -r "v3.0.0" \
+nextflow run -c cluster.config Ferlab-Ste-Justine/snv-post-processing -r "v3.0.0" \
     -params-file params.json  \
    --input samplesheet.csv \
    --outdir results/dir \
@@ -59,7 +59,7 @@ To start from a specific step, use the `--step` parameter:
 
 ```bash
 # Start from normalization step
-nextflow run -c cluster.config Ferlab-Ste-Justine/Post-processing-Pipeline -r "v3.0.0" \
+nextflow run -c cluster.config Ferlab-Ste-Justine/snv-post-processing -r "v3.0.0" \
     --step normalize \
     --input samplesheet.csv \
     --outdir results/dir \
@@ -79,7 +79,7 @@ For more details, see [docs/usage.md](docs/usage.md) and [docs/reference_data.md
 
 The `-stub` (or `-stub-run`) option can be added to run the "stub" block of processes instead of the "script" block. This can be helpful for testing.
 
-To test your setup in stub mode, simply run `nextflow run Ferlab-Ste-Justine/Post-processing-Pipeline -profile test,docker -stub`.
+To test your setup in stub mode, simply run `nextflow run Ferlab-Ste-Justine/snv-post-processing -profile test,docker -stub`.
 
 For tests with real data, see documentation in the [test configuration profile](conf/test.config).
 The test data is expected to be accessible locally under the launch directory. Before testing the pipeline, verify that the test-data directory exists.
@@ -94,7 +94,7 @@ See [docs/output.md](docs/output.md) for more details about pipeline outputs.
 
 ## Credits
 
-Ferlab-Ste-Justine/Post-processing-Pipeline was originally written by Damien Geneste, David Morais, Felix-Antoine Le Sieur, Jeremy Costanza, Lysiane Bouchard, Georgette Femerling, Julien Tremblay.
+Ferlab-Ste-Justine/snv-post-processing was originally written by Damien Geneste, David Morais, Felix-Antoine Le Sieur, Jeremy Costanza, Lysiane Bouchard, Georgette Femerling, Julien Tremblay.
 
 ## Contributions and Support
 

@@ -10,7 +10,7 @@ inputs:
   s3_path:
     description: "S3 location of the test dataset. The one place CI defines it."
     required: false
-    default: "s3://ferlab-public-dataset/nextflow/Post-Processing-Pipeline/V7/data-test"
+    default: "s3://ferlab-public-dataset/nextflow/snv-post-processing/V7/data-test"
   destination:
     description: "Local directory to copy the dataset into"
     required: false

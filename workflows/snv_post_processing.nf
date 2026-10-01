@@ -390,7 +390,7 @@ workflow SNV_POST_PROCESSING {
         .mix(topic_versions_string)
         .collectFile(
             storeDir: "${params.outdir}/pipeline_info",
-            name:     'Post-Processing-Pipeline_software_mqc_versions.yml',
+            name:     'snv-post-processing_software_mqc_versions.yml',
             sort:     true,
             newLine:  true
         )

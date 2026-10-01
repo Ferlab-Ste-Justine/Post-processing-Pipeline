@@ -1,7 +1,7 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://raw.githubusercontent.com/Ferlab-Ste-Justine/Post-Processing-Pipeline/master/assets/schema_input.json",
-    "title": "Ferlab-Ste-Justine/Post-Processing-Pipeline - params.input schema",
+    "$id": "https://raw.githubusercontent.com/Ferlab-Ste-Justine/snv-post-processing/master/assets/schema_input.json",
+    "title": "Ferlab-Ste-Justine/snv-post-processing - params.input schema",
     "description": "Schema for the file provided with params.input",
     "type": "array",
     "items": {

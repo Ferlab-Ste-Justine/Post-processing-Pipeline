@@ -1,7 +1,7 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://raw.githubusercontent.com/Ferlab-Ste-Justine/Post-Processing-Pipeline/master/nextflow_schema.json",
-    "title": "Ferlab-Ste-Justine/Post-Processing-Pipeline pipeline parameters",
+    "$id": "https://raw.githubusercontent.com/Ferlab-Ste-Justine/snv-post-processing/master/nextflow_schema.json",
+    "title": "Ferlab-Ste-Justine/snv-post-processing pipeline parameters",
     "description": "Variant analysis for genome and exome GVCFs",
     "type": "object",
     "$defs": {

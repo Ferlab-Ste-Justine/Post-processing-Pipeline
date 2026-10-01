@@ -1,4 +1,4 @@
-# Ferlab-Ste-Justine/Post-processing-Pipeline: Usage
+# Ferlab-Ste-Justine/snv-post-processing: Usage
 
 > _Parameters documentation is available in the [pipeline schema](../nextflow_schema.json)._
 > _You can use the command `nf-core pipelines schema docs` to output parameters documentation._
@@ -7,7 +7,7 @@
 
 ## Introduction
 
-The Ferlab-Ste-Justine/Post-processing-Pipeline is a bioinformatics pipeline designed for family-based analysis of GVCFs from multiple samples. It performs joint genotyping, tags low-quality variants, and optionally annotates the final VCF using VEP and/or Exomiser. This document provides instructions on how to prepare input files, run the pipeline, and understand the output.
+The Ferlab-Ste-Justine/snv-post-processing is a bioinformatics pipeline designed for family-based analysis of GVCFs from multiple samples. It performs joint genotyping, tags low-quality variants, and optionally annotates the final VCF using VEP and/or Exomiser. This document provides instructions on how to prepare input files, run the pipeline, and understand the output.
 
 ## Samplesheet input
 
@@ -25,7 +25,7 @@ Additionally, there is an optional _familyPheno_ column that can contain a `.yml
 
 There is also an optional _familyPed_ column that can point to a `.ped` pedigree file for the family. This column is required to run the [slivar inheritance step](#slivar-inheritance-step), which tags variants by mode of inheritance and identifies compound heterozygotes from a VEP-annotated VCF. As with `familyPheno`, the value must be identical for all members of the same family.
 
-> **Note:** the `sample` (and `familyId`) values in the samplesheet are used only for this pipeline's own file naming and internal tracking (e.g. `meta.id`, published filenames, CSV manifests). They are **not** validated against the sample name actually embedded in the corresponding `gvcf`/`vcf` file's header — if the two differ, the pipeline will not detect or warn about it, and everything downstream that reads sample names directly from the VCF/PED/phenopacket files (GATK joint genotyping, slivar's inheritance tagging, exomiser's phenotype matching) will use the file's own embedded name regardless of what the samplesheet says. This is intentional (e.g. to allow a LIMS-assigned identifier to differ from a sequencing core's internal sample name) and not implemented here (Post-processing-Pipeline) because it is already implemented in pipelines that should be run downstream of this one (e.g. QC and file integrity pipelines). However, note that if the sample identifiers in the pedigree or phenopacket file differ from the ones in their corresponding VCF file, the pipeline will still fail at the slivar and/or exomiser steps.
+> **Note:** the `sample` (and `familyId`) values in the samplesheet are used only for this pipeline's own file naming and internal tracking (e.g. `meta.id`, published filenames, CSV manifests). They are **not** validated against the sample name actually embedded in the corresponding `gvcf`/`vcf` file's header — if the two differ, the pipeline will not detect or warn about it, and everything downstream that reads sample names directly from the VCF/PED/phenopacket files (GATK joint genotyping, slivar's inheritance tagging, exomiser's phenotype matching) will use the file's own embedded name regardless of what the samplesheet says. This is intentional (e.g. to allow a LIMS-assigned identifier to differ from a sequencing core's internal sample name) and not implemented here (snv-post-processing) because it is already implemented in pipelines that should be run downstream of this one (e.g. QC and file integrity pipelines). However, note that if the sample identifiers in the pedigree or phenopacket file differ from the ones in their corresponding VCF file, the pipeline will still fail at the slivar and/or exomiser steps.
 
 **sample.csv**
 
@@ -56,7 +56,7 @@ These files must be correctly downloaded and specified through pipeline paramete
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run -c fusion.config Ferlab-Ste-Justine/Post-processing-Pipeline -r "v3.0.0" \
+nextflow run -c fusion.config Ferlab-Ste-Justine/snv-post-processing -r "v3.0.0" \
     -params-file params.json  \
    --input samplesheet.csv \
    --outdir results/dir \
@@ -267,7 +267,7 @@ The slivar expressions and the bcftools annotate command can also be tuned via t
 
 The `-stub` (or `-stub-run`) option can be added to run the "stub" block of processes instead of the "script" block. This can be helpful for testing.
 
-To test your setup in stub mode, simply run `nextflow run Ferlab-Ste-Justine/Post-processing-Pipeline -profile test,docker -stub`.
+To test your setup in stub mode, simply run `nextflow run Ferlab-Ste-Justine/snv-post-processing -profile test,docker -stub`.
 
 For tests with real data, see documentation in the [test configuration profile](conf/test.config)
 
@@ -276,14 +276,14 @@ For tests with real data, see documentation in the [test configuration profile](
 When you run the above command, Nextflow automatically pulls the pipeline code from GitHub and stores it as a cached version. When running the pipeline after this, it will always use the cached version if available - even if the pipeline has been updated since. To make sure that you're running the latest version of the pipeline, make sure that you regularly update the cached version of the pipeline:
 
 ```bash
-nextflow pull Ferlab-Ste-Justine/Post-processing-Pipeline
+nextflow pull Ferlab-Ste-Justine/snv-post-processing
 ```
 
 ### Reproducibility
 
 It is a good idea to specify a pipeline version when running the pipeline on your data. This ensures that a specific version of the pipeline code and software are used when you run your pipeline. If you keep using the same tag, you'll be running the same version of the pipeline, even if there have been changes to the code since.
 
-First, go to the [Ferlab-Ste-Justine/Post-processing-Pipeline releases page](https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline/tags) and find the latest pipeline version - numeric only (eg. `v3.0.0`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r v3.0.0`. Of course, you can switch to another version by changing the number after the `-r` flag.
+First, go to the [Ferlab-Ste-Justine/snv-post-processing releases page](https://github.com/Ferlab-Ste-Justine/snv-post-processing/tags) and find the latest pipeline version - numeric only (eg. `v3.0.0`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r v3.0.0`. Of course, you can switch to another version by changing the number after the `-r` flag.
 
 This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future. For example, at the bottom of the MultiQC reports.
 

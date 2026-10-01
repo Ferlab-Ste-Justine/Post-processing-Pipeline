@@ -4,7 +4,7 @@ This file gives Claude Code the context it needs to work effectively in this rep
 
 ## Project overview
 
-`Ferlab-Ste-Justine/Post-processing-Pipeline` (manifest name: `Ferlab-Ste-Justine/Post-Processing-Pipeline`) is a Nextflow DSL2 pipeline for family-based variant analysis of GVCFs. It performs joint genotyping, tags low-quality variants, optionally normalizes, annotates with VEP, tags variants by mode of inheritance with slivar, and prioritizes variants with exomiser.
+`Ferlab-Ste-Justine/snv-post-processing` (named `Post-processing-Pipeline` until BIOINFO-238; older docs, CHANGELOG entries and PR links use that name) is a Nextflow DSL2 pipeline for family-based variant analysis of GVCFs. It performs joint genotyping, tags low-quality variants, optionally normalizes, annotates with VEP, tags variants by mode of inheritance with slivar, and prioritizes variants with exomiser.
 
 The repo is structured following nf-core conventions. It is _not_ a published nf-core pipeline.
 
@@ -49,7 +49,7 @@ docs/                        # usage.md, output.md, reference_data.md
 Typical invocation (from the README):
 
 ```bash
-nextflow run -c cluster.config Ferlab-Ste-Justine/Post-processing-Pipeline -r "v3.0.0" \
+nextflow run -c cluster.config Ferlab-Ste-Justine/snv-post-processing -r "v3.0.0" \
     -params-file params.json \
     --input samplesheet.csv \
     --outdir results/dir \
@@ -65,13 +65,13 @@ Important conventions:
 ### Test dataset
 
 The test data is expected to be accessible locally under the launch directory. Before testing the pipeline, verify that the test-data directory exists.
-The data lives in a private AWS S3 bucket `s3://ferlab-public-dataset/nextflow/Post-Processing-Pipeline/V7/data-test` and in a private CEPH S3 bucket `s3://cqdg-prod-file-import/test-datasets/Post-Processing-Pipeline/V7/data-test`.
+The data lives in a private AWS S3 bucket `s3://ferlab-public-dataset/nextflow/snv-post-processing/V7/data-test` and in a private CEPH S3 bucket `s3://cqdg-prod-file-import/test-datasets/snv-post-processing/V7/data-test`.
 In CI, `nf-test.yml` and `ci-full-run.yml` both download it through the `.github/actions/copy-test-data` composite action, the only place CI defines the S3 path. When the dataset version changes, update it there, in `scripts/run-smoke-tests.sh`, in `tests/nextflow.config` (`pipelines_testdata_base_path`, which nf-core lint requires but no test reads), and here.
 
 ### Stub / quick smoke test
 
 ```bash
-nextflow run Ferlab-Ste-Justine/Post-processing-Pipeline -profile test,docker -stub
+nextflow run Ferlab-Ste-Justine/snv-post-processing -profile test,docker -stub
 ```
 
 `-stub` runs the `stub:` block of each process instead of the real `script:` block — useful for verifying wiring without real data or reference downloads.
@@ -83,13 +83,13 @@ If running locally:
 - Make sure Docker Desktop is installed and running.
 
 ```bash
-nextflow run Ferlab-Ste-Justine/Post-processing-Pipeline -profile test,docker
+nextflow run Ferlab-Ste-Justine/snv-post-processing -profile test,docker
 ```
 
 If running on ARM hardware, add the `arm` profile to pull ARM-compatible images:
 
 ```bash
-nextflow run Ferlab-Ste-Justine/Post-processing-Pipeline -profile test,docker,arm
+nextflow run Ferlab-Ste-Justine/snv-post-processing -profile test,docker,arm
 ```
 
 To clean-up outputs, run `nextflow clean -f`.

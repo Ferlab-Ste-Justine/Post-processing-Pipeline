@@ -1,6 +1,6 @@
 {
-    "name": "Ferlab-Ste-Justine/Post-processing-Pipeline",
-    "homePage": "https://github.com/Ferlab-Ste-Justine/Post-processing-Pipeline",
+    "name": "Ferlab-Ste-Justine/snv-post-processing",
+    "homePage": "https://github.com/Ferlab-Ste-Justine/snv-post-processing",
     "repos": {
         "https://github.com/nf-core/modules.git": {
             "modules": {

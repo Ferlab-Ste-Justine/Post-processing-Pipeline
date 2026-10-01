@@ -1,7 +1,7 @@
 nextflow_function {
 
-    name "Test Subworkflow UTILS_NFCORE_POSTPROCESSING_PIPELINE isToolIncluded function"
-    script "subworkflows/local/utils_nfcore_postprocessing_pipeline/utils.nf"
+    name "Test Subworkflow UTILS_NFCORE_SNV_POST_PROCESSING_PIPELINE isToolIncluded function"
+    script "subworkflows/local/utils_nfcore_snv_post_processing_pipeline/utils.nf"
     tag "local"
 
     function "isToolIncluded"

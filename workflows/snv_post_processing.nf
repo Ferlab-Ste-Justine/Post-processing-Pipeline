@@ -22,9 +22,9 @@ include { CHANNEL_CREATE_CSV as CHANNEL_CREATE_CSV_VEP      } from '../subworkfl
 include { CHANNEL_CREATE_CSV as CHANNEL_CREATE_CSV_GENOTYPE } from '../subworkflows/local/channel_create_csv'
 include { CHANNEL_CREATE_CSV as CHANNEL_CREATE_CSV_EXOMISER } from '../subworkflows/local/channel_create_csv'
 //functions
-include { isExomiserToolIncluded  } from '../subworkflows/local/utils_nfcore_postprocessing_pipeline/utils'
-include { isVepToolIncluded       } from '../subworkflows/local/utils_nfcore_postprocessing_pipeline/utils'
-include { isToolIncluded          } from '../subworkflows/local/utils_nfcore_postprocessing_pipeline/utils'
+include { isExomiserToolIncluded  } from '../subworkflows/local/utils_nfcore_snv_post_processing_pipeline/utils'
+include { isVepToolIncluded       } from '../subworkflows/local/utils_nfcore_snv_post_processing_pipeline/utils'
+include { isToolIncluded          } from '../subworkflows/local/utils_nfcore_snv_post_processing_pipeline/utils'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -63,7 +63,7 @@ process writemeta {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-workflow POSTPROCESSING {
+workflow SNV_POST_PROCESSING {
 
     take:
     ch_samplesheet

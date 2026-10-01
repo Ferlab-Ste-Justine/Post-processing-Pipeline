@@ -1,12 +1,12 @@
 nextflow_function {
 
-    name "Test Subworkflow UTILS_NFCORE_POSTPROCESSING_PIPELINE isExomiserToolIncluded function"
-    script "subworkflows/local/utils_nfcore_postprocessing_pipeline/utils.nf"
+    name "Test Subworkflow UTILS_NFCORE_SNV_POST_PROCESSING_PIPELINE isVepToolIncluded function"
+    script "subworkflows/local/utils_nfcore_snv_post_processing_pipeline/utils.nf"
     tag "local"
 
-    function "isExomiserToolIncluded"
+    function "isVepToolIncluded"
 
-    test("Test Function isExomiserToolIncluded - both vep and exomiser") {
+    test("Test Function isVepToolIncluded - both vep and exomiser") {
         when {
             params {
                 tools = "vep,exomiser"
@@ -24,10 +24,10 @@ nextflow_function {
         }
     }
 
-    test("Test Function isExomiserToolIncluded - only exomiser") {
+    test("Test Function isVepToolIncluded - only vep") {
         when {
             params {
-                tools = "exomiser"
+                tools = "vep"
             }
             function {
                 """
@@ -42,25 +42,25 @@ nextflow_function {
         }
     }
 
-    test("Test Function isExomiserToolIncluded - only vep") {
+    test("Test Function isVepToolIncluded - only exomiser") {
         when {
             params {
-                tools = "vep"
+                tools = "exomiser"
             }
             function {
                 """
                 """
             }
-        }
-        then {
-            assertAll(
-                { assert function.success },
-                { assert function.result == false }
-            )
+            then {
+                assertAll(
+                    { assert function.success },
+                    { assert function.result == false }
+                )
+            }
         }
     }
 
-    test("Test Function isExomiserToolIncluded - no tools") {
+    test("Test Function isVepToolIncluded - no tools") {
         when {
             params {
                 tools = null
@@ -69,12 +69,12 @@ nextflow_function {
                 """
                 """
             }
-        }
-        then {
-            assertAll(
-                { assert function.success },
-                { assert function.result == false }
-            )
+            then {
+                assertAll(
+                    { assert function.success },
+                    { assert function.result == false }
+                )
+            }
         }
     }
 }

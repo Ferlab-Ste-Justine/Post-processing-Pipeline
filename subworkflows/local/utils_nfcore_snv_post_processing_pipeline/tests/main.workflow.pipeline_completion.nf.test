@@ -1,7 +1,7 @@
 nextflow_workflow {
 
-    name "Test Workflow UTILS_NFCORE_POSTPROCESSING_PIPELINE PIPELINE_COMPLETION"
-    script "subworkflows/local/utils_nfcore_postprocessing_pipeline/main.nf"
+    name "Test Workflow UTILS_NFCORE_SNV_POST_PROCESSING_PIPELINE PIPELINE_COMPLETION"
+    script "subworkflows/local/utils_nfcore_snv_post_processing_pipeline/main.nf"
 
     workflow "PIPELINE_COMPLETION "
     tag 'local'

@@ -15,7 +15,7 @@ nextflow_process {
     // equivalent -- this is real pipeline behaviour, not upstream boilerplate, so
     // it gets its own test outside the ignored tree. Reproduces the production
     // ext.args/args2 from conf/modules.config and the empty ploidy/sex/regions/
-    // targets call from workflows/postprocessing.nf.
+    // targets call from workflows/snv_post_processing.nf.
     test("fixploidy - haploid GT normalized, diploid GT untouched") {
         when {
             process {

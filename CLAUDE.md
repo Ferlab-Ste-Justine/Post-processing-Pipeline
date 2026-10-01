@@ -12,7 +12,7 @@ Nextflow version range: `>=24.10.5, <26.0.0`. Pipeline version is tracked in `ne
 
 ## High-level pipeline flow
 
-The single entry workflow is in `main.nf`, which calls `POSTPROCESSING` in `workflows/postprocessing.nf`. That workflow is gated by the `--step` parameter so the pipeline can be entered at five points:
+The single entry workflow is in `main.nf`, which calls `SNV_POST_PROCESSING` in `workflows/snv_post_processing.nf`. That workflow is gated by the `--step` parameter so the pipeline can be entered at five points:
 
 1. `genotype` (default): standardize input VCFs → optional gVCF record sanitization → `COMBINEGVCFS` → `GATK4_GENOTYPEGVCFS` → tag artifacts (VQSR for WGS, GATK `VariantFiltration` hard-filtering for WES)
 2. `normalize`: starts from filtered VCFs → `SPLIT_MULTIALLELICS` (bcftools norm)
@@ -30,12 +30,12 @@ The WES/WGS distinction is load-bearing: it controls both the artifact-tagging m
 ## Repository layout
 
 ```
-main.nf                      # Entry point — calls PIPELINE_INITIALISATION, FERLAB_POSTPROCESSING, PIPELINE_COMPLETION
+main.nf                      # Entry point — calls PIPELINE_INITIALISATION, FERLABSTEJUSTINE_SNV_POST_PROCESSING, PIPELINE_COMPLETION
 nextflow.config              # Params, profiles, per-process resources, manifest
 nextflow_schema.json         # Authoritative parameter schema (use this, not the README)
 nf-test.config               # nf-test runner config (profile "test")
-workflows/postprocessing.nf  # Main POSTPROCESSING workflow — step gating + inlined stage logic (standardize, gVCF sanitization, artifact tagging, VEP/slivar/exomiser branches); the old helper closures were inlined in v3.0.0 (their names survive only as `ch_output_from_*` channels)
-subworkflows/local/          # sanitize_gvcf_records, vqsr, slivar_inheritance, channel_create_csv, utils_nfcore_postprocessing_pipeline
+workflows/snv_post_processing.nf  # Main SNV_POST_PROCESSING workflow — step gating + inlined stage logic (standardize, gVCF sanitization, artifact tagging, VEP/slivar/exomiser branches); the old helper closures were inlined in v3.0.0 (their names survive only as `ch_output_from_*` channels)
+subworkflows/local/          # sanitize_gvcf_records, vqsr, slivar_inheritance, channel_create_csv, utils_nfcore_snv_post_processing_pipeline
 subworkflows/nf-core/        # utils_nextflow_pipeline, utils_nfcore_pipeline, utils_nfschema_plugin, vcf_annotate_ensemblvep
 modules/local/               # combine_gvcfs, exomiser, gatk4/applyvqsr, slivar/{expr,compoundhets}, split_multiallelics
 modules/nf-core/             # bcftools (annotate/filter/norm/view), ensemblvep (vep, download), gatk4 (genotypegvcfs, variantfiltration, variantrecalibrator)
@@ -59,7 +59,7 @@ nextflow run -c cluster.config Ferlab-Ste-Justine/Post-processing-Pipeline -r "v
 Important conventions:
 
 - Pass parameters via CLI flags or `-params-file` (JSON/YAML). **Do not** put params in a `-c` config file — `-c` is reserved for resource/infrastructure tuning. The `docs/usage.md` and `nextflow.config` comments both call this out.
-- `--tools` is a comma-separated list. Membership is checked with `isToolIncluded` / `isVepToolIncluded` / `isExomiserToolIncluded` (in `subworkflows/local/utils_nfcore_postprocessing_pipeline/utils`).
+- `--tools` is a comma-separated list. Membership is checked with `isToolIncluded` / `isVepToolIncluded` / `isExomiserToolIncluded` (in `subworkflows/local/utils_nfcore_snv_post_processing_pipeline/utils`).
 - `--step` defaults to `genotype`. Other valid values: `normalize`, `annotation`, `exomiser`, `inheritance`.
 
 ### Test dataset
@@ -149,10 +149,10 @@ Required columns depend on `--step`. See `assets/schema_input.json` for the auth
 A few patterns worth knowing before editing:
 
 - **Channel shape convention.** Most VCF channels carry `[meta, vcf, tbi]`. After a `BCFTOOLS_*` / `GATK4_*` call, the index is usually emitted separately and joined back: `out.vcf.join(out.index)` for the nf-core bcftools modules, `out.vcf.join(out.tbi)` for GATK4 and VEP.
-- **Software versions.** nf-core modules report their versions through the `versions` topic channel, which `POSTPROCESSING` collects; don't mix their outputs into `ch_versions`. Local modules still emit `versions.yml`, mixed into `ch_versions`. Reading a topic needs `nextflow.preview.topic` on Nextflow 24.10, which `main.nf` sets only below 25.04 (25.04+ fails if it's set).
+- **Software versions.** nf-core modules report their versions through the `versions` topic channel, which `SNV_POST_PROCESSING` collects; don't mix their outputs into `ch_versions`. Local modules still emit `versions.yml`, mixed into `ch_versions`. Reading a topic needs `nextflow.preview.topic` on Nextflow 24.10, which `main.nf` sets only below 25.04 (25.04+ fails if it's set).
 - **Per-process resources** live in `nextflow.config` under `process { withName: '...' }`, gated by the `check_max(...)` function and the `max_cpus / max_memory / max_disk / max_time` params. When adding a new process, follow the same `errorStrategy = 'retry'` + `task.attempt`-scaled pattern.
 - **Hard filters** for WES are defined as a list of `[name, expression]` pairs in `nextflow.config` (`params.hardFilters`). VQSR tranches/annotations are in the same block.
-- **Reference inputs** are resolved at the top of `POSTPROCESSING` from `params.referenceGenome` + `params.referenceGenomeFasta` (the Fasta lives _inside_ the referenceGenome directory; `.fai` and `.dict` are derived from the Fasta path).
+- **Reference inputs** are resolved at the top of `SNV_POST_PROCESSING` from `params.referenceGenome` + `params.referenceGenomeFasta` (the Fasta lives _inside_ the referenceGenome directory; `.fai` and `.dict` are derived from the Fasta path).
 - **Adding an nf-core module:** use `nf-core modules install <tool>` so `modules.json` stays consistent. Local-only logic goes under `modules/local/`.
 - **Updating nf-core modules:** the `container` overrides in `conf/modules.config` pin the tools that actually run (VEP 114.2, bcftools 1.20, GATK 4.5.0.0); keep them, so a module update never changes results. Some components are deliberately held behind their latest version because newer ones break on Nextflow 24.10 or in our pinned containers; `docs/journal.md` lists them and the checks to run before updating.
 - **Schema and params stay in sync.** `nextflow_schema.json` is the source of truth for parameter validation (driven by the `nf-schema` plugin, `nf-schema@2.1.0` — migrated from `nf-validation` in v3.0.0). When adding a param, update both `nextflow.config` defaults and the schema.

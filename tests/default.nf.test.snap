@@ -110,10 +110,10 @@
                 "gatk4/family4.snpindel.vqsr_99.vcf.gz",
                 "gatk4/family4.snpindel.vqsr_99.vcf.gz.tbi",
                 "pipeline_info",
-                "pipeline_info/Post-Processing-Pipeline_software_mqc_versions.yml",
                 "pipeline_info/configs",
                 "pipeline_info/configs/nextflow.config",
                 "pipeline_info/nextflow.log",
+                "pipeline_info/snv-post-processing_software_mqc_versions.yml",
                 "slivar",
                 "slivar/family1.ch.slivar.summary.txt",
                 "slivar/family1.expr.slivar.summary.txt",
@@ -186,11 +186,11 @@
                     "bcftools": 1.2
                 },
                 "Workflow": {
-                    "Ferlab-Ste-Justine/Post-Processing-Pipeline": "v3.0.0"
+                    "Ferlab-Ste-Justine/snv-post-processing": "v3.0.0"
                 }
             }
         ],
-        "timestamp": "2026-09-29T16:43:32.022135706",
+        "timestamp": "2026-10-01T13:52:57.027957343",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "24.10.5"

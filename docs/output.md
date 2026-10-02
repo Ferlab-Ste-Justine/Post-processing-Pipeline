@@ -1,4 +1,4 @@
-# Ferlab-Ste-Justine/Post-Processing-Pipeline: Output
+# Ferlab-Ste-Justine/snv-post-processing: Output
 
 ## Introduction
 
@@ -14,7 +14,7 @@ Unless stated otherwise, this document assumes that the default output locations
 
 The pipeline output is saved step-by-step in the output directory as each step is completed. Below, we provide a description of the output folders corresponding to the main steps, as well as the `pipeline_info` folder, which contains details about the submitted job.
 
-- [Ferlab-Ste-Justine/Post-Processing-Pipeline: Output](#ferlabpostprocessing-output)
+- [Ferlab-Ste-Justine/snv-post-processing: Output](#ferlab-ste-justinesnv-post-processing-output)
   - [Introduction](#introduction)
   - [Overview](#overview)
   - [Directory Structure](#directory-structure)
@@ -74,7 +74,7 @@ Here we describe in more details the content of the `pipeline_info `subdirectory
    |_ execution_trace_2024-12-09_12-03-20.txt
    |_ params_2024-12-09_12-03-23.json
    |_ pipeline_dag_2024-12-09_12-03-20.html
-   |_ Post-Processing-Pipeline_software_mqc_versions.yml
+   |_ snv-post-processing_software_mqc_versions.yml
    |_ metadata.txt
    |_ nextflow.log
 ```
@@ -89,7 +89,7 @@ The file prefixed by `params` contains the parameters used by the pipeline.
 
 The file prefixed by `pipeline_dag` contains a diagram of the pipeline steps.
 
-The `Post-Processing-Pipeline_software_mqc_versions.yml` file aggregates the software versions reported by every module/subworkflow that exposes a `versions` channel (bcftools, GATK4 sub-tools, VEP, exomiser, etc.) plus the pipeline and Nextflow versions. The format is MultiQC-friendly so it can be picked up by an external MultiQC step if/when one is wired in.
+The `snv-post-processing_software_mqc_versions.yml` file aggregates the software versions reported by every module/subworkflow that exposes a `versions` channel (bcftools, GATK4 sub-tools, VEP, exomiser, etc.) plus the pipeline and Nextflow versions. The format is MultiQC-friendly so it can be picked up by an external MultiQC step if/when one is wired in.
 
 The `metadata.txt` file contains various information relevant for reproducibility, such as the original command line, the name of the branch / revision used, the username associated to the command, a list of configuration files passed, the nextflow work directory, etc.
 

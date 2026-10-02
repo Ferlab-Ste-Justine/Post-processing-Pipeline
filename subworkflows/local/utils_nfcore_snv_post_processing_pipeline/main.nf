@@ -1,5 +1,5 @@
 //
-// Subworkflow with functionality specific to the Ferlab-Ste-Justine/Post-Processing-Pipeline pipeline
+// Subworkflow with functionality specific to the Ferlab-Ste-Justine/snv-post-processing pipeline
 //
 
 /*

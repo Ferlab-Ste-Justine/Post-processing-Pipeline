@@ -1,9 +1,9 @@
 #!/usr/bin/env nextflow
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Ferlab-Ste-Justine/Post-Processing-Pipeline
+    Ferlab-Ste-Justine/snv-post-processing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Github : https://github.com/Ferlab-Ste-Justine/Post-Processing-Pipeline
+    Github : https://github.com/Ferlab-Ste-Justine/snv-post-processing
 ----------------------------------------------------------------------------------------
 */
 
@@ -23,11 +23,11 @@ if (nextflow.version < version_25_04) {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { POSTPROCESSING  } from './workflows/postprocessing'
-include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_postprocessing_pipeline'
-include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_postprocessing_pipeline'
+include { SNV_POST_PROCESSING     } from './workflows/snv_post_processing'
+include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_snv_post_processing_pipeline'
+include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_snv_post_processing_pipeline'
 
-include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_postprocessing_pipeline'
+include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_snv_post_processing_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -42,7 +42,7 @@ include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_post
 //
 // WORKFLOW: Run main analysis pipeline depending on type of input
 //
-workflow FERLAB_POSTPROCESSING {
+workflow FERLABSTEJUSTINE_SNV_POST_PROCESSING {
 
     take:
     samplesheet // channel: samplesheet read in from --input
@@ -52,7 +52,7 @@ workflow FERLAB_POSTPROCESSING {
     //
     // WORKFLOW: Run pipeline
     //
-    POSTPROCESSING (
+    SNV_POST_PROCESSING (
         samplesheet
     )
 }
@@ -82,7 +82,7 @@ workflow {
     //
     // WORKFLOW: Run main workflow
     //
-    FERLAB_POSTPROCESSING (
+    FERLABSTEJUSTINE_SNV_POST_PROCESSING (
         PIPELINE_INITIALISATION.out.samplesheet
     )
     //
